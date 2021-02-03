@@ -21,6 +21,7 @@
       </div>
       <div class="messages">
         <% if (messages) {%> <% messages.forEach(message => { %>
+          <% console.log(messages) %>
         <li data-testid="message">
           <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
         </li>

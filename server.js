@@ -40,8 +40,4 @@ io.on('connection', async (socket) => {
   });
 });
 
-app.use('/', (_, res) => {
-  res.render('index.ejs');
-});
-
 server.listen(PORT, () => console.log(`Baguncinha rolando na porta ${PORT}`));
