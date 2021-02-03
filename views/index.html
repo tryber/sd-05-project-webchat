@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+</head>
+
+<body>
+  <div class="contianer-users">
+    <ul id="listUsers"></ul>
+    <button class="btn-public" data-testid="public">Público</button>
+  </div>
+  <div class="contianer-messages">
+    <ul id="listMessages"></ul>
+  </div>
+
+  <div class="container-input-messages">
+    <input
+        type="text"
+        name="chatMessage"
+        placeholder="Digite a menssagem aqui"
+        data-testid="message-box"
+        class="chatMessage"
+      >
+      <button
+        type="button"
+        data-testid="send-button"
+        class="chatMessageBtn"
+      >
+        Enviar
+      </button>
+    <input
+        type="text"
+        name="nickname"
+        placeholder="Digite um apelido aqui"
+        data-testid="nickname-box"
+        class="nickname"
+      >
+      <button
+        type="button"
+        data-testid="nickname-save"
+        class="nicknameSaveBtn"
+      >
+        Salvar
+      </button>
+  </div>
+</body>
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script src="./script.js"></script>
+
+</html>
