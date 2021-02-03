@@ -28,8 +28,6 @@ app.get('/', async (req, res) => {
 app.use('/', express.static(path.join(__dirname, './views')));
 
 io.on('connect', async (socket) => {
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
   // socket.emit('history', allMessages);
