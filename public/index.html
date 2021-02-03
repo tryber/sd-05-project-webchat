@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zap da Trybe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form id="chat">
+      <div>
+        <input
+          data-testid="nickname-box"
+          id="nickname"
+          type="text"
+          placeholder="Digite seu nickname"
+        />
+        <button data-testid="nickname-save" id="nickBtn" type="button">Trocar</button>
+      </div>
+      <div class="messages"></div>
+      <div>
+        <input
+          data-testid="message-box"
+          id="message"
+          type="text"
+          name="message"
+          placeholder="Digite sua mensagem"
+        />
+        <button data-testid="send-button" id="submitBtn" type="button">Enviar</button>
+      </div>
+    </form>
+
+    <script>
+      const socket = io();
+      let nickInUse = `User${parseInt((Math.random()*100000))}`;
+      const nick = document.querySelector('#nickname');
+      const nickBtn = document.querySelector('#nickBtn')
+      const chat = document.querySelector('#chat');
+      const button = document.querySelector('#submitBtn');
+      const msginput = document.querySelector('#message');
+      const messages = document.querySelector('.messages');
+
+      nickBtn.addEventListener('click', () => {
+        nickInUse = nick.value;
+        nick.value = '';
+        console.log('novo nick: ', nickInUse);
+      })
+
+      function renderMessage(message) {
+        const li = document.createElement('li');
+        li.innerHTML = message;
+        li.setAttribute('data-testid', 'message');
+        messages.appendChild(li);
+      }
+
+      socket.on('message', (message) => {
+        renderMessage(message);
+      });
+
+      button.addEventListener('click', () => {
+        if (msginput.value.length) {
+          const chatMessage = msginput.value;
+          const nickname = nick.value;
+
+          const dateTime = new Date().getTime();
+          const date = moment(dateTime).format('DD-MM-yyyy h:mm:ss A');
+
+          const sendMessage = { chatMessage, nickname: nickInUse, date };
+
+          socket.emit('message', sendMessage);
+          const message = `${date} - ${sendMessage.nickname}: ${sendMessage.chatMessage}`;
+          renderMessage(message);
+          msginput.value = '';
+        }
+      });
+    </script>
+  </body>
+</html>
