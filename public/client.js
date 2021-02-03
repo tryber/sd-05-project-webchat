@@ -1,9 +1,7 @@
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
-  const element = (id) => {
-    return document.getElementById(id);
-  };
+  const element = (id) => document.getElementById(id);
 
   const status = element('status');
   const messages = element('messages');
@@ -64,7 +62,7 @@ window.onload = () => {
         textArea.value = '';
       }
     });
-    
+
     // Handle input
     sndBtn.addEventListener('click', () => {
       // Emit to server input
