@@ -62,12 +62,12 @@
       button.addEventListener('click', () => {
         if (msginput.value.length) {
           const chatMessage = msginput.value;
-          const nickname = nick.value;
+          const nickname = nickInUse;
 
           const dateTime = new Date().getTime();
           const date = moment(dateTime).format('DD-MM-yyyy h:mm:ss A');
 
-          const sendMessage = { chatMessage, nickname: nickInUse, date };
+          const sendMessage = { chatMessage, nickname, date };
 
           socket.emit('message', sendMessage);
           const message = `${date} - ${sendMessage.nickname}: ${sendMessage.chatMessage}`;
