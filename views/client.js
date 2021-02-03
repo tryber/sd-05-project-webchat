@@ -51,10 +51,10 @@ window.onload = () => {
     }
   });
 
-  clientSocketIo.on('message', ({ data, hora, nickname, chatMessage }) => {
+  clientSocketIo.on('message', (completeMessage) => {
     const message = document.createElement('div');
     message.setAttribute('data-testid', 'message');
-    message.textContent = `${data} ${hora} ${nickname}: ${chatMessage}`;
+    message.textContent = completeMessage;
     messageList.appendChild(message);
     messageList.insertBefore(message, messageList.firstChild);
   });

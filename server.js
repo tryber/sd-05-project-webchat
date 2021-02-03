@@ -19,13 +19,14 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+app.use('/', express.static(path.join(__dirname, './views')));
+
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
   res.render('index', { allMessages });
 });
 
-app.use('/', express.static(path.join(__dirname, './views')));
 
 io.on('connect', async (socket) => {
   // Emiti todas as mensagens salvas ao conectar
@@ -44,7 +45,10 @@ io.on('connect', async (socket) => {
 
     const messageProfile = createMessageProfile(nickname, chatMessage);
     await messagesModel.insert(messageProfile);
-    io.emit('message', messageProfile);
+
+    const { data, hora } = messageProfile;
+    const completeMessage = `${data} ${hora} ${nickname}: ${chatMessage}`;
+    io.emit('message', completeMessage);
     return io.emit('status', 'Mensagem enviada');
   });
 
