@@ -9,7 +9,10 @@ window.onload = () => {
   const username = element('username');
   const clearBtn = element('clear');
   const sndBtn = element('btn-send');
-  const saveBTN = element('btn-save');
+
+  // Como fazer a lógica de salvar nickname?
+
+  // const saveBTN = element('btn-save');
 
   // Set default status
   const statusDefault = status.textContent;
@@ -25,11 +28,11 @@ window.onload = () => {
     }
   };
 
-  clientSocketIo.on('newNickName', ( nickname ) => {
+  clientSocketIo.on('newNickName', (nickname) => {
     console.log({ nickname });
     username.value = nickname;
-  })
-  
+  });
+
   // Handle input
   sndBtn.addEventListener('click', () => {
     // Emit to server input
