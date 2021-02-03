@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <form id="chat">
+    <form class="chat">
       <div>
         <input
           data-testid="nickname-box"
@@ -37,7 +37,6 @@
       let nickInUse = `User${parseInt((Math.random()*100000))}`;
       const nick = document.querySelector('#nickname');
       const nickBtn = document.querySelector('#nickBtn')
-      const chat = document.querySelector('#chat');
       const button = document.querySelector('#submitBtn');
       const msginput = document.querySelector('#message');
       const messages = document.querySelector('.messages');
