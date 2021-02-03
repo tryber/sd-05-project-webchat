@@ -11,19 +11,16 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
 const { addMessage } = require('./models/messages');
+const { messagesList } = require('./controllers/messageController');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'public'));
 
 app.engine('html', require('ejs').renderFile);
 
-app.set('view engine', 'html');
+app.set('view engine', 'ejs');
 
-app.use('/', (_, res) => {
-  res.render('index.html');
-});
-
-server.listen(PORT, () => console.log(`Baguncinha rolando na porta ${PORT}`));
+app.get('/', messagesList);
 
 io.on('connection', async (socket) => {
   console.log(`Usuário conectado! ID: ${socket.id}`);
@@ -42,3 +39,9 @@ io.on('connection', async (socket) => {
     console.log(`Usuário desconectado! ID: ${socket.id}`);
   });
 });
+
+app.use('/', (_, res) => {
+  res.render('index.ejs');
+});
+
+server.listen(PORT, () => console.log(`Baguncinha rolando na porta ${PORT}`));
