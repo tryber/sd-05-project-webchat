@@ -63,7 +63,7 @@ O MVC será usado para renderizar as mensagens do histórico e usuários online,
 
 ### Data de Entrega
 
-O projeto tem até a seguinte data: `DD/MM/YYYY - 14:00h`. Para ser entregue a avaliação final.
+O projeto tem até a seguinte data: `12/02/2021 - 14:00h`. Para ser entregue a avaliação final.
 
 ---
 
