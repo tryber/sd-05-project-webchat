@@ -7,7 +7,7 @@ async function connection() {
   if (schema) return Promise.resolve(schema);
 
   return mongoClient
-    .connect(process.env.DB_URL, {
+    .connect(process.env.DB_URL || 'mongodb://localhost:27017/webchat', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
@@ -23,3 +23,5 @@ async function connection() {
 }
 
 module.exports = connection;
+
+// lembrar de ligar o server do mongo

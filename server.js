@@ -1,0 +1,52 @@
+// const client = require('socket.io').listen(4000).sockets;
+const socketIO = require('socket.io');
+const http = require('http');
+const cors = require('cors');
+const path = require('path');
+const express = require('express');
+const messagesModel = require('./models/messagesModel');
+const createMessageProfile = require('./tests/helpers/createMessageProfile');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
+
+const PORT = 3000;
+
+app.use(cors());
+
+app.use('/', express.static(path.join(__dirname, 'public')));
+
+io.on('connect', async (socket) => {
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  // Emiti todas as mensagens salvas ao conectar
+  const allMessages = await messagesModel.getAll();
+  socket.emit('history', allMessages);
+
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  // Ao receber message, insere mensagem e emiti para o history novamente
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    if (!nickname || !chatMessage) return io.emit('status', 'Digite seu nome ou mensagem');
+
+    const messageProfile = createMessageProfile(nickname, chatMessage);
+    await messagesModel.insert(messageProfile);
+    io.emit('message', messageProfile);
+    return io.emit('status', 'Mensagem enviada');
+  });
+
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  // Ao receber 'clear', deleta todas mensagens do banco
+  socket.on('clear', async () => {
+    await messagesModel.deleteAll();
+    socket.emit('cleared');
+  });
+
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+});
+
+server.listen(PORT, () => {
+  console.log(`Server na porta: ${PORT}`);
+});
