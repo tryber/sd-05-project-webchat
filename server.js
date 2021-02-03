@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-const PORT = 5000;
+const PORT = 3000;
 
 app.use(cors());
 
@@ -29,15 +29,14 @@ app.use('/', express.static(path.join(__dirname, './views')));
 
 io.on('connect', async (socket) => {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  const fakename = faker.name.firstName();
-  socket.emit('newNickName', fakename);
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+  
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
   // socket.emit('history', allMessages);
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  const fakename = faker.name.firstName();
+  socket.emit('newNickName', fakename);
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

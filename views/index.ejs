@@ -29,14 +29,23 @@
           <br>
           <div class="card">
 
- 
 
             <div id='messageList' class="card-block">
+
+
               <% if (allMessages) {%>
-                  <% allMessages.forEach( ({ data, hora, nickname, chatMessage }) => { %>
-                    <div><%= data %> <%= hora %> <%= nickname %> <%= chatMessage %></div>
-                  <%})%>
-                  <% } %>
+                <% allMessages.forEach(({ data, hora, nickname, chatMessage }) => { %>
+                  <div data-testid="message">
+                    <%= data %> 
+                    <%= hora %> 
+                    <%= nickname %>
+                    <%= chatMessage %>
+                  </div>
+                <%})%>
+                <% } %>
+
+
+
             </div>
 
 
