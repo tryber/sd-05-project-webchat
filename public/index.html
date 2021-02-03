@@ -8,7 +8,7 @@
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
   <title>MongoChat</title>
   <style>
-    #messages {
+    #messageList {
       height: 300px;
     }
   </style>
@@ -24,16 +24,17 @@
         </h1>
         <div id="status"></div>
         <div class="chat">
-          <input type="text" id="username" class="form-control" placeholder="Enter name...">
+          <input data-testid="nickname-box" type="text" id="username" class="form-control" placeholder="Enter name...">
+          <button data-testid="nickname-save" id="btn-save" >Save</button>
           <br>
           <div class="card">
-            <div id='messages' class="card-block">
+            <div id='messageList' class="card-block">
 
             </div>
           </div>
           <br>
-          <textarea id="textarea" class="form-control" placeholder="Enter messsage..."></textarea>
-          <button id="sendBtn">Enviar</button>
+          <textarea data-testid="message-box" id="textarea" class="form-control" placeholder="Enter messsage..."></textarea>
+          <button data-testid="send-button" id="btn-send">Enviar</button>
         </div>
       </div>
     </div>

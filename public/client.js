@@ -4,11 +4,12 @@ window.onload = () => {
   const element = (id) => document.getElementById(id);
 
   const status = element('status');
-  const messages = element('messages');
+  const messageList = element('messageList');
   const textArea = element('textarea');
   const username = element('username');
   const clearBtn = element('clear');
-  const sndBtn = element('sendBtn');
+  const sndBtn = element('btn-send');
+  const saveBTN = element('btn-save');
 
   // Set default status
   const statusDefault = status.textContent;
@@ -24,62 +25,54 @@ window.onload = () => {
     }
   };
 
-  // Handle output
-  if (clientSocketIo !== undefined) {
-    console.log('Connected to socket...');
-    // console.log(socket);
-    clientSocketIo.on('history', (data) => {
-      // console.log(data);
-      if (data.length) {
-        data.forEach((d) => {
-          // build out message div
-          console.log(d);
-          const message = document.createElement('div');
-          message.setAttribute('class', 'chat-message');
-          message.textContent = `${d.data} ${d.hora} ${d.nickname}: ${d.chatMessage}`;
-          messages.appendChild(message);
-          messages.insertBefore(message, messages.firstChild);
-        });
-      }
+  clientSocketIo.on('newNickName', ( nickname ) => {
+    console.log({ nickname });
+    username.value = nickname;
+  })
+  
+  // Handle input
+  sndBtn.addEventListener('click', () => {
+    // Emit to server input
+    clientSocketIo.emit('message', {
+      nickname: username.value,
+      chatMessage: textArea.value,
     });
+  });
 
-    clientSocketIo.on('message', ({ data, hora, nickname, chatMessage }) => {
-      const message = document.createElement('div');
-      message.setAttribute('class', 'chat-message');
-      message.textContent = `${data} ${hora} ${nickname}: ${chatMessage}`;
-      messages.appendChild(message);
-      messages.insertBefore(message, messages.firstChild);
-    });
-
-    // Get status from server
-    clientSocketIo.on('status', (data) => {
-      // Get message status
-      setStatus(typeof data === 'object' ? data.message : data);
-
-      // If status is clear, clear text
-
-      if (data.clear) {
-        textArea.value = '';
-      }
-    });
-
-    // Handle input
-    sndBtn.addEventListener('click', () => {
-      // Emit to server input
-      clientSocketIo.emit('message', {
-        nickname: username.value,
-        chatMessage: textArea.value,
+  clientSocketIo.on('history', (data) => {
+    if (data.length) {
+      data.forEach((d) => {
+        // build out message div
+        console.log(d);
+        const message = document.createElement('div');
+        message.setAttribute('data-testid', 'message');
+        message.textContent = `${d.data} ${d.hora} ${d.nickname}: ${d.chatMessage}`;
+        messageList.appendChild(message);
+        messageList.insertBefore(message, messageList.firstChild);
       });
-    });
+    }
+  });
 
-    // Handle chat clear
-    clearBtn.addEventListener('click', () => {
-      clientSocketIo.emit('clear');
-    });
+  clientSocketIo.on('message', ({ data, hora, nickname, chatMessage }) => {
+    const message = document.createElement('div');
+    message.setAttribute('data-testid', 'message');
+    message.textContent = `${data} ${hora} ${nickname}: ${chatMessage}`;
+    messageList.appendChild(message);
+    messageList.insertBefore(message, messageList.firstChild);
+  });
 
-    // Clear message
-    clientSocketIo.on('cleared', () => {
-      messages.textContent = '';
-    });
-  }
+  clientSocketIo.on('status', (data) => {
+    setStatus(typeof data === 'object' ? data.message : data);
+    if (data.clear) {
+      textArea.value = '';
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    clientSocketIo.emit('clear');
+  });
+
+  clientSocketIo.on('cleared', () => {
+    messageList.textContent = '';
+  });
 };

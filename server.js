@@ -4,6 +4,7 @@ const http = require('http');
 const cors = require('cors');
 const path = require('path');
 const express = require('express');
+const faker = require('faker');
 const messagesModel = require('./models/messagesModel');
 const createMessageProfile = require('./tests/helpers/createMessageProfile');
 
@@ -18,6 +19,11 @@ app.use(cors());
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 io.on('connect', async (socket) => {
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  const fakename = faker.name.firstName();
+  socket.emit('newNickName', fakename);
+
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Emiti todas as mensagens salvas ao conectar
