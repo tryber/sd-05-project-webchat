@@ -27,7 +27,6 @@ app.get('/', async (req, res) => {
   res.render('index', { allMessages });
 });
 
-
 io.on('connect', async (socket) => {
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
