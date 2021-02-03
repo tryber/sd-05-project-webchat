@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -28,9 +28,18 @@
           <button data-testid="nickname-save" id="btn-save">Save</button>
           <br>
           <div class="card">
-            <div id='messageList' class="card-block">
 
+ 
+
+            <div id='messageList' class="card-block">
+              <% if (allMessages) {%>
+                  <% allMessages.forEach( ({ data, hora, nickname, chatMessage }) => { %>
+                    <div><%= data %> <%= hora %> <%= nickname %> <%= chatMessage %></div>
+                  <%})%>
+                  <% } %>
             </div>
+
+
           </div>
           <br>
           <textarea data-testid="message-box" id="textarea" class="form-control"
@@ -45,4 +54,4 @@
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 </body>
 
-</html> -->
+</html>

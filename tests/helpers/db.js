@@ -23,5 +23,3 @@ async function connection() {
 }
 
 module.exports = connection;
-
-// lembrar de ligar o server do mongo
