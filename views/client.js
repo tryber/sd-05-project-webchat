@@ -27,7 +27,6 @@ window.onload = () => {
     }
   };
 
-  console.log(clientSocketIo);
   // console.log(clientSocketIo.sessionid);
 
   // clientSocketIo.on('newNickName', (nickname) => {
@@ -73,6 +72,9 @@ window.onload = () => {
   clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
 
+    // const createLI = (username) => {
+      
+    // }
     // Coloca nos usuarios online primeiro o próprio usuário
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');

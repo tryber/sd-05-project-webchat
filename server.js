@@ -38,6 +38,7 @@ app.get('/', async (req, res) => {
 });
 
 io.on('connect', async (socket) => {
+  console.log(userSocketIdMap);
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
   // socket.emit('history', allMessages);
@@ -47,14 +48,17 @@ io.on('connect', async (socket) => {
 
   // socket.user = { nickname: faker.name.firstName() };
   const fakename = faker.name.firstName();
-  console.log(socket.id)
+  console.log(socket.id);
 
   const clientID = socket.id;
 
   addClientToMap(fakename, clientID);
 
-  // const map = userSocketIdMap.keys();
-  // console.log(map);
+  socket.on('disconnect', () => {
+    console.log('Got disconnect!');
+
+    removeClientFromMap(fakename, clientID);
+  });
 
   // let map = new Map().set('a', 1).set('b', 2),
   const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
@@ -66,7 +70,8 @@ io.on('connect', async (socket) => {
 
   // Ao receber message, insere mensagem e emiti para o history novamente
   socket.on('message', async ({ nickname, chatMessage }) => {
-    if (!nickname || !chatMessage) return io.emit('status', 'Digite seu nome ou mensagem');
+    if (!nickname || !chatMessage)
+      return io.emit('status', 'Digite seu nome ou mensagem');
 
     const messageProfile = createMessageProfile(nickname, chatMessage);
     await messagesModel.insert(messageProfile);
@@ -76,7 +81,6 @@ io.on('connect', async (socket) => {
     io.emit('message', completeMessage);
     return io.emit('status', 'Mensagem enviada');
   });
-
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Ao receber 'clear', deleta todas mensagens do banco
