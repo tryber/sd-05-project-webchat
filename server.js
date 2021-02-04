@@ -55,7 +55,7 @@ io.on('connect', async (socket) => {
 
   console.log(userSocketIdMap);
 
-  socket.emit('newUser', fakename);
+  socket.emit('newUser', { fakename, clientID });
   // socket.emit('newNickName', fakename);
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

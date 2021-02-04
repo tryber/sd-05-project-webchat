@@ -1,3 +1,5 @@
+const { userSocketIdMap } = require('../tests/helpers/userSocketIDMap');
+
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
@@ -73,12 +75,14 @@ window.onload = () => {
     }
   });
 
-  clientSocketIo.on('newUser', (newUserName) => {
-    username.value = newUserName;
+  clientSocketIo.on('newUser', ({ fakename, clientID }) => {
+    username.value = fakename;
+    // https://www.javascripttutorial.net/es6/javascript-map/#:~:text=To%20get%20the%20keys%20of,of%20elements%20in%20the%20map.
+    const connectedUsers = [...userSocketIdMap.keys()];
 
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
-    li.textContent = newUserName;
+    li.textContent = fakename;
 
     users.append(li);
   });
