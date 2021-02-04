@@ -1,16 +1,28 @@
 const connection = require('./connection');
 
-async function sendMessage(data) {
-  const message = await connection().then((db) => db.collection('messages').insertOne(data));
+async function createMessage({ nickname, chatMessage, timestamp }) {
+  try {
+    const message = await connection().then((db) =>
+      db.collection('messages').insertOne({ nickname, chatMessage, timestamp }));
 
-  console.log(message);
-  return message;
+    return message.ops[0];
+  } catch (error) {
+    console.error(error.message);
+
+    return error.message;
+  }
 }
 
 async function getAllMessages() {
-  const messages = await connection().then((db) => db.collection('messages').find().toArray());
+  try {
+    const messages = await connection().then((db) => db.collection('messages').find().toArray());
 
-  return messages;
+    return messages;
+  } catch (error) {
+    console.error(error.message);
+
+    return error.message;
+  }
 }
 
-module.exports = { sendMessage, getAllMessages };
+module.exports = { createMessage, getAllMessages };
