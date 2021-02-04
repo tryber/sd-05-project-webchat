@@ -1,48 +1,30 @@
+<!-- Front-end client side
+DONE: simple html connected with client.js - containing socketio interaction with server
+TODO: later for req3 turn it into EJS -->
+
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebChat Project</title>
-    <!-- <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font: 13px Helvetica, Arial;
-      }
-      form {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      form input {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      form button {
-        width: 9%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-      }
-      #mensagens {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      #mensagens li {
-        padding: 5px 10px;
-      }
-      #mensagens li:nth-child(odd) {
-        background: #eee;
-      }
-    </style> -->
+    <!-- <link rel="stylesheet" href="style.css"> -->
+  </head>
+  <body>
+    <h2>Welcome to the WebChien Chat</h2>
+    <ul id="messages"></ul>
+    <!-- Cada mensagem ou seja li deve ter o data-testid="message". -->
+    <form class=chat-inputs>
+      <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
+      <button data-testid="nickname-save" id="nickname-save" type="button">Save nickname</button>
+      <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
+    </form>
+    <button data-testid="send-button" id="send">Send message</button>
+  </body>
+  <!-- Connect with client.js and right port -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="/client.js"></script>
+  <!-- Example of other option: use socket in script here
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();
@@ -65,12 +47,5 @@
       socket.on('ola', (mensagem) => createMessage(mensagem));
       // Aqui o evento é recebido da mesma maneira do último, mas este não é recebido pelo cliente que enviou o mesmo
       socket.on('mensagemServer', (objeto) => createMessage(objeto.mensagem));
-    </script>
-  </head>
-  <body>
-    <ul id="mensagens"></ul>
-    <form action="">
-      <input id="mensagemInput" autocomplete="off" /><button>Send</button>
-    </form>
-  </body>
+    </script> -->
 </html>
