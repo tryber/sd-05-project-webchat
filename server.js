@@ -54,18 +54,22 @@ io.on('connect', async (socket) => {
 
   addClientToMap(fakename, clientID);
 
+  
+  // let map = new Map().set('a', 1).set('b', 2),
+  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
+  
+  socket.emit('newUser', { fakename, usersMap });
+  
   socket.on('disconnect', () => {
     console.log('Got disconnect!');
 
     removeClientFromMap(fakename, clientID);
+    socket.emit('newUser', { fakename, usersMap });
+
   });
 
-  // let map = new Map().set('a', 1).set('b', 2),
-  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
-
-  socket.emit('newUser', { fakename, usersMap });
   // socket.emit('newNickName', fakename);
-
+  
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Ao receber message, insere mensagem e emiti para o history novamente
