@@ -27,6 +27,12 @@ window.onload = () => {
     }
   };
 
+  console.log(clientSocketIo);
+  // console.log(clientSocketIo.sessionid);
+  clientSocketIo.on('connect', (something) => {
+    console.log(something)
+  })
+
   // clientSocketIo.on('newNickName', (nickname) => {
   //   console.log({ nickname });
   //   username.value = nickname;

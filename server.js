@@ -7,6 +7,11 @@ const express = require('express');
 const faker = require('faker');
 const messagesModel = require('./models/messagesModel');
 const createMessageProfile = require('./tests/helpers/createMessageProfile');
+const {
+  userSocketIdMap,
+  addClientToMap,
+  removeClientFromMap,
+} = require('./tests/helpers/userSocketIDMap');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +19,7 @@ const io = socketIO(server);
 
 const PORT = 3000;
 
+app.use(express.urlencoded());
 app.use(cors());
 
 app.set('view engine', 'ejs');
@@ -31,29 +37,6 @@ app.get('/', async (req, res) => {
   res.render('index', { allMessages });
 });
 
-const userSocketIdMap = new Map();
-
-function addClientToMap(userName, socketId) {
-  if (!userSocketIdMap.has(userName)) {
-    // when user is joining first time
-    userSocketIdMap.set(userName, new Set([socketId]));
-  } else {
-    // user had already joined from one client and now joining using another client;
-    userSocketIdMap.get(userName).add(socketId);
-  }
-}
-
-function removeClientFromMap(userName, socketId) {
-  if (userSocketIdMap.has(userName)) {
-    const userSocketIdSet = userSocketIdMap.get(userName);
-    userSocketIdSet.delete(socketId);
-    // if there are no clients for a user, remove that user from online list(map);
-    if (userSocketIdSet.size === 0) {
-      userSocketIdMap.delete(userName);
-    }
-  }
-}
-
 io.on('connect', async (socket) => {
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
@@ -64,10 +47,13 @@ io.on('connect', async (socket) => {
 
   // socket.user = { nickname: faker.name.firstName() };
   const fakename = faker.name.firstName();
+  console.log(socket.id)
 
-  addClientToMap(fakename, socket.id);
+  const clientID = socket.id;
 
-  console.log(userSocketIdMap.get(fakename));
+  addClientToMap(fakename, clientID);
+
+  console.log(userSocketIdMap);
 
   socket.emit('newUser', fakename);
   // socket.emit('newNickName', fakename);
@@ -93,6 +79,8 @@ io.on('connect', async (socket) => {
   socket.on('clear', async () => {
     await messagesModel.deleteAll();
     socket.emit('cleared');
+    userSocketIdMap.clear();
+    console.log('clear', userSocketIdMap);
   });
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
