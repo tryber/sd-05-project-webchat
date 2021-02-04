@@ -4,6 +4,7 @@
 
 const express = require('express');
 const path = require('path');
+// const faker = require('faker');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 require('dotenv').config();
@@ -34,19 +35,26 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// app.get('/', (_req, res) => {
-//   const data = [];
-//   res.render('index', data);
-// now inside index.ejs you can use these data, this was like passing a props
-// });
+app.get('/', (_req, res) => {
+  const data = [];
+  res.render('index', data);
+  // now inside index.ejs you can use these data, this was like passing a props
+});
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
 
 io.on('connection', async (socket) => {
   console.log(`User ${socket.id} connected`);
 
-  // 2. Receive 'message' emitted by client and emit the formatted one
+  // 2. Receive 'message' emitted by client and emit back the formatted one
   socket.on('message', async ({ chatMessage, nickname }) => {
+    // const defaultNickname = faker.name.firstName();
+    // let finalNickname = '';
+    // if (nickname.length > 0) {
+    //   finalNickname = nickname;
+    // } else {
+    //   finalNickname = defaultNickname;
+    // }
     const dateNow = new Date().getTime();
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;

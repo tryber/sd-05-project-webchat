@@ -3,25 +3,24 @@
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
-  const faker = require('faker');
-
   // 1. User click send message
+
   // See if nickname is default or one chosen by user
-  let nicknameUsed = faker.name.firstName();
+  // `User${Math.round(Math.random() * 1000)}`
+  let nickname = '';
   const chosenNickname = document.getElementById('nickname-input').value;
   const nicknameBtn = document.getElementById('nickname-save');
   nicknameBtn.addEventListener('click', () => {
-    nicknameUsed = chosenNickname.value;
+    nickname = chosenNickname;
   });
-
+  // this part above is actually totally ignored because from another scope
+  
   const sendBtn = document.getElementById('send');
   sendBtn.addEventListener('click', () => {
     const chatMessage = document.getElementById('message-input').value;
-    const emitMessage = {
-      nickname: nicknameUsed,
-      chatMessage,
-    };
-    clientSocketIo.emit('message', emitMessage);
+    const nickname = document.getElementById('nickname-input').value;
+    clientSocketIo.emit('message', { chatMessage, nickname });
+    // does not send anything, i think because nickname is from another scope
   });
 
   // 3. Show the formatted message on the chat div
