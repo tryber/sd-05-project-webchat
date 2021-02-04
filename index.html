@@ -6,19 +6,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <form action="" id="nicknameBox">
-      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-save">Save</button>
+    <form action="" class="nicknameBox">
+      <input data-testid="nickname-box" placeholder="nickname" class="nicknameInput" autocomplete="off" /><button data-testid="nickname-save">Save</button>
     </form>
-    <form action="" id="messageBox">
-      <input data-testid="message-box" id="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
+    <form action="" class="messageBox">
+      <input data-testid="message-box" placeholder="type here" class="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
     </form>
-    <ul id="mensagens"></ul>
+    <ul class="mensagens"></ul>
     <script>
       const socket = io();
-      const messageForm = document.querySelector('#messageBox');
-      const nicknameForm = document.querySelector('#nicknameBox');
-      const inputMessage = document.querySelector('#mensagemInput');
-      const inputNickname = document.querySelector('#nicknameInput');
+      const messageForm = document.querySelector('.messageBox');
+      const nicknameForm = document.querySelector('.nicknameBox');
+      const inputMessage = document.querySelector('.mensagemInput');
+      const inputNickname = document.querySelector('.nicknameInput');
       let nickname = 'Fulano';
 
       messageForm.addEventListener('submit', (e) => {
@@ -29,7 +29,7 @@
       });
 
       const createMessage = (message, nickname) => {
-        const messagesUl = document.querySelector('#mensagens');
+        const messagesUl = document.querySelector('.mensagens');
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
         li.innerText = `${nickname} - ${message}`;
