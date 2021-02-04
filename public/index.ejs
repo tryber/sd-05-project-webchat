@@ -13,7 +13,7 @@
       <div id="user"></div>
       <div>
         <% if (onlineUsers) {%> <% onlineUsers.forEach(user => { %>
-        <p data-testid="online-user" id="<%=user.userId %>"><%= user.nickname%></p>
+        <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
         <%})%> <% } %>
       </div>
       <div>
@@ -71,7 +71,7 @@
       }
       const p = document.createElement('p');
       p.setAttribute('data-testid', 'online-user');
-      p.setAttribute('id', `${userId}`);
+      p.setAttribute('id', `a${userId}`);
       p.innerHTML = randomNick;
       user.appendChild(p);
     });
@@ -80,7 +80,7 @@
       outro usuário trocou nick
     **/
     socket.on('anotherUserChangedNick', (nickname, userId) => {
-      const p = document.querySelector(`#${userId}`);
+      const p = document.querySelector(`#a${userId}`);
       p.innerHTML = nickname;
     });
 
@@ -97,7 +97,7 @@
 
     socket.on('quit', (userId) => {
       console.log('quitou');
-      const p = document.querySelector(`#${userId}`);
+      const p = document.querySelector(`#a${userId}`);
       p.innerHTML = '';
       p.remove()
     });
@@ -127,7 +127,7 @@
       if (nick.value.length) {
         nickInUse = nick.value;
         nick.value = '';
-        const p = document.querySelector(`#${UserId}`);
+        const p = document.querySelector(`#a${UserId}`);
         p.innerHTML = nickInUse;
         socket.emit('nickChange', nickInUse);
       }
