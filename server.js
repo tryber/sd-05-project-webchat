@@ -21,10 +21,14 @@ app.set('views', './views');
 
 app.use('/', express.static(path.join(__dirname, './views')));
 
+const fakename = faker.name.firstName();
+
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
-  res.render('index', { allMessages });
+  // socket.emit('newNickName', fakename);
+
+  res.render('index', { allMessages, fakename });
 });
 
 io.on('connect', async (socket) => {
@@ -33,8 +37,7 @@ io.on('connect', async (socket) => {
   // socket.emit('history', allMessages);
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const fakename = faker.name.firstName();
-  socket.emit('newNickName', fakename);
+  // socket.emit('newNickName', fakename);
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

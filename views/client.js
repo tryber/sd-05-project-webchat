@@ -74,3 +74,14 @@ window.onload = () => {
     messageList.textContent = '';
   });
 };
+
+//  TODO
+
+// clientSocketIo.on('newUser', (username) => {
+//   const divUsers = document.getElementById('users')
+//   const li = document.createElement('li')
+//     li.setAttribute('data-name', 'user-online')
+//   li.textContent = username;
+
+//   divUsers.append(li)
+// });
