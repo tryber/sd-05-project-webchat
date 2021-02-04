@@ -19,12 +19,8 @@
     <div class="row">
       <ul id="users">
 
-        <% if (fakename) { %>
-          <li data-testid="online-user""> 
-            <%= fakename %>
-          </li>
-        <% } %>
 
+        
       </ul>
       <div class="col-md-6 offset-md-3 col-sm-12">
         <h1 class="text-center">
@@ -39,8 +35,8 @@
           id="username" 
           class="form-control" 
 
-          value="<%= fakename %>"
           
+
           >
           <button data-testid="nickname-save" id="btn-save">Save</button>
           <br>

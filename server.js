@@ -21,15 +21,38 @@ app.set('views', './views');
 
 app.use('/', express.static(path.join(__dirname, './views')));
 
-const fakename = faker.name.firstName();
+// const fakename = faker.name.firstName();
 
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
   // socket.emit('newNickName', fakename);
 
-  res.render('index', { allMessages, fakename });
+  res.render('index', { allMessages });
 });
+
+const userSocketIdMap = new Map();
+
+function addClientToMap(userName, socketId) {
+  if (!userSocketIdMap.has(userName)) {
+    // when user is joining first time
+    userSocketIdMap.set(userName, new Set([socketId]));
+  } else {
+    // user had already joined from one client and now joining using another client;
+    userSocketIdMap.get(userName).add(socketId);
+  }
+}
+
+function removeClientFromMap(userName, socketId) {
+  if (userSocketIdMap.has(userName)) {
+    const userSocketIdSet = userSocketIdMap.get(userName);
+    userSocketIdSet.delete(socketId);
+    // if there are no clients for a user, remove that user from online list(map);
+    if (userSocketIdSet.size === 0) {
+      userSocketIdMap.delete(userName);
+    }
+  }
+}
 
 io.on('connect', async (socket) => {
   // Emiti todas as mensagens salvas ao conectar
@@ -39,11 +62,20 @@ io.on('connect', async (socket) => {
 
   // socket.emit('newNickName', fakename);
 
+  // socket.user = { nickname: faker.name.firstName() };
+  const fakename = faker.name.firstName();
+
+  addClientToMap(fakename, socket.id);
+
+  socket.emit('newUser', fakename);
+  // socket.emit('newNickName', fakename);
+
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Ao receber message, insere mensagem e emiti para o history novamente
   socket.on('message', async ({ nickname, chatMessage }) => {
-    if (!nickname || !chatMessage) return io.emit('status', 'Digite seu nome ou mensagem');
+    if (!nickname || !chatMessage)
+      return io.emit('status', 'Digite seu nome ou mensagem');
 
     const messageProfile = createMessageProfile(nickname, chatMessage);
     await messagesModel.insert(messageProfile);

@@ -9,6 +9,7 @@ window.onload = () => {
   const username = element('username');
   const clearBtn = element('clear');
   const sndBtn = element('btn-send');
+  const users = element('users');
 
   // Como fazer a lógica de salvar nickname?
 
@@ -26,10 +27,10 @@ window.onload = () => {
     }
   };
 
-  clientSocketIo.on('newNickName', (nickname) => {
-    console.log({ nickname });
-    username.value = nickname;
-  });
+  // clientSocketIo.on('newNickName', (nickname) => {
+  //   console.log({ nickname });
+  //   username.value = nickname;
+  // });
 
   sndBtn.addEventListener('click', () => {
     clientSocketIo.emit('message', {
@@ -66,6 +67,16 @@ window.onload = () => {
     }
   });
 
+  clientSocketIo.on('newUser', (newUserName) => {
+    username.value = newUserName;
+
+    const li = document.createElement('li');
+    li.setAttribute('data-testid', 'online-user');
+    li.textContent = newUserName;
+
+    users.append(li);
+  });
+
   clearBtn.addEventListener('click', () => {
     clientSocketIo.emit('clear');
   });
@@ -75,13 +86,12 @@ window.onload = () => {
   });
 };
 
-//  TODO
+// TODO
 
-// clientSocketIo.on('newUser', (username) => {
-//   const divUsers = document.getElementById('users')
-//   const li = document.createElement('li')
-//     li.setAttribute('data-name', 'user-online')
-//   li.textContent = username;
+// value="<%= fakename %>"
 
-//   divUsers.append(li)
-// });
+// <% if (fakename) { %>
+//   <li data-testid="online-user""> 
+//     <%= fakename %>
+//   </li>
+// <% } %>
