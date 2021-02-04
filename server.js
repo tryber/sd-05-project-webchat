@@ -5,7 +5,7 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const faker = require('faker');
+// const faker = require('faker');
 const moment = require('moment');
 require('dotenv').config();
 
@@ -38,7 +38,7 @@ app.set('views', './views');
 // app.get('/', (_req, res) => {
 //   const data = [];
 //   res.render('index', data);
-  // now inside index.ejs you can use these data, this was like passing a props
+// now inside index.ejs you can use these data, this was like passing a props
 // });
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
