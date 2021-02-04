@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- <script src="http://localhost:4555/socket.io/socket.io.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        // const socket = io('http://localhost:3000');
+        const socket = io();
+
+        socket.on('notification', (data) => {
+            // const li = document.createElement('li');
+            // li.textContent = data;
+            // document.getElementById('mensagem').appendChild(li);
+            // document.getElementById('mensagem').innerHTML = data;
+            // alert(data);
+
+            const li = document.createElement('li');
+            li.textContent = data.nickname;
+            const li2 = document.createElement('li');
+            li2.textContent = data.chatMessage;
+            document.getElementById('mensagem').appendChild(li);
+            document.getElementById('mensagem').appendChild(li2);
+        });
+    </script>
+
+</head>
+
+<body>
+    <div id="mensagem"></div>
+    <div class="msg">Hello</div>
+</body>
+
+</html>
