@@ -19,7 +19,7 @@ const io = socketIO(server);
 
 const PORT = 3000;
 
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 app.use(cors());
 
 app.set('view engine', 'ejs');
@@ -53,9 +53,13 @@ io.on('connect', async (socket) => {
 
   addClientToMap(fakename, clientID);
 
-  console.log(userSocketIdMap);
+  // const map = userSocketIdMap.keys();
+  // console.log(map);
 
-  socket.emit('newUser', { fakename, clientID });
+  // let map = new Map().set('a', 1).set('b', 2),
+  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
+
+  socket.emit('newUser', { fakename, usersMap });
   // socket.emit('newNickName', fakename);
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

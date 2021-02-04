@@ -1,5 +1,3 @@
-const { userSocketIdMap } = require('../tests/helpers/userSocketIDMap');
-
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
@@ -31,9 +29,6 @@ window.onload = () => {
 
   console.log(clientSocketIo);
   // console.log(clientSocketIo.sessionid);
-  clientSocketIo.on('connect', (something) => {
-    console.log(something)
-  })
 
   // clientSocketIo.on('newNickName', (nickname) => {
   //   console.log({ nickname });
@@ -75,16 +70,28 @@ window.onload = () => {
     }
   });
 
-  clientSocketIo.on('newUser', ({ fakename, clientID }) => {
+  clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
-    // https://www.javascripttutorial.net/es6/javascript-map/#:~:text=To%20get%20the%20keys%20of,of%20elements%20in%20the%20map.
-    const connectedUsers = [...userSocketIdMap.keys()];
 
+    // Coloca nos usuarios online primeiro o próprio usuário
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
     li.textContent = fakename;
 
     users.append(li);
+
+    // Tira o próprio usuário ;
+
+    const usersMapWithouHero = usersMap.filter((user) => user.name !== fakename);
+
+    // renderiza o restante
+    usersMapWithouHero.forEach((user) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.textContent = user.name;
+
+      users.append(li);
+    });
   });
 
   clearBtn.addEventListener('click', () => {
@@ -101,7 +108,7 @@ window.onload = () => {
 // value="<%= fakename %>"
 
 // <% if (fakename) { %>
-//   <li data-testid="online-user""> 
+//   <li data-testid="online-user"">
 //     <%= fakename %>
 //   </li>
 // <% } %>
