@@ -10,49 +10,57 @@
   </head>
   <body>
     <form class="chat">
-      <div id="user"></div>
       <div class="online-users">
-        <% if (onlineUsers) {%>
-          <% onlineUsers.forEach(user => { %>
-            <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
-          <%})%>
-        <% } %>
+        <div>
+          <div class="pvt-chat-user" id="user"></div>
+          <% if (onlineUsers) {%>
+            <% onlineUsers.forEach(user => { %>
+              <div class="pvt-chat-box">
+                <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
+                <button type="button" class="pvt-chat-btn" id="<%= user.userId %>">Pvt</button>
+              </div>
+            <%})%>
+          <% } %>
+        </div>
+        <div class="chat-mode">
+          <button class="chat-mode-btn" type="button" id="public" data-testid="public">public</button>
+          <button class="chat-mode-btn" type="button" id="private" data-testid="private">private</button>
+        </div>
       </div>
-      <div>
-        <input
-          data-testid="nickname-box"
-          id="nickname"
-          type="text"
-          placeholder="Digite seu nickname"
-        />
-        <button data-testid="nickname-save" id="nickBtn" type="button">Trocar</button>
-      </div>
-      <div class="messages">
-        <% if (messages) {%>
-          <% messages.forEach(message => { %>
-            <li data-testid="message">
-              <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
-            </li>
-          <%})%>
-        <% } %>
-      </div>
-      <div class="private-messages">
+      <div class="right-box">
+        <div class="input-box">
+          <input
+            data-testid="nickname-box"
+            id="nickname"
+            type="text"
+            placeholder="Digite seu nickname"
+          />
+          <button class="chatBtn" data-testid="nickname-save" id="nickBtn" type="button">Trocar</button>
+        </div>
+        <div class="messages">
+          <% if (messages) {%>
+            <% messages.forEach(message => { %>
+              <li data-testid="message">
+                <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
+              </li>
+            <%})%>
+          <% } %>
+        </div>
+        <div class="private-messages">
 
+        </div>
+        <div class="input-box">
+          <input
+            data-testid="message-box"
+            id="message"
+            type="text"
+            name="message"
+            placeholder="Digite sua mensagem"
+          />
+          <button data-testid="send-button" class="chatBtn" id="submitBtn" type="button">Enviar</button>
+        </div>
       </div>
-      <div>
-        <input
-          data-testid="message-box"
-          id="message"
-          type="text"
-          name="message"
-          placeholder="Digite sua mensagem"
-        />
-        <button data-testid="send-button" id="submitBtn" type="button">Enviar</button>
-      </div>
-      <button type="button" id="public" data-testid="public">public</button>
-      <button type="button" id="private" data-testid="private">private</button>
     </form>
-    
   </body>
   <script>
     const socket = io();
@@ -130,6 +138,7 @@
     /**
       chat privado
     **/
+    let to;
     const pvtMsgs = document.querySelector('.private-messages');
     const pvtBtn = document.querySelector('#private');
     pvtBtn.addEventListener('click', () => {
@@ -182,7 +191,7 @@
 
         const sendMessage = { chatMessage, nickname, date };
 
-        socket.emit('message', sendMessage);
+        socket.emit('message', sendMessage, to, UserId);
         msginput.value = '';
       }
     });
