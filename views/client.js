@@ -1,8 +1,16 @@
 // Client side, where to manipulate the DOM
-// Reference: https://github.com/tryber/sd-04-live-lectures/pull/67/files 
+// Reference: https://github.com/tryber/sd-04-live-lectures/pull/67/files
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
+  // 1. User click send message
+  document.getElementById('send').addEventListener('click', () => {
+    const chatMessage = document.getElementById('message-input').value;
+    const nickname = document.getElementById('nickname-input').value;
+    clientSocketIo.emit('message', { chatMessage, nickname });
+  });
+
+  // 3. Show the message on the chat div
   clientSocketIo.on('message', (fullMessage) => {
     const divMessages = document.getElementById('messages')
     const li = document.createElement('li')
@@ -29,11 +37,4 @@ window.onload = () => {
 
   //   allMessages.appendChild(p)
   // });
-
-  // document.getElementById('send').addEventListener('click', () => {
-  //   const message = document.getElementById('message').value;
-  //   const name = document.querySelectorAll('li[data-name="user-online"]')[0].innerText;
-  //   clientSocketIo.emit('message', { name, message });
-  // });
-
 }

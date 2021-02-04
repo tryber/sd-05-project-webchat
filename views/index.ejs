@@ -13,8 +13,7 @@ TODO: later for req3 turn it into EJS -->
   <body>
     <h2>Welcome to the WebChien Chat</h2>
     <ul id="messages"></ul>
-    <!-- Cada mensagem ou seja li deve ter o data-testid="message". -->
-    <form class="chat-inputs">
+    <section class="chat-inputs">
       <div class="nickname-stuff">
         <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
         <button data-testid="nickname-save" id="nickname-save" type="button">Save nickname</button>
@@ -23,12 +22,14 @@ TODO: later for req3 turn it into EJS -->
         <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
         <button data-testid="send-button" id="send">Send message</button>
       </div>
-    </form>
+    </section>
+    <!-- if using form tag, remember type="button" and preventDefault
+    so as to not default to cleaning screen and method get -->
   </body>
   <!-- Connect with client.js and right port -->
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script defer src="/client.js"></script>
-  <!-- Example of other option: use socket in script here
+  <!-- Example of other option: use socket and dom manipulation in script here
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();

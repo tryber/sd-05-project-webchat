@@ -1,4 +1,4 @@
-//same code is actually already in tests/helpers/db/js
+// same code is actually already in tests/helpers/db/js
 
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
