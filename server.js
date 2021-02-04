@@ -64,7 +64,8 @@ io.on('connect', async (socket) => {
 
     removeClientFromMap(fakename, clientID);
     // userSocketIdMap.clear();
-    io.emit('newUser', { fakename, usersMap });
+    io.emit('userLeft', { fakename, clientID });
+    io.emit('status', `${fakename} left the chat.`);
   });
 
   // socket.emit('newNickName', fakename);
@@ -90,7 +91,7 @@ io.on('connect', async (socket) => {
   // Ao receber 'clear', deleta todas mensagens do banco
   socket.on('clear', async () => {
     await messagesModel.deleteAll();
-    socket.emit('cleared');
+    io.emit('cleared');
     userSocketIdMap.clear();
     console.log('clear', userSocketIdMap);
   });

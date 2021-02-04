@@ -23,7 +23,7 @@ window.onload = () => {
     if (s !== statusDefault) {
       setTimeout(() => {
         setStatus(statusDefault);
-      }, 4000);
+      }, 5000);
     }
   };
 
@@ -41,18 +41,18 @@ window.onload = () => {
     });
   });
 
-  clientSocketIo.on('history', (data) => {
-    if (data.length) {
-      data.forEach((d) => {
-        // console.log(d);
-        const message = document.createElement('div');
-        message.setAttribute('data-testid', 'message');
-        message.textContent = `${d.data} ${d.hora} ${d.nickname}: ${d.chatMessage}`;
-        messageList.appendChild(message);
-        messageList.insertBefore(message, messageList.firstChild);
-      });
-    }
-  });
+  // clientSocketIo.on('history', (data) => {
+  //   if (data.length) {
+  //     data.forEach((d) => {
+  //       // console.log(d);
+  //       const message = document.createElement('div');
+  //       message.setAttribute('data-testid', 'message');
+  //       message.textContent = `${d.data} ${d.hora} ${d.nickname}: ${d.chatMessage}`;
+  //       messageList.appendChild(message);
+  //       messageList.insertBefore(message, messageList.firstChild);
+  //     });
+  //   }
+  // });
 
   clientSocketIo.on('message', (completeMessage) => {
     const message = document.createElement('div');
@@ -71,11 +71,12 @@ window.onload = () => {
 
   clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
+    users.innerHTML = '';
 
     // const createLI = (username) => {
     // }
     // Coloca nos usuarios online primeiro o próprio usuário
-    const li = document.createElement('li');
+    let li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
     li.textContent = fakename;
 
@@ -87,12 +88,23 @@ window.onload = () => {
 
     // renderiza o restante
     usersMapWithouHero.forEach((user) => {
-      const li = document.createElement('li');
+      li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', user.name);
       li.textContent = user.name;
 
       users.append(li);
     });
+  });
+
+  clientSocketIo.on('userLeft', ({ fakename, clienteId }) => {
+    const message = document.createElement('div');
+    message.setAttribute('class', 'userLeft');
+    message.textContent = `${fakename} left...`;
+    messageList.appendChild(message);
+    messageList.insertBefore(message, messageList.firstChild);
+
+    // Remover LI que contenha a ID com o nome
   });
 
   clearBtn.addEventListener('click', () => {
