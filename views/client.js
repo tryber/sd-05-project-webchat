@@ -73,7 +73,6 @@ window.onload = () => {
     username.value = fakename;
 
     // const createLI = (username) => {
-      
     // }
     // Coloca nos usuarios online primeiro o próprio usuário
     const li = document.createElement('li');
