@@ -10,6 +10,12 @@
   </head>
   <body>
     <form class="chat">
+      <div id="user"></div>
+      <div>
+        <% if (onlineUsers) {%> <% onlineUsers.forEach(user => { %>
+        <p data-testid="online-user" id="<%=user.userId %>"><%= user.nickname%></p>
+        <%})%> <% } %>
+      </div>
       <div>
         <input
           data-testid="nickname-box"
@@ -21,7 +27,6 @@
       </div>
       <div class="messages">
         <% if (messages) {%> <% messages.forEach(message => { %>
-          <% console.log(messages) %>
         <li data-testid="message">
           <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
         </li>
@@ -41,19 +46,67 @@
   </body>
   <script>
     const socket = io();
-    let nickInUse = `User${parseInt(Math.random() * 100000)}`;
+    let nickInUse;
+    let UserId;
     const nick = document.querySelector('#nickname');
     const nickBtn = document.querySelector('#nickBtn');
     const button = document.querySelector('#submitBtn');
     const msginput = document.querySelector('#message');
     const messages = document.querySelector('.messages');
+    const user = document.querySelector('#user');
 
-    nickBtn.addEventListener('click', () => {
-      nickInUse = nick.value;
-      nick.value = '';
-      console.log('novo nick: ', nickInUse);
+    /**
+
+        sockets
+
+    **/
+
+    /**
+      usuário logou
+    **/
+    socket.on('userLogedIn', (randomNick, userId) => {
+      if (!UserId) {
+        nickInUse = randomNick;
+        UserId = userId;
+      }
+      const p = document.createElement('p');
+      p.setAttribute('data-testid', 'online-user');
+      p.setAttribute('id', `${userId}`);
+      p.innerHTML = randomNick;
+      user.appendChild(p);
     });
 
+    /**
+      outro usuário trocou nick
+    **/
+    socket.on('anotherUserChangedNick', (nickname, userId) => {
+      const p = document.querySelector(`#${userId}`);
+      p.innerHTML = nickname;
+    });
+
+    /**
+      usuário enviou msg
+    **/
+    socket.on('message', (message) => {
+      renderMessage(message);
+    });
+
+    /**
+      Outro usuário desconectou
+    **/
+
+    socket.on('quit', (userId) => {
+      console.log('quitou');
+      const p = document.querySelector(`#${userId}`);
+      p.innerHTML = '';
+      p.remove()
+    });
+
+    /**
+
+        renderiza mensagem no chat
+
+    **/
     function renderMessage(message) {
       const li = document.createElement('li');
       li.innerHTML = message;
@@ -61,10 +114,28 @@
       messages.appendChild(li);
     }
 
-    socket.on('message', (message) => {
-      renderMessage(message);
+    /**
+
+        event listeners
+
+    **/
+
+    /**
+      evento de trocar nick
+    **/
+    nickBtn.addEventListener('click', () => {
+      if (nick.value.length) {
+        nickInUse = nick.value;
+        nick.value = '';
+        const p = document.querySelector(`#${UserId}`);
+        p.innerHTML = nickInUse;
+        socket.emit('nickChange', nickInUse);
+      }
     });
 
+    /**
+      evento de enviar msg
+    **/
     button.addEventListener('click', () => {
       if (msginput.value.length) {
         const chatMessage = msginput.value;
@@ -76,8 +147,6 @@
         const sendMessage = { chatMessage, nickname, date };
 
         socket.emit('message', sendMessage);
-        const message = `${date} - ${sendMessage.nickname}: ${sendMessage.chatMessage}`;
-        renderMessage(message);
         msginput.value = '';
       }
     });
