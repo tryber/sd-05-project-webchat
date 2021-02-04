@@ -5,7 +5,8 @@
 }
 
 body {
-  font: 13px Helvetica, Arial;
+  font: 13px;
+  font-family: Helvetica, Arial;
 }
 
 form {
