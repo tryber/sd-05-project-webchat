@@ -11,10 +11,12 @@
   <body>
     <form class="chat">
       <div id="user"></div>
-      <div>
-        <% if (onlineUsers) {%> <% onlineUsers.forEach(user => { %>
-        <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
-        <%})%> <% } %>
+      <div class="online-users">
+        <% if (onlineUsers) {%>
+          <% onlineUsers.forEach(user => { %>
+            <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
+          <%})%>
+        <% } %>
       </div>
       <div>
         <input
@@ -26,11 +28,16 @@
         <button data-testid="nickname-save" id="nickBtn" type="button">Trocar</button>
       </div>
       <div class="messages">
-        <% if (messages) {%> <% messages.forEach(message => { %>
-        <li data-testid="message">
-          <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
-        </li>
-        <%})%> <% } %>
+        <% if (messages) {%>
+          <% messages.forEach(message => { %>
+            <li data-testid="message">
+              <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
+            </li>
+          <%})%>
+        <% } %>
+      </div>
+      <div class="private-messages">
+
       </div>
       <div>
         <input
@@ -42,18 +49,13 @@
         />
         <button data-testid="send-button" id="submitBtn" type="button">Enviar</button>
       </div>
+      <button type="button" id="public" data-testid="public">public</button>
+      <button type="button" id="private" data-testid="private">private</button>
     </form>
+    
   </body>
   <script>
     const socket = io();
-    let nickInUse;
-    let UserId;
-    const nick = document.querySelector('#nickname');
-    const nickBtn = document.querySelector('#nickBtn');
-    const button = document.querySelector('#submitBtn');
-    const msginput = document.querySelector('#message');
-    const messages = document.querySelector('.messages');
-    const user = document.querySelector('#user');
 
     /**
 
@@ -64,6 +66,9 @@
     /**
       usuário logou
     **/
+    const user = document.querySelector('#user');
+    let nickInUse;
+    let UserId;
     socket.on('userLogedIn', (randomNick, userId) => {
       if (!UserId) {
         nickInUse = randomNick;
@@ -99,7 +104,7 @@
       console.log('quitou');
       const p = document.querySelector(`#a${userId}`);
       p.innerHTML = '';
-      p.remove()
+      p.remove();
     });
 
     /**
@@ -107,6 +112,8 @@
         renderiza mensagem no chat
 
     **/
+    const messages = document.querySelector('.messages');
+
     function renderMessage(message) {
       const li = document.createElement('li');
       li.innerHTML = message;
@@ -116,13 +123,39 @@
 
     /**
 
-        event listeners
+        botões
 
     **/
 
     /**
-      evento de trocar nick
+      chat privado
     **/
+    const pvtMsgs = document.querySelector('.private-messages');
+    const pvtBtn = document.querySelector('#private');
+    pvtBtn.addEventListener('click', () => {
+      if (messages.style.display = "block") {
+        messages.style.display === "none"
+        pvtMsgs.style.display = "block"
+      }
+    })
+
+
+    /**
+      chat publico
+    **/
+    const pubBtn = document.querySelector('#public');
+    pubBtn.addEventListener('click', () => {
+      if (pvtMsgs.style.display = "block") {
+        pvtMsgs.style.display === "none"
+        messages.style.display = "block"
+      }
+    })
+
+    /**
+      troca de nick
+    **/
+    const nick = document.querySelector('#nickname');
+    const nickBtn = document.querySelector('#nickBtn');
     nickBtn.addEventListener('click', () => {
       if (nick.value.length) {
         nickInUse = nick.value;
@@ -134,8 +167,11 @@
     });
 
     /**
-      evento de enviar msg
+      envia msg
     **/
+    const msginput = document.querySelector('#message');
+    const button = document.querySelector('#submitBtn');
+
     button.addEventListener('click', () => {
       if (msginput.value.length) {
         const chatMessage = msginput.value;
