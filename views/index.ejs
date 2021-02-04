@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trybe - Webchat</title>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   </head>
   <body>
     <h1>
@@ -13,6 +13,15 @@
       <span>for Trybe's students</span>
     </h1>
     <form>
+      <section id="messages">
+        <% if (messages) { %>
+          <% messages.forEach((message) => { %>
+            <li data-testid="message">
+              <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+            </li>
+         <% }) %>
+        <% } %>
+      </section>
       <section>
         <input
           data-testid="nickname-box"
@@ -33,4 +42,36 @@
       </section>
     </form>
   </body>
+  <script type="text/javascript">
+    const client = io('http://localhost:3000');
+
+    let nick = `Guest #${Math.round(Math.random() * 1000)}`;
+    const nickname = document.getElementById('nickname');
+    const nameBtn = document.getElementById('btn-name');
+
+    nameBtn.addEventListener('click', () => {
+      nick.value = nickname.value;
+    });
+
+    const message = document.getElementById('message');
+    const messageBtn = document.getElementById('btn-message');
+    const messages = document.getElementById('messages');
+    const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+
+    messageBtn.addEventListener('click', () => {
+      if (message.value.length) {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${timestamp} - ${nickname.value}: ${message.value}`
+        messages.appendChild(li);
+      }
+
+      const sendMessage = {
+        nickname: nickname.value,
+        chatMessage: message.value,
+      };
+
+      client.emit('message', sendMessage);
+    });
+  </script>
 </html>
