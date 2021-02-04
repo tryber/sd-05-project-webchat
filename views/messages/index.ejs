@@ -12,7 +12,17 @@
     <form action="" class="messageBox">
       <input data-testid="message-box" placeholder="type here" class="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
     </form>
-    <ul class="mensagens"></ul>
+    <ul class="mensagens">
+      <% if(messages) { %>
+        <% messages.forEach((message) => { %>
+          <li data-testid="message">
+            <%=message.timeStamp %>
+            <%=message.nickname %>
+            <%=message.chatMessage %>
+          </li>
+        <% }) %>
+      <% } %>
+    </ul>
     <script>
       const socket = io();
       const messageForm = document.querySelector('.messageBox');
