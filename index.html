@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO - trybe</title>
+    <link rel="stylesheet" type="text/css" href="/assets/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <form action="" id="nicknameBox">
+      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-save">Save</button>
+    </form>
+    <form action="" id="messageBox">
+      <input data-testid="message-box" id="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
+    </form>
+    <ul id="mensagens"></ul>
+    <script>
+      const socket = io();
+      const messageForm = document.querySelector('#messageBox');
+      const nicknameForm = document.querySelector('#nicknameBox');
+      const inputMessage = document.querySelector('#mensagemInput');
+      const inputNickname = document.querySelector('#nicknameInput');
+      let nickname = 'Fulano';
+
+      messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        socket.emit('message', { chatMessage: inputMessage.value, nickname });
+        inputMessage.value = '';
+        return false;
+      });
+
+      const createMessage = (message, nickname) => {
+        const messagesUl = document.querySelector('#mensagens');
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = `${nickname} - ${message}`;
+        messagesUl.appendChild(li);
+      };
+
+      socket.on('ola', (mensagem) => createMessage(mensagem));
+
+      socket.on('mensagemServer', ({ chatMessage, nickname }) => createMessage(chatMessage, nickname));
+
+      nicknameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        nickname = inputNickname.value;
+      });
+
+    </script>
+  </body>
+</html>
