@@ -67,6 +67,8 @@ io.on('connect', async (socket) => {
 
   addClientToMap(fakename, socket.id);
 
+  console.log(userSocketIdMap.get(fakename));
+
   socket.emit('newUser', fakename);
   // socket.emit('newNickName', fakename);
 
@@ -74,8 +76,7 @@ io.on('connect', async (socket) => {
 
   // Ao receber message, insere mensagem e emiti para o history novamente
   socket.on('message', async ({ nickname, chatMessage }) => {
-    if (!nickname || !chatMessage)
-      return io.emit('status', 'Digite seu nome ou mensagem');
+    if (!nickname || !chatMessage) return io.emit('status', 'Digite seu nome ou mensagem');
 
     const messageProfile = createMessageProfile(nickname, chatMessage);
     await messagesModel.insert(messageProfile);
