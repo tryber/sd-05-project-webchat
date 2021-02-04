@@ -28,22 +28,20 @@
         return false;
       });
 
-      const createMessage = (message, nickname) => {
+        nicknameForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          nickname = inputNickname.value;
+        });
+
+      const createMessage = (message) => {
         const messagesUl = document.querySelector('.mensagens');
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
-        li.innerText = `${nickname} - ${message}`;
+        li.innerText = message;
         messagesUl.appendChild(li);
       };
 
-      socket.on('ola', (mensagem) => createMessage(mensagem));
-
-      socket.on('mensagemServer', ({ chatMessage, nickname }) => createMessage(chatMessage, nickname));
-
-      nicknameForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        nickname = inputNickname.value;
-      });
+      socket.on('message', (message) => createMessage(message));
 
     </script>
   </body>
