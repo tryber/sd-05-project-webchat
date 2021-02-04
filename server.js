@@ -35,11 +35,11 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (_req, res) => {
-  const data = [];
-  res.render('index', data);
+// app.get('/', (_req, res) => {
+//   const data = [];
+//   res.render('index', data);
   // now inside index.ejs you can use these data, this was like passing a props
-}),
+// });
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
 
@@ -47,11 +47,11 @@ io.on('connection', async (socket) => {
   console.log(`User ${socket.id} connected`);
   // Create random nickname (https://www.npmjs.com/package/faker) and inject it in socket
 
-  socket.user = { nickname: faker.name.firstName() };
+  // socket.user = { nickname: faker.name.firstName() };
   // nickname logic: or user stays with its random one, or user picks and save one
   // firstNickname = socket.user.nickname;
 
-  // 2. Receive 'message' emitted by client
+  // 2. Receive 'message' emitted by client and emit the formatted one
   socket.on('message', async ({ chatMessage, nickname }) => {
     const dateNow = new Date().getTime();
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');

@@ -4,6 +4,6 @@
   justify-content: center;
 }
 
-#messages {
+.messages {
   height: 200px;
 }

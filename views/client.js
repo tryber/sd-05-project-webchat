@@ -10,14 +10,14 @@ window.onload = () => {
     clientSocketIo.emit('message', { chatMessage, nickname });
   });
 
-  // 3. Show the message on the chat div
+  // 3. Show the formatted message on the chat div
   clientSocketIo.on('message', (fullMessage) => {
-    const divMessages = document.getElementById('messages')
-    const li = document.createElement('li')
-      li.setAttribute('data-tested', 'message')
+    const divMessages = document.getElementById('messages');
+    const li = document.createElement('li');
+    li.setAttribute('data-tested', 'message');
     li.textContent = fullMessage;
     // li.innerHTML = fullMessage;
-    divMessages.append(li)
+    divMessages.append(li);
   });
 
   // clientSocketIo.on('newUser', (username) => {
@@ -37,4 +37,4 @@ window.onload = () => {
 
   //   allMessages.appendChild(p)
   // });
-}
+};
