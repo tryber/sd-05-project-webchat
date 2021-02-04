@@ -1,0 +1,9 @@
+.chat-inputs {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#messages {
+  height: 200px;
+}

@@ -8,18 +8,22 @@ TODO: later for req3 turn it into EJS -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebChat Project</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <h2>Welcome to the WebChien Chat</h2>
     <ul id="messages"></ul>
     <!-- Cada mensagem ou seja li deve ter o data-testid="message". -->
-    <form class=chat-inputs>
-      <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
-      <button data-testid="nickname-save" id="nickname-save" type="button">Save nickname</button>
-      <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
+    <form class="chat-inputs">
+      <div class="nickname-stuff">
+        <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
+        <button data-testid="nickname-save" id="nickname-save" type="button">Save nickname</button>
+      </div>
+      <div class="message-stuff">
+        <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
+        <button data-testid="send-button" id="send">Send message</button>
+      </div>
     </form>
-    <button data-testid="send-button" id="send">Send message</button>
   </body>
   <!-- Connect with client.js and right port -->
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>

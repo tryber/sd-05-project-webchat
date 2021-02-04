@@ -1,18 +1,16 @@
-// Client side
-
-// To be able to manipulate the DOM corresponding to our rendered front end
+// Client side, where to manipulate the DOM
 // Reference: https://github.com/tryber/sd-04-live-lectures/pull/67/files 
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
-  // clientSocketIo.on('myNickname', (name) => {
-  //   const divUsers = document.getElementById('users')
-  //   const li = document.createElement('li')
-  //     li.setAttribute('data-name', 'user-online')
-  //   li.textContent = name;
-
-  //   divUsers.append(li)
-  // });
+  clientSocketIo.on('message', (fullMessage) => {
+    const divMessages = document.getElementById('messages')
+    const li = document.createElement('li')
+      li.setAttribute('data-tested', 'message')
+    li.textContent = fullMessage;
+    // li.innerHTML = fullMessage;
+    divMessages.append(li)
+  });
 
   // clientSocketIo.on('newUser', (username) => {
   //   const divUsers = document.getElementById('users')
