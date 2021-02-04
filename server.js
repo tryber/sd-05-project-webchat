@@ -5,7 +5,6 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-// const faker = require('faker');
 const moment = require('moment');
 require('dotenv').config();
 
@@ -45,11 +44,6 @@ app.set('views', './views');
 
 io.on('connection', async (socket) => {
   console.log(`User ${socket.id} connected`);
-  // Create random nickname (https://www.npmjs.com/package/faker) and inject it in socket
-
-  // socket.user = { nickname: faker.name.firstName() };
-  // nickname logic: or user stays with its random one, or user picks and save one
-  // firstNickname = socket.user.nickname;
 
   // 2. Receive 'message' emitted by client and emit the formatted one
   socket.on('message', async ({ chatMessage, nickname }) => {

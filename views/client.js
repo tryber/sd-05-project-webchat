@@ -3,11 +3,25 @@
 window.onload = () => {
   const clientSocketIo = window.io('http://localhost:3000');
 
+  const faker = require('faker');
+
   // 1. User click send message
-  document.getElementById('send').addEventListener('click', () => {
+  // See if nickname is default or one chosen by user
+  let nicknameUsed = faker.name.firstName();
+  const chosenNickname = document.getElementById('nickname-input').value;
+  const nicknameBtn = document.getElementById('nickname-save');
+  nicknameBtn.addEventListener('click', () => {
+    nicknameUsed = chosenNickname.value;
+  });
+
+  const sendBtn = document.getElementById('send');
+  sendBtn.addEventListener('click', () => {
     const chatMessage = document.getElementById('message-input').value;
-    const nickname = document.getElementById('nickname-input').value;
-    clientSocketIo.emit('message', { chatMessage, nickname });
+    const emitMessage = {
+      nickname: nicknameUsed,
+      chatMessage,
+    };
+    clientSocketIo.emit('message', emitMessage);
   });
 
   // 3. Show the formatted message on the chat div
