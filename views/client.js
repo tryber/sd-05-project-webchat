@@ -105,6 +105,10 @@ window.onload = () => {
     messageList.insertBefore(message, messageList.firstChild);
 
     // Remover LI que contenha a ID com o nome
+
+    const userToRemoveFromList = element(fakename);
+    userToRemoveFromList.innerHTML = '';
+
   });
 
   clearBtn.addEventListener('click', () => {
