@@ -1,5 +1,9 @@
 const socket = window.io('http://localhost:3000');
 
+const message = document.getElementById('inputMessage');
+const messageBtn = document.getElementById('send-button');
+const messages = document.getElementById('messageList');
+
 const createMessage = (insertChat) => {
   const li = document.createElement('li');
   li.setAttribute('data-testid', 'message');
@@ -8,44 +12,40 @@ const createMessage = (insertChat) => {
 };
 
 socket.on('message', (msg) => createMessage(msg));
-// window.onload = () => {  
+// window.onload = () => {
 //   socket.on('message', (msg) => createMessage(msg));
 // };
 // const handleClick = (e) => {
   // const socket = io(); //'http://localhost:3000'
-  
-  let userName = `Usuário ${Date.now()}`;
-  const nameBtn = document.getElementById('btn-name');
-  
-  nameBtn.addEventListener('click', () => {
-    userName = document.getElementById('nickNameInput').value;
-    // alert(`nome ${userName} salvo`);
-    document.getElementById('nickNameInput').value = '';
-  });
-  
-  const message = document.getElementById('inputMessage');
-  const messageBtn = document.getElementById('send-button');
-  const messages = document.getElementById('messageList');
-  // const time = new Date().toUTCString();
-  // const now = new Date();
-  // const date = dateFormat(now, 'dd-mm-yyyy');
-  // const time = dateFormat(now, 'HH:mm:ss');
-  
-  messageBtn.addEventListener('click', () => {
-    if (message.value.length) {
-      // const li = document.createElement('li');
-      // li.setAttribute('data-testid', 'message');
-      // li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
-      // messages.appendChild(li);
-      const nickname = userName;
-      const chatMessage = message.value
 
-      socket.emit('message', { chatMessage, nickname  });
-      // console.log(`${userName} ${message.value}`);
-      message.value = '';
-    }
-  });
-  
+let userName = `Usuário ${Date.now()}`;
+const nameBtn = document.getElementById('btn-name');
+
+nameBtn.addEventListener('click', () => {
+  userName = document.getElementById('nickNameInput').value;
+  // alert(`nome ${userName} salvo`);
+  document.getElementById('nickNameInput').value = '';
+});
+// const time = new Date().toUTCString();
+// const now = new Date();
+// const date = dateFormat(now, 'dd-mm-yyyy');
+// const time = dateFormat(now, 'HH:mm:ss');
+
+messageBtn.addEventListener('click', () => {
+  if (message.value.length) {
+    // const li = document.createElement('li');
+    // li.setAttribute('data-testid', 'message');
+    // li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
+    // messages.appendChild(li);
+    const nickname = userName;
+    const chatMessage = message.value;
+
+    socket.emit('message', { chatMessage, nickname });
+    // console.log(`${userName} ${message.value}`);
+    message.value = '';
+  }
+});
+
 //   e.preventDefault();
 //   const socket = io();
 //   socket.emit('mensagem', { newMsg: e.inputMessage.value, nickname: e.nickNameInput.value});
