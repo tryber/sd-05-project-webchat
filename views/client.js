@@ -1,7 +1,7 @@
 // window.onload = () => {
 //   const clientSocketIo = window.io('http://localhost:3000');
 
-//   // Ainda precisa melhorar isto, não funciona para os casos do checklist no readme.md 
+//   // Ainda precisa melhorar isto, não funciona para os casos do checklist no readme.md
 //   clientSocketIo.on('myNickname', (name) => {
 //     const divUsers = document.getElementById('users')
 //     const li = document.createElement('li')

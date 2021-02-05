@@ -9,14 +9,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
         integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
         crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 
 <body>
-    <input type="text" id="input-nick" placeholder="Enter a username" />
-    <button id="btn-nick">Save</button>
+    <input type="text" id="input-name" placeholder="Enter a username" /><br>
+    <!-- <button id="btn-name">Save</button> -->
 
     <textarea data-testid="message-box" id="input-msg" placeholder="Type your messsage"></textarea>
     <button data-testid="send-button" id="btn-msg">Send</button>
@@ -24,10 +25,11 @@
     <div id='messageList' class="card-block">
 
         <% if (historyMessage) {%>
-            <% historyMessage.forEach(({ nickname, chatMessage })=> { %>
+            <% historyMessage.forEach(({ nickname, chatMessage, timestamp })=> { %>
                 <div data-testid="message">
-                    <%= nickname %>
-                        <%= chatMessage %>
+                    <%= timestamp %>
+                        <%= nickname %>
+                            <%= chatMessage %>
                 </div>
                 <%})%>
                     <% } %>
@@ -36,32 +38,48 @@
 </body>
 <script>
     const client = io('http://localhost:3000');
-    console.log(client);
-    let nickname = '';
+    // console.log(client);
+    // let nickname = '';
 
-    const nickBtn = document.getElementById('btn-nick');
-    const nickInput = document.getElementById('input-nick');
+    // const nameBtn = document.getElementById('btn-name');
+    const nameInput = document.getElementById('input-name');
     const msgInput = document.getElementById('input-msg');
     const btnMessage = document.getElementById('btn-msg');
     const listMessage = document.getElementById('messageList');
+    const timestamp = moment(new Date())
 
 
-    nickBtn.addEventListener('click', () => {
-        nickname = nickInput.value
-    });
+    // nameBtn.addEventListener('click', () => {
+    //     nickname = nameInput.value
+    // });
 
     btnMessage.addEventListener('click', () => {
         const chatMessage = msgInput.value;
-
-        const li = document.createElement('li');
-        li.innerHTML = `${nickname}: ${chatMessage}`;
-        listMessage.appendChild(li);
+        const nickname = nameInput.value
+        // const li = document.createElement('li');
+        // li.innerHTML = `${nickname}: ${chatMessage}`;
+        // listMessage.appendChild(li);
 
         const data = { nickname, chatMessage }
         client.emit('message', data)
 
     });
 
+    client.on('message', (message) => {
+
+        const li = document.createElement('li');
+        li.innerHTML = message;
+        // console.log({ timestamp, nickname, chatMessage });
+        // li.innerHTML = `${timestamp} - ${nickname}: ${chatMessage} [egg]`;
+        listMessage.appendChild(li);
+    });
+
+    client.on('welcome', (welcome) => {
+        const li = document.createElement('li');
+        const nickname = nameInput.value;
+        li.innerHTML = welcome;
+        listMessage.appendChild(li);
+    });
 
 </script>
 
