@@ -1,7 +1,7 @@
 // Client side, where to manipulate the DOM
 // Reference: https://github.com/tryber/sd-04-live-lectures/pull/67/files
 window.onload = () => {
-  const clientSocketIo = window.io('http://localhost:3000');
+  const clientSocketIo = window.io();
 
   // 1. User click send message
 

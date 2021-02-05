@@ -13,7 +13,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
-// const { createMessage } = require('./models/messageModel');
+const { createMessage, getMessages } = require('./models/messagesModel');
 
 // SET IO & CORS
 
@@ -32,13 +32,16 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'views')));
 // informing express to use static file inside views directory
+// better practice to put in public, for static
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.get('/', (_req, res) => {
-  const data = [];
-  res.render('index', data);
-  // now inside index.ejs you can use these data, this was like passing a props
+  // const data = [];
+  const allMessages = await getMessages();
+  res.render('index', { allMessages });
+  // to be able to pass data to index.ejs, like passing a props
+  // res.render('index');
 });
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
@@ -59,8 +62,11 @@ io.on('connection', async (socket) => {
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
     // req3 will keep this message in BD, calling function from model
-    // await createMessage(fullMessage);
-    socket.broadcast.emit('message', fullMessage);
+    await createMessage(fullMessage);
+    // socket.broadcast.emit('message', fullMessage);
+    // socket.emit('message', fullMessage);
+    io.emit('message', fullMessage);
+    // to have chat in both sides
   });
 
   socket.on('disconnect', () => {
