@@ -46,7 +46,7 @@ io.on('connect', async (socket) => {
   // socket.emit('newNickName', fakename);
 
   // socket.user = { nickname: faker.name.firstName() };
-  const fakename = faker.name.firstName();
+  let fakename = faker.name.firstName();
 
   const clientID = socket.id;
 
@@ -77,13 +77,16 @@ io.on('connect', async (socket) => {
 
     console.log(userSocketIdMap);
 
+
+
     const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
 
     console.log({ usersMap2 });
 
     socket.emit('newUser', { fakename: newNick, usersMap: usersMap2 });
 
-    io.emit('atualizaUsers', usersMap2);
+    io.emit('atualizaUsers', { usersMap2, oldNameToDelete: fakename });
+    fakename = newNick;
   });
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

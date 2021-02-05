@@ -84,7 +84,7 @@ window.onload = () => {
   });
   // ///////////////////////////////////////////
 
-  clientSocketIo.on('atualizaUsers', (usersMap2) => {
+  clientSocketIo.on('atualizaUsers', ({ usersMap2, oldNameToDelete }) => {
     const firstNameOfTheList = users.firstChild.textContent;
 
     users.innerHTML = '';
@@ -110,7 +110,9 @@ window.onload = () => {
       users.append(li);
     });
 
-    // console.log(usersMapWithouHero);
+    const userToRemoveFromList = element(oldNameToDelete);
+    element.parentNode.removeChild(userToRemoveFromList);
+
   });
   // ///////////////////////////////////////////
 
