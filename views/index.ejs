@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat</title>
+  </head>
+  <script src="socket.io/socket.io.js"></script>
+  <link
+    rel="stylesheet"
+    href="
+  ./css/style.css"
+  />
+  <body>
+    <ul>
+      <% if (messageHistory) {
+        messageHistory.forEach((message) => {
+          %><li data-testid="message"><%= message %></li><% 
+        })
+      } %>
+    </ul>
+    <section id="chat">
+      <form>
+        <input id="text-input" data-testid="message-box" />
+        <button type="button" data-testid="send-button" id="send-button">Enviar</button>
+        <input placeholder="Escolha um nick" data-testid="nickname-box" id="nickname-box" />
+        <button type="button" data-testid="nickname-save" id="nickname-save">Salvar</button>
+      </form>
+    </section>
+    <script>
+      window.onload = () => {
+        const socket = io();
+        const sendButton = document.getElementById('send-button');
+        const chatMessage = document.getElementById('text-input');
+        const nicknameInput = document.getElementById('nickname-box');
+        const saveButton = document.getElementById('nickname-save');
+        let nickname = 'anônimo'
+        
+        socket.on('message', (text) => {
+          const ul = document.getElementsByTagName('ul')[0];
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'message');
+          li.innerText = text;
+          ul.appendChild(li);
+        })
+
+        sendButton.addEventListener('click', () => {
+          socket.emit('message', {
+            nickname,
+            chatMessage: chatMessage.value,
+          });
+          chatMessage.value = '';
+        });
+
+        saveButton.addEventListener('click', () => {
+          nickname = nicknameInput.value
+          nicknameInput.value = ''
+        })
+      };
+    </script>
+  </body>
+</html>
