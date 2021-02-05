@@ -38,14 +38,7 @@ app.get('/', async (req, res) => {
 });
 
 io.on('connect', async (socket) => {
-  // Emiti todas as mensagens salvas ao conectar
-  // const allMessages = await messagesModel.getAll();
-  // socket.emit('history', allMessages);
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  // socket.emit('newNickName', fakename);
-
-  // socket.user = { nickname: faker.name.firstName() };
   let fakename = faker.name.firstName();
 
   const clientID = socket.id;
@@ -57,17 +50,14 @@ io.on('connect', async (socket) => {
 
   socket.emit('newUser', { fakename, usersMap });
 
-  socket.on('disconnect', () => {
-    // console.log('Got disconnect!');
+  // io.emit('atualizaUsers', { usersMap2: usersMap, oldNameToDelete: fakename });
 
-    removeClientFromMap(fakename, clientID);
-    // userSocketIdMap.clear();
-    io.emit('userLeft', { fakename, clientID });
-    io.emit('status', `${fakename} left the chat.`);
+  socket.on('newUserArrived', (userThatArrived) => {
+    io.emit('putNewUserOnYourList', userThatArrived);
   });
 
-  // socket.emit('newNickName', fakename);
 
+  // socket.emit('newNickName', fakename);
   socket.on('changeNick', (newNick) => {
     removeClientFromMap(fakename, clientID);
     console.log({ fakename });
@@ -75,9 +65,9 @@ io.on('connect', async (socket) => {
     addClientToMap(newNick, clientID);
 
     console.log(userSocketIdMap);
-
+    
     const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
-
+    
     console.log({ usersMap2 });
 
     socket.emit('newUser', { fakename: newNick, usersMap: usersMap2 });
@@ -87,6 +77,14 @@ io.on('connect', async (socket) => {
   });
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  socket.on('disconnect', () => {
+    // console.log('Got disconnect!');
+
+    removeClientFromMap(fakename, clientID);
+    // userSocketIdMap.clear();
+    io.emit('userLeft', { fakename, clientID });
+    io.emit('status', `${fakename} left the chat.`);
+  });
 
   // Ao receber message, insere mensagem e emiti para o history novamente
   socket.on('message', async ({ nickname, chatMessage }) => {

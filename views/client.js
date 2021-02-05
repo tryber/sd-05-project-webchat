@@ -62,6 +62,8 @@ window.onload = () => {
     // Coloca nos usuarios online primeiro o próprio usuário
     let li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
+    li.setAttribute('id', fakename);
+
     li.textContent = fakename;
 
     users.append(li);
@@ -81,6 +83,26 @@ window.onload = () => {
 
       users.append(li);
     });
+    clientSocketIo.emit('newUserArrived', { userThatArrived: fakename });
+  });
+  // ///////////////////////////////////////////
+  clientSocketIo.on('putNewUserOnYourList', ({ userThatArrived }) => {
+    const isThereAnElementWithThisNameId = element(userThatArrived);
+
+    console.log(users.childElementCount);
+
+    if (isThereAnElementWithThisNameId > 1) {
+      users.removeChild(users.lastChild);
+    }
+
+    if (!isThereAnElementWithThisNameId) {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', userThatArrived);
+      li.textContent = userThatArrived;
+
+      users.append(li);
+    }
   });
   // ///////////////////////////////////////////
 
@@ -91,6 +113,8 @@ window.onload = () => {
 
     let li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
+    li.setAttribute('id', firstNameOfTheList);
+
     li.textContent = firstNameOfTheList;
 
     users.append(li);
