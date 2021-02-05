@@ -16,8 +16,8 @@
 </head>
 
 <body>
-    <input type="text" id="input-name" placeholder="Enter a username" /><br>
-    <!-- <button id="btn-name">Save</button> -->
+    <input data-testid="nickname-box" type="text" id="input-name" placeholder="Enter a username" />
+    <button data-testid="nickname-save" id="btn-name">Save</button><br>
 
     <textarea data-testid="message-box" id="input-msg" placeholder="Type your messsage"></textarea>
     <button data-testid="send-button" id="btn-msg">Send</button>
@@ -69,6 +69,7 @@
 
         const li = document.createElement('li');
         li.innerHTML = message;
+        li.setAttribute('data-testid', 'message');
         // console.log({ timestamp, nickname, chatMessage });
         // li.innerHTML = `${timestamp} - ${nickname}: ${chatMessage} [egg]`;
         listMessage.appendChild(li);

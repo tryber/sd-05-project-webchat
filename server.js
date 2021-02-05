@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+
 const app = express();
 const parser = require('body-parser');
 const cors = require('cors');
@@ -7,6 +8,7 @@ const path = require('path');
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const moment = require('moment');
+const faker = require('faker');
 
 const messagesModel = require('./models/messagesModel');
 
@@ -29,22 +31,22 @@ app.get('/', async (req, res) => {
 
 io.on('connection', (socket) => {
   console.log(`${socket.id} now connected`);
-  socket.emit('welcome', `Welcome to server!`);
+  const fake = faker.name.firstName();
+  socket.emit('welcome', `Welcome to server, ${fake}!!`);
 
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
 
   socket.on('message', async (message) => {
-    // console.log(message);
     const date = new Date().getTime();
     const timestamp = moment(date).format('DD-MM-yyyy hh:mm:ss');
-    message = {...message, timestamp};
-    // console.log(message);
-    await messagesModel.postMessage(message);
+    const post = { ...message, timestamp };
+
+    await messagesModel.postMessage(post);
+    const formattedPost = `${message.timestamp} - ${message.nickname || fake}: ${message.chatMessage}`;
+    io.emit('message', formattedPost);
     // socket.broadcast.emit('message', message);
-    message = `${message.timestamp} - ${message.nickname}: ${message.chatMessage}`
-    io.emit('message', message);
   });
 
   socket.on('error', (error) => {
