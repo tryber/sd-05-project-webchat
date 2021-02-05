@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Cduessel - WebChat</title>
+    <!-- <link rel="stylesheet" href="style.css" type="text/css" media="screen"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script> -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>The new ZapZap webchat</h1>
+      <div class="row g-3">
+        <input data-testid="nickname-box" id="nickNameInput" autocomplete="off" type= "text" placeholder="Escreva seu nome aqui" class="col-3 form-control"/>
+        <button data-testid="nickname-save" id="btn-name"" class="btn btn-primary" type="button">Salvar</button>
+      </div>
+      <ul class="list-unstyled">
+        <li>usuários on</li>
+      </ul>
+      <ul class="list-unstyled" id="messageList">
+        <% if (historyMessages) { %>
+          <% historyMessages.forEach((msg) => { %>
+            <li data-testid="message">
+              <%= `${msg.time} - ${msg.nickname}: ${msg.message}` %>
+            </li>
+          <% }) %>
+          <% }%>
+      </ul>
+      <form class="row" style="position: fixed; bottom: 2%;">
+        <input data-testid="message-box" id="inputMessage" autocomplete="off" placeholder="Escreva sua mensagem aqui" class="col-9 form-control" />
+        <button
+        id="send-button"
+        data-testid="send-button"
+        class="btn btn-primary"
+        type="button"
+        >Enviar</button>
+      </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <!-- <script src="script.js"></script> -->
+   </body>
+   <script type="text/javascript">
+    const socket = io(); //'http://localhost:3000'
+    
+    let userName = `Usuário ${Date.now()}`;
+    const nameBtn = document.getElementById('btn-name'); 
+
+    nameBtn.addEventListener('click', () => { 
+      userName = document.getElementById('nickNameInput').value;
+      alert(`nome ${userName} salvo`);
+    });
+
+    const message = document.getElementById('inputMessage');
+    const messageBtn = document.getElementById('send-button');
+    const messages = document.getElementById('messageList');
+    const time = new Date().toUTCString();
+
+   messageBtn.addEventListener('click', () => {
+      if (message.value.length) {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${time} - ${userName}: ${message.value}`
+        messages.appendChild(li);
+        socket.emit('message', { nickname: userName, newMsg: message.value });
+        console.log(`${userName} ${message.value}`)
+        message.value='';
+      }
+    });
+
+    const createMessage = (message) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerHTML = message;
+      messages.appendChild(li);
+    };
+
+    socket.on('message', (msg) => createMessage(msg));
+
+//socket.emit('mensagem', { newMsg: e.inputMessage.value, nickname: e.nickNameInput.value})
+    </script>
+</html>
