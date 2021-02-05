@@ -6,23 +6,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <form action="" class="nicknameBox">
-      <input data-testid="nickname-box" placeholder="nickname" class="nicknameInput" autocomplete="off" /><button data-testid="nickname-save">Save</button>
-    </form>
-    <form action="" class="messageBox">
-      <input data-testid="message-box" placeholder="type here" class="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
-    </form>
-    <ul class="mensagens">
-      <% if(messages) { %>
-        <% messages.forEach((message) => { %>
-          <li data-testid="message">
-            <%=message.timeStamp %>
-            <%=message.nickname %>
-            <%=message.chatMessage %>
-          </li>
-        <% }) %>
-      <% } %>
-    </ul>
+    <div class="main-container">
+      <div>
+        <form action="" class="nicknameBox">
+          <input data-testid="nickname-box" placeholder="nickname" class="nicknameInput" autocomplete="off" /><button data-testid="nickname-save">Save</button>
+        </form>
+        <form action="" class="messageBox">
+          <input data-testid="message-box" placeholder="type here" class="mensagemInput" autocomplete="off" /><button data-testid="send-button">Send</button>
+        </form>
+        <ul class="mensagens">
+          <% if(messages) { %>
+            <% messages.forEach((message) => { %>
+              <li data-testid="message">
+                <%=message.timeStamp %>
+                <%=message.nickname %>
+                <%=message.chatMessage %>
+              </li>
+            <% }) %>
+          <% } %>
+        </ul>
+      </div>
+      <div>
+        <ul class="users">
+          <% if(onlineUsers !== []) { %>
+            <% onlineUsers.forEach((user) => { %>
+              <li data-testid="online-user" class="onlineUser"><%=user.nickname %></li>
+            <% }) %>
+          <% } %>
+        </ul>
+      </div>
+    </div>
     <script>
       const socket = io();
       const messageForm = document.querySelector('.messageBox');
@@ -30,6 +43,7 @@
       const inputMessage = document.querySelector('.mensagemInput');
       const inputNickname = document.querySelector('.nicknameInput');
       let nickname = 'Fulano';
+      let userId = '';
 
       messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -38,10 +52,11 @@
         return false;
       });
 
-        nicknameForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          nickname = inputNickname.value;
-        });
+      nicknameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        nickname = inputNickname.value;
+        socket.emit('changeNickname', { nickname });
+      });
 
       const createMessage = (message) => {
         const messagesUl = document.querySelector('.mensagens');
@@ -51,7 +66,35 @@
         messagesUl.appendChild(li);
       };
 
+      const createOnlineUsersList = (onlineUsers) => {
+        const usersUl = document.querySelector('.users');
+        usersUl.innerText = '';
+        const li = document.createElement('li');
+
+        li.setAttribute('data-testid', 'online-user');
+        li.setAttribute('class', 'onlineUser');
+        li.innerText = nickname;
+        usersUl.appendChild(li);
+
+        onlineUsers.forEach((user) => {
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'online-user');
+          li.innerText = user.nickname;
+          usersUl.appendChild(li);
+        });
+      };
+
+      socket.emit('newUser', { nickname });
+
       socket.on('message', (message) => createMessage(message));
+
+      socket.on('updatedOnlineUsers', ({ onlineUsers, id }) => {
+        if (userId === '') {
+          userId = id;
+        };
+        const onlineUsersWithoutActualClient = onlineUsers.filter((user) => user.id !== userId);
+        createOnlineUsersList(onlineUsersWithoutActualClient);
+      });
 
     </script>
   </body>

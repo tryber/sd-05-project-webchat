@@ -33,9 +33,9 @@ form button {
 
 .nicknameBox {
   background: gray;
+  bottom: 100px;
   padding: 3px;
   position: fixed;
-  top: 0;
   width: 100%;
 }
 
@@ -43,7 +43,7 @@ form button {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  position: absolute;
+  /* position: absolute; */
   top: 50px;
 }
 
@@ -53,4 +53,9 @@ form button {
 
 .mensagens li:nth-child( odd ) {
   background: rgb(238, 238, 238);
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
 }

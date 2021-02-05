@@ -21,15 +21,32 @@ app.use(express.static('./'));
 
 app.use(cors());
 
+let onlineUsers = [];
+
 app.get('/', async (req, res) => {
   const messages = await messagesModel.getAll();
-  res.status(200).render('messages/index', { messages });
+  res.status(200).render('messages/index', { messages, onlineUsers });
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected');
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} desconnected`);
+    const updatedOnlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
+    onlineUsers = updatedOnlineUsers;
+    io.emit('updatedOnlineUsers', { onlineUsers, id: socket.id });
+  });
 
-  socket.on('disconnect', () => console.log('User desconnected'));
+  socket.on('newUser', ({ nickname }) => {
+    console.log(`${socket.id} connected`);
+    onlineUsers.push({ id: socket.id, nickname });
+    io.emit('updatedOnlineUsers', { onlineUsers, id: socket.id });
+  });
+
+  socket.on('changeNickname', ({ nickname }) => {
+    const index = onlineUsers.findIndex((user) => user.id === socket.id);
+    onlineUsers[index] = { id: socket.id, nickname };
+    io.emit('updatedOnlineUsers', { onlineUsers, id: socket.id });
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timeStamp = dateFormat(new Date(), 'dd-mm-yyyy HH:mm:ss');
