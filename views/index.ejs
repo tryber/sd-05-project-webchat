@@ -12,16 +12,16 @@
       <strong>Webchat</strong>
       <span>for Trybe's students</span>
     </h1>
+    <section id="messages">
+      <% if (messages) { %>
+        <% messages.forEach((message) => { %>
+          <li data-testid="message">
+            <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+          </li>
+       <% }) %>
+      <% } %>
+    </section>
     <form>
-      <section id="messages">
-        <% if (messages) { %>
-          <% messages.forEach((message) => { %>
-            <li data-testid="message">
-              <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
-            </li>
-         <% }) %>
-        <% } %>
-      </section>
       <section>
         <input
           data-testid="nickname-box"
@@ -40,25 +40,46 @@
         />
         <button data-testid="send-button" id="btn-message" type="button">Send</button>
       </section>
+      <section id="users">
+        <% if(users.length > 0) { %>
+          <% users.forEach((user) => { %>
+            <li data-testid="online-user" class="onlineUser"><%= `${user.nickname}` %></li>
+          <% }) %>
+        <% } %>
+      </section>
     </form>
   </body>
   <script type="text/javascript">
     const client = io('http://localhost:3000');
 
-    let nick = `Guest #${Math.round(Math.random() * 1000)}`;
     const nickname = document.getElementById('nickname');
     const nameBtn = document.getElementById('btn-name');
-
-    nameBtn.addEventListener('click', () => {
-      nick.value = nickname.value;
-    });
-
+    let nick = `Guest #${Math.round(Math.random() * 1000)}`;
+    
     const message = document.getElementById('message');
     const messageBtn = document.getElementById('btn-message');
     const messages = document.getElementById('messages');
-    const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    
+    const users = document.getElementById('users');
+    
+    nameBtn.addEventListener('click', () => {
+      if (nickname.value.length) {
+        nick = nickname.value;
 
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = nick ? nick : nickname.value;
+        users.appendChild(li);
+      }
+
+      const newUser = { nickname: nickname.value };
+
+      client.emit('userLogin', newUser);
+    });
+    
     messageBtn.addEventListener('click', () => {
+      const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+
       if (message.value.length) {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
