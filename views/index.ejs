@@ -1,6 +1,4 @@
-<!-- Front-end client side
-DONE: simple html connected with client.js - containing socketio interaction with server
-TODO: later for req3 turn it into EJS -->
+<!-- Front-end client side -->
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -12,7 +10,16 @@ TODO: later for req3 turn it into EJS -->
   </head>
   <body>
     <h2>Welcome to the WebChien Chat</h2>
-    <ul class="messages" id="messages"></ul>
+    <!-- Both lists here: from new messages & from bd historic -->
+    <ul class="messages" id="messages">
+      <% if (allMessages) { %>
+        <% allMessages.forEach((msg) => { %>
+          <li data-testid="message">
+            <%= `${msg.dateFormat} - ${msg.nickname}: ${msg.chatMessage}`%>
+          </li>
+       <% }) %>
+      <% } %>
+    </ul>
     <section class="chat-inputs">
       <div class="nickname-stuff">
         <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
@@ -24,12 +31,12 @@ TODO: later for req3 turn it into EJS -->
       </div>
     </section>
     <!-- if using form tag, remember type="button" and preventDefault
-    so as to not default to cleaning screen and method get -->
+    so as not to default to cleaning screen and method get -->
   </body>
   <!-- Connect with client.js and right port -->
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script defer src="/client.js"></script>
-  <!-- Example of other option: use socket and dom manipulation in script here
+  <!-- Example of another option without client.js file: socket & dom manipulation here
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();

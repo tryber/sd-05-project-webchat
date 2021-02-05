@@ -1,7 +1,5 @@
 const connection = require('./connection');
 
-// TODO friday: understand why db does not appear despite of "use webchat" in mongod
-
 const createMessage = async ({ dateFormat, nickname, chatMessage }) => {
   try {
     const newMessage = await connection().then((db) =>
@@ -14,7 +12,14 @@ const createMessage = async ({ dateFormat, nickname, chatMessage }) => {
   }
 };
 
-const getMessages = () => connection().then((db) => db.collection('messages').find().toArray());
+const getMessages = async () => {
+  try {
+    const allMessages = await connection().then((db) => db.collection('messages').find().toArray());
+    return allMessages;
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   createMessage,
