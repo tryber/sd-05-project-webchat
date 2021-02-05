@@ -1,5 +1,7 @@
+const clientSocketIo = window.io('http://localhost:3000');
+
+
 window.onload = () => {
-  const clientSocketIo = window.io('http://localhost:3000');
 
   const element = (id) => document.getElementById(id);
 
@@ -135,9 +137,8 @@ window.onload = () => {
     messageList.appendChild(message);
     messageList.insertBefore(message, messageList.firstChild);
 
-    // const nameToBeRemoved = element(fakename);
-    // console.log(nameToBeRemoved);
-    // nameToBeRemoved.remove();
+    const nameToBeRemoved = element(fakename);
+    if (nameToBeRemoved) nameToBeRemoved.remove();
   });
 
   clearBtn.addEventListener('click', () => {
@@ -148,3 +149,8 @@ window.onload = () => {
     messageList.textContent = '';
   });
 };
+
+window.onbeforeunload = () => {
+  clientSocketIo.close();
+};
+

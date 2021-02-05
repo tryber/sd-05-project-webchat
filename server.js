@@ -30,21 +30,25 @@ app.use('/', express.static(path.join(__dirname, './views')));
 // const fakename = faker.name.firstName();
 
 // let onlineUsers = [];
-
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
-  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
-
+  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({
+    name,
+    id,
+  }));
   res.render('index', { allMessages, usersMap });
+
+  console.log('entrou no get');
 });
 
 io.on('connect', async (socket) => {
-  
   console.log('map ao conectar');
   console.log(userSocketIdMap);
+
   let fakename = faker.name.firstName();
   const clientID = socket.id;
+  console.log(clientID);
   addClientToMap(fakename, clientID);
   console.log('map depois de adicionar novo user');
   console.log(userSocketIdMap);
@@ -58,11 +62,11 @@ io.on('connect', async (socket) => {
   // ++++++
 
   socket.on('disconnect', () => {
-    console.log('map antes de user sair');
-    console.log(userSocketIdMap);
+    // console.log('map antes de user sair');
+    // console.log(userSocketIdMap);
     removeClientFromMap(fakename, clientID);
-    console.log('map depois de removido');
-    console.log(userSocketIdMap);
+    // console.log('map depois de removido');
+    // console.log(userSocketIdMap);
     io.emit('userLeft', { fakename, clientID });
     io.emit('status', `${fakename} left the chat.`);
   });
