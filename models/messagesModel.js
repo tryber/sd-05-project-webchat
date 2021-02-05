@@ -1,5 +1,7 @@
 const connection = require('./connection');
 
+// TODO friday: understand why db does not appear despite of "use webchat" in mongod
+
 const createMessage = (fullMessage) =>
 connection().then((db) => db.collection('messages').insertOne(fullMessage));
 

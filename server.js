@@ -36,12 +36,12 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (_req, res) => {
+app.get('/', async (_req, res) => {
   // const data = [];
-  const allMessages = await getMessages();
-  res.render('index', { allMessages });
+  // const allMessages = await getMessages();
+  // res.render('index', { allMessages });
   // to be able to pass data to index.ejs, like passing a props
-  // res.render('index');
+  res.render('index');
 });
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
@@ -62,7 +62,8 @@ io.on('connection', async (socket) => {
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
     // req3 will keep this message in BD, calling function from model
-    await createMessage(fullMessage);
+    // await createMessage(fullMessage);
+    // for now, gives error on side message (is this what forces us to use ejs?)
     // socket.broadcast.emit('message', fullMessage);
     // socket.emit('message', fullMessage);
     io.emit('message', fullMessage);
