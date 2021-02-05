@@ -112,11 +112,10 @@ window.onload = () => {
 
     const userToRemoveFromList = element(oldNameToDelete);
     element.parentNode.removeChild(userToRemoveFromList);
-
   });
   // ///////////////////////////////////////////
 
-  clientSocketIo.on('userLeft', ({ fakename, clienteId }) => {
+  clientSocketIo.on('userLeft', ({ fakename }) => {
     const message = document.createElement('div');
     message.setAttribute('class', 'userLeft');
     message.textContent = `${fakename} left...`;

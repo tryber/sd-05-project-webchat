@@ -69,15 +69,12 @@ io.on('connect', async (socket) => {
   // socket.emit('newNickName', fakename);
 
   socket.on('changeNick', (newNick) => {
-
     removeClientFromMap(fakename, clientID);
     console.log({ fakename });
     console.log({ newNick });
     addClientToMap(newNick, clientID);
 
     console.log(userSocketIdMap);
-
-
 
     const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
 
