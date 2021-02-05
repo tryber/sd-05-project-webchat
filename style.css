@@ -1,4 +1,4 @@
-html, body {
+html , body {
   height: 100%;
 }
 
@@ -8,12 +8,12 @@ html, body {
   padding: 0;
 }
 
-#chat {
+#messages {
   align-items: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   height: 100%;
+  justify-content: center;
 }
 
 input {
@@ -26,7 +26,7 @@ input {
 
 button {
   background: #069;
-  color: #FFF;
+  color: #ffffff;
   font-size: 14px;
   font-weight: bold;
   height: 50px;
