@@ -1,42 +1,36 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const moment = require('moment');
 const path = require('path');
-
-const expressPORT = 3000;
-const socketIoPORT = 4555;
-
-const socketIoServer = require('http').createServer();
-const io = require('socket.io')(socketIoServer, {
-  cors: {
-    origin: `http://localhost:${expressPORT}`,
-    methods: ['GET', 'POST'],
-  },
-});
+const socketIo = require('socket.io');
+const http = require('http');
 
 const app = express();
+const httpServer = http.createServer(app);
+const io = socketIo(httpServer);
+const PORT = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'));
 });
 
-app.post('/message', (req, res) => {
-  const { message } = req.body;
-  // const { chatMessage, nickname } = message;
+io.on('connection', (socket) => {
+  console.log(`${socket.nickname} connected.`);
 
-  if (!message) {
-    return res.status(422).json({ message: 'No messages have been sent!' });
-  }
+  socket.on('message', ({ nickname, chatMessage }) => {
+    const dateAndTimeNow = moment(new Date()).format('DD-MM-yyyy hh:mm:ss A');
+    const message = `${dateAndTimeNow} - ${nickname}: ${chatMessage}`;
+    io.emit('message', message);
+  });
 
-  io.emit('message', message);
-
-  res.status(200).json({ message: 'Message emitted' });
+  socket.on('disconnect', () => {
+    console.log(`${socket.nickname} disconnected.`);
+  });
 });
 
-app.listen(expressPORT, () => console.log(`Express: rodando na porta ${expressPORT}...`));
-
-app.listen(socketIoPORT, () => console.log(`Socket.io: rodando na porta ${socketIoPORT}...`));
+httpServer.listen(PORT, () => console.log(`Rodando na porta ${PORT}...`));
