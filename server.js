@@ -41,8 +41,8 @@ io.on('connection', (socket) => {
   // users.push(socket.nickname);
   // recebe msg + nick, insere no banco e devolve para a view:
 
-  socket.on('message', async ({ nickname, newMsg }) => {
-    if (!nickname || !newMsg) {
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    if (!nickname || !chatMessage) {
       return socket.emit('status', 'Dados inválidos');
     }
     // const time = new Date().toUTCString();
@@ -50,10 +50,10 @@ io.on('connection', (socket) => {
     const date = dateFormat(now, 'dd-mm-yyyy');
     const time = dateFormat(now, 'HH:mm:ss');
 
-    console.log(`Mensagem ${time} ${newMsg} por ${nickname}`);
-    await model.create({ date, time, nickname, newMsg }); // ou precisa passar pelo controller?
-    socket.emit('message', (`${date} ${time} - ${nickname}: ${newMsg}`));
-    socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${newMsg}`));
+    console.log(`Mensagem ${time} ${nickname} ${chatMessage}`);
+    await model.create({ date, time, nickname, chatMessage }); // ou precisa passar pelo controller?
+    socket.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
+    socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     return socket.emit('status', 'mensagem enviada');
   });
   // console.log(`${nickname} conectado`);

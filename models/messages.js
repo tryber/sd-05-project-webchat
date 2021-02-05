@@ -5,6 +5,7 @@ const getCollection = require('./connection');
 const getMessages = async () => {
   try {
     const history = await getCollection('messages').then((messages) => messages.find().toArray());
+    console.log(`model: ${history[0]}`);
     return history;
   } catch (error) {
     console.log(error.message);
@@ -12,10 +13,10 @@ const getMessages = async () => {
   }
 };
 
-const create = async ({ date, time, nickname, newMsg }) => {
+const create = async ({ date, time, nickname, chatMessage }) => {
   try {
-    const insertNew = await getCollection('messages').then((messages) => messages.insertOne({ date, time, nickname, message: newMsg }));
-    // console.log("insert ok");
+    const insertNew = await getCollection('messages').then((messages) => messages.insertOne({ date, time, nickname, chatMessage }));
+    console.log("insert ok");
     return insertNew;
   } catch (error) {
     console.log('deu ruim inserir msg nova', error.message);

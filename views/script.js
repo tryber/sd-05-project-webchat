@@ -1,15 +1,28 @@
-window.onload = () => {
-  const socket = window.io('http://localhost:3000');
-  // const socket = io(); //'http://localhost:3000'
+const socket = window.io('http://localhost:3000');
 
+const createMessage = (insertChat) => {
+  const li = document.createElement('li');
+  li.setAttribute('data-testid', 'message');
+  li.innerHTML = insertChat;
+  messages.appendChild(li);
+};
+
+socket.on('message', (msg) => createMessage(msg));
+// window.onload = () => {  
+//   socket.on('message', (msg) => createMessage(msg));
+// };
+// const handleClick = (e) => {
+  // const socket = io(); //'http://localhost:3000'
+  
   let userName = `Usuário ${Date.now()}`;
   const nameBtn = document.getElementById('btn-name');
-
+  
   nameBtn.addEventListener('click', () => {
     userName = document.getElementById('nickNameInput').value;
-    alert(`nome ${userName} salvo`);
+    // alert(`nome ${userName} salvo`);
+    document.getElementById('nickNameInput').value = '';
   });
-
+  
   const message = document.getElementById('inputMessage');
   const messageBtn = document.getElementById('send-button');
   const messages = document.getElementById('messageList');
@@ -17,29 +30,22 @@ window.onload = () => {
   // const now = new Date();
   // const date = dateFormat(now, 'dd-mm-yyyy');
   // const time = dateFormat(now, 'HH:mm:ss');
-
+  
   messageBtn.addEventListener('click', () => {
     if (message.value.length) {
       // const li = document.createElement('li');
       // li.setAttribute('data-testid', 'message');
       // li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
       // messages.appendChild(li);
-      socket.emit('message', { nickname: userName, newMsg: message.value });
+      const nickname = userName;
+      const chatMessage = message.value
+
+      socket.emit('message', { chatMessage, nickname  });
       // console.log(`${userName} ${message.value}`);
       message.value = '';
     }
   });
-
-  const createMessage = (insertChat) => {
-    const li = document.createElement('li');
-    li.setAttribute('data-testid', 'message');
-    li.innerHTML = insertChat;
-    messages.appendChild(li);
-  };
-
-  socket.on('message', (msg) => createMessage(msg));
-};
-// const handleClick = (e) => {
+  
 //   e.preventDefault();
 //   const socket = io();
 //   socket.emit('mensagem', { newMsg: e.inputMessage.value, nickname: e.nickNameInput.value});

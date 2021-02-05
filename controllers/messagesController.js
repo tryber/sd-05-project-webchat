@@ -4,6 +4,7 @@ const listMessages = async (req, res) => {
   try {
     const historyMessages = await messages.getMessages();
     res.render('index', { historyMessages });
+    console.log(`controller: ${historyMessages[0]}`);
   } catch (error) {
     console.log(error.message);
   }
@@ -11,7 +12,4 @@ const listMessages = async (req, res) => {
 
 module.exports = {
   listMessages,
-  // showAuthor,
-  // newAuthor,
-  // createAuthor,
 };

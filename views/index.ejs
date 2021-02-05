@@ -21,7 +21,7 @@
         <% if (historyMessages) { %>
           <% historyMessages.forEach((msg) => { %>
             <li data-testid="message">
-              <%= `${msg.date} ${msg.time} - ${msg.nickname}: ${msg.message}` %>
+              <%= `${msg.date} ${msg.time} - ${msg.nickname}: ${msg.chatMessage}` %>
             </li>
           <% }) %>
           <% }%>
@@ -36,8 +36,8 @@
         >Enviar</button>
       </form>
     </div>
-    <script defer src="/script.js"></script>
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script defer src="/script.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
     </body>
    <!-- <script type="text/javascript">
