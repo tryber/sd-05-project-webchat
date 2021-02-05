@@ -62,7 +62,7 @@ io.on('connection', async (socket) => {
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
     // req3 will keep this message in BD, calling function from model
-    // await createMessage(fullMessage);
+    await createMessage({ dateFormat, nickname, chatMessage });
     // for now, gives error on side message (is this what forces us to use ejs?)
     // socket.broadcast.emit('message', fullMessage);
     // socket.emit('message', fullMessage);
