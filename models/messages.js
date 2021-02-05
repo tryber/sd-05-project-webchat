@@ -5,9 +5,9 @@ const getCollection = require('./connection');
 const getMessages = async () => {
   try {
     const history = await getCollection('messages').then((messages) => messages.find().toArray());
-    return history;  
+    return history;
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
     return error.message;
   }
 };
@@ -15,7 +15,7 @@ const getMessages = async () => {
 const create = async ({ time, nickname, newMsg }) => {
   try {
     const insertNew = await getCollection('messages').then((messages) => messages.insertOne({ time, nickname, message: newMsg }));
-    console.log("insert ok")
+    // console.log("insert ok");
     return insertNew;
   } catch (error) {
     console.log('deu ruim inserir msg nova', error.message);
@@ -31,4 +31,4 @@ module.exports = {
   // update,
   // exclude,
   // uploadImage,
-}
+};

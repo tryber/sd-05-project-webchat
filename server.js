@@ -22,7 +22,7 @@ const io = socketIO(server);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(cors()) // Permite recursos restritos na página web serem pedidos a domínio externo
+app.use(cors()); // Permite recursos restritos na página web serem pedidos a domínio externo
 
 app.set('view engine', 'ejs');
 
@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
   // recebe msg + nick, insere no banco e devolve para a view:
 
   socket.on('message', async ({ nickname, newMsg }) => {
-    if (!nickname || !newMsg){
+    if (!nickname || !newMsg) {
       return socket.emit('status', 'Dados inválidos');
     }
     const time = new Date().toUTCString(); // const dateFormat = require('dateformat')?
@@ -53,18 +53,15 @@ io.on('connection', (socket) => {
 
   // socket.emit('ola', 'Bem vindo, fica mais um cadin, vai ter bolo :)' );
 
-  // socket.broadcast.emit('onlineUsers', { mensagem: ' Iiiiiirraaaa! Fulano acabou de se conectar :D'});
-  
+  // socket.broadcast.emit('onlineUsers', { mensagem: ' ira! Fulano acabou de se conectar :D'});
+
   // socket.on('mensagemParaTodos', (msg)=> {
   //   io.broadcast('mensagemParaTodos', msg)
   // })
 
   socket.on('disconnect', () => {
-    console.log(
-      `${socket.id} disconnected`
-    );
+    console.log(`${socket.id} disconnected`);
   });
-
 });
 
 server.listen(3000, () => {

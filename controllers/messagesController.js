@@ -9,18 +9,6 @@ const listMessages = async (req, res) => {
   }
 };
 
-// const createAuthor = async (req, res) => {
-//   const { first_name, middle_name, last_name } = req.body;
-
-//   if (!Author.isValid(first_name, middle_name, last_name)) {
-//     return res.render('authors/new', { message: 'Dados inválidos' });
-//   }
-
-//   await Author.create(first_name, middle_name, last_name);
-//   res.redirect('authors');
-// };
-
-
 module.exports = {
   listMessages,
   // showAuthor,
