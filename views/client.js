@@ -52,7 +52,7 @@ window.onload = () => {
       textArea.value = '';
     }
   });
-  /////////////////////////////////////////////
+  // ///////////////////////////////////////////
   clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
     users.innerHTML = '';
@@ -82,20 +82,37 @@ window.onload = () => {
       users.append(li);
     });
   });
-  /////////////////////////////////////////////
+  // ///////////////////////////////////////////
 
   clientSocketIo.on('atualizaUsers', (usersMap2) => {
     const firstNameOfTheList = users.firstChild.textContent;
 
-    console.log(firstNameOfTheList);
+    users.innerHTML = '';
+
+    let li = document.createElement('li');
+    li.setAttribute('data-testid', 'online-user');
+    li.textContent = firstNameOfTheList;
+
+    users.append(li);
+
+    // console.log(firstNameOfTheList);
 
     const usersMapWithouHero = usersMap2.filter(
       (user) => user.name !== firstNameOfTheList,
     );
 
-    console.log(usersMapWithouHero);
+    usersMapWithouHero.forEach((user) => {
+      li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', user.name);
+      li.textContent = user.name;
+
+      users.append(li);
+    });
+
+    // console.log(usersMapWithouHero);
   });
-  /////////////////////////////////////////////
+  // ///////////////////////////////////////////
 
   clientSocketIo.on('userLeft', ({ fakename, clienteId }) => {
     const message = document.createElement('div');
