@@ -10,10 +10,7 @@ window.onload = () => {
   const clearBtn = element('clear');
   const sndBtn = element('btn-send');
   const users = element('users');
-
-  // Como fazer a lógica de salvar nickname?
-
-  // const saveBTN = element('btn-save');
+  const saveBTN = element('btn-save');
 
   const statusDefault = status.textContent;
 
@@ -41,19 +38,6 @@ window.onload = () => {
     });
   });
 
-  // clientSocketIo.on('history', (data) => {
-  //   if (data.length) {
-  //     data.forEach((d) => {
-  //       // console.log(d);
-  //       const message = document.createElement('div');
-  //       message.setAttribute('data-testid', 'message');
-  //       message.textContent = `${d.data} ${d.hora} ${d.nickname}: ${d.chatMessage}`;
-  //       messageList.appendChild(message);
-  //       messageList.insertBefore(message, messageList.firstChild);
-  //     });
-  //   }
-  // });
-
   clientSocketIo.on('message', (completeMessage) => {
     const message = document.createElement('div');
     message.setAttribute('data-testid', 'message');
@@ -68,7 +52,7 @@ window.onload = () => {
       textArea.value = '';
     }
   });
-
+  /////////////////////////////////////////////
   clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
     users.innerHTML = '';
@@ -84,7 +68,9 @@ window.onload = () => {
 
     // Tira o próprio usuário ;
 
-    const usersMapWithouHero = usersMap.filter((user) => user.name !== fakename);
+    const usersMapWithouHero = usersMap.filter(
+      (user) => user.name !== fakename,
+    );
 
     // renderiza o restante
     usersMapWithouHero.forEach((user) => {
@@ -96,6 +82,20 @@ window.onload = () => {
       users.append(li);
     });
   });
+  /////////////////////////////////////////////
+
+  clientSocketIo.on('atualizaUsers', (usersMap2) => {
+    const firstNameOfTheList = users.firstChild.textContent;
+
+    console.log(firstNameOfTheList);
+
+    const usersMapWithouHero = usersMap2.filter(
+      (user) => user.name !== firstNameOfTheList,
+    );
+
+    console.log(usersMapWithouHero);
+  });
+  /////////////////////////////////////////////
 
   clientSocketIo.on('userLeft', ({ fakename, clienteId }) => {
     const message = document.createElement('div');
@@ -112,6 +112,10 @@ window.onload = () => {
     element.parentNode.removeChild(userToRemoveFromList);
   });
 
+  saveBTN.addEventListener('click', () => {
+    clientSocketIo.emit('changeNick', username.value);
+  });
+
   clearBtn.addEventListener('click', () => {
     clientSocketIo.emit('clear');
   });
@@ -120,13 +124,3 @@ window.onload = () => {
     messageList.textContent = '';
   });
 };
-
-// TODO
-
-// value="<%= fakename %>"
-
-// <% if (fakename) { %>
-//   <li data-testid="online-user"">
-//     <%= fakename %>
-//   </li>
-// <% } %>

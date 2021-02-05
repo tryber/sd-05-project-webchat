@@ -38,7 +38,6 @@ app.get('/', async (req, res) => {
 });
 
 io.on('connect', async (socket) => {
-  console.log(userSocketIdMap);
   // Emiti todas as mensagens salvas ao conectar
   // const allMessages = await messagesModel.getAll();
   // socket.emit('history', allMessages);
@@ -48,7 +47,6 @@ io.on('connect', async (socket) => {
 
   // socket.user = { nickname: faker.name.firstName() };
   const fakename = faker.name.firstName();
-  console.log(socket.id);
 
   const clientID = socket.id;
 
@@ -60,7 +58,7 @@ io.on('connect', async (socket) => {
   socket.emit('newUser', { fakename, usersMap });
 
   socket.on('disconnect', () => {
-    console.log('Got disconnect!');
+    // console.log('Got disconnect!');
 
     removeClientFromMap(fakename, clientID);
     // userSocketIdMap.clear();
@@ -70,12 +68,30 @@ io.on('connect', async (socket) => {
 
   // socket.emit('newNickName', fakename);
 
+  socket.on('changeNick', (newNick) => {
+
+    removeClientFromMap(fakename, clientID);
+    console.log({ fakename });
+    console.log({ newNick });
+    addClientToMap(newNick, clientID);
+
+    console.log(userSocketIdMap);
+
+    const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
+
+    console.log({ usersMap2 });
+
+    socket.emit('newUser', { fakename: newNick, usersMap: usersMap2 });
+
+    io.emit('atualizaUsers', usersMap2);
+  });
+
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Ao receber message, insere mensagem e emiti para o history novamente
   socket.on('message', async ({ nickname, chatMessage }) => {
     if (!nickname || !chatMessage) {
-      return io.emit('status', 'Digite seu nome ou mensagem');
+      return socket.emit('status', 'Digite seu nome ou mensagem');
     }
 
     const messageProfile = createMessageProfile(nickname, chatMessage);
@@ -84,7 +100,7 @@ io.on('connect', async (socket) => {
     const { data, hora } = messageProfile;
     const completeMessage = `${data} ${hora} ${nickname}: ${chatMessage}`;
     io.emit('message', completeMessage);
-    return io.emit('status', 'Mensagem enviada');
+    return socket.emit('status', 'Mensagem enviada');
   });
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -93,7 +109,6 @@ io.on('connect', async (socket) => {
     await messagesModel.deleteAll();
     io.emit('cleared');
     userSocketIdMap.clear();
-    console.log('clear', userSocketIdMap);
   });
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
