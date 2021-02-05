@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>webChat</title>
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <link rel="stylesheet" href="../style.css">
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- <link rel="stylesheet" href="../style.css"> -->
   </head>
   <body>
     <form>
@@ -27,19 +27,20 @@
       <div class="messages"></div>
       <div>
         <input data-testid="message-box" id="message" type="text" placeholder="Digite sua mensagem">
-        <button data-testid="send-button" id="btnMsg" type="button">Enviar</button>
+        <button data-testid="send-button" id="btnMsg" type="submit" >Enviar</button>
       </div>
     </form>
   </body>
   <script type="text/javascript">
     const client = io('http://localhost:3000');
 
+    // para não aparecer o anônimo no chat
     let name = `Guest #${Math.round(Math.random() * 1000)}`;
     const nickname = document.getElementById('nickname');
     const btnName = document.getElementById('btnName');
 
-    btnName.addEventListener('click', () => {
-      name.value = nickname.value;
+    btnName.addEventListener('click', async () => {
+      name = await nickname.value;
     });
 
     const message = document.getElementById('message');
@@ -47,11 +48,10 @@
     const messages = document.getElementById('messages');
     const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
     // moment do projeto crush manager
-    /* if (!moment(date.datedAt, 'DD/MM/AAAA').isValid()) {
-      res.status(400).json({ message: 'O campo "datedAt" deve ter o formato "dd/mm/aaaa"' });
-    } */
     
-    btnMsg.addEventListener('click', async () => { 
+    // rederiza as msgs na tela
+    btnMsg.addEventListener('click', () => {
+      // console.log('message.value==>', message.value);
       if (message.value.length) {
         const li = document.createElement('li');
         li.setAttribute('data-testid', message);
@@ -60,8 +60,8 @@
       }
 
       const send = {
-        nickname: nickname.value,
         chatMessage: message.value,
+        nickname: nickname.value,
       };
 
       client.emit('message', send);

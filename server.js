@@ -39,6 +39,7 @@ client.on('connection', async (socket) => {
 
   // cada msg do client será composta pelo momento q enviou a msg, o nickname e a msg
   socket.on('message', async ({ nickname, chatMessage }) => {
+    // console.log('aquiii ==>' ,nickname, chatMessage)
     const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
     // moment do projeto crush manager
     /* if (!moment(date.datedAt, 'DD/MM/AAAA').isValid()) {
@@ -50,7 +51,6 @@ client.on('connection', async (socket) => {
     // toda vez que o evento message for emitido vai renderizar a msg no padrão da const message
     socket.broadcast.emit('message', message);
   });
-
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnect`);
   });
