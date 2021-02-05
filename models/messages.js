@@ -12,9 +12,9 @@ const getMessages = async () => {
   }
 };
 
-const create = async ({ time, nickname, newMsg }) => {
+const create = async ({ date, time, nickname, newMsg }) => {
   try {
-    const insertNew = await getCollection('messages').then((messages) => messages.insertOne({ time, nickname, message: newMsg }));
+    const insertNew = await getCollection('messages').then((messages) => messages.insertOne({ date, time, nickname, message: newMsg }));
     // console.log("insert ok");
     return insertNew;
   } catch (error) {

@@ -4,6 +4,8 @@ const cors = require('cors');
 const socketIO = require('socket.io');
 const path = require('path');
 const bodyParser = require('body-parser');
+const dateFormat = require('dateformat');
+// https://www.npmjs.com/package/dateformat, um oferecimento de Paulo D'Andrea
 
 const model = require('./models/messages');
 const msgController = require('./controllers/messagesController');
@@ -43,10 +45,15 @@ io.on('connection', (socket) => {
     if (!nickname || !newMsg) {
       return socket.emit('status', 'Dados inválidos');
     }
-    const time = new Date().toUTCString(); // const dateFormat = require('dateformat')?
-    console.log(`Mensagem ${newMsg} por ${nickname}`);
-    await model.create({ time, nickname, newMsg }); // ou precisa passar pelo controller?
-    socket.broadcast.emit('message', (`${time} - ${nickname}: ${newMsg}`));
+    //const time = new Date().toUTCString();
+    const now = new Date();
+    const date = dateFormat(now, 'dd-mm-yyyy');
+    const time = dateFormat(now, 'HH:mm:ss');
+
+    console.log(`Mensagem ${time} ${newMsg} por ${nickname}`);
+    await model.create({ date, time, nickname, newMsg }); // ou precisa passar pelo controller?
+    socket.emit('message', (`${date} ${time} - ${nickname}: ${newMsg}`));
+    socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${newMsg}`));
     return socket.emit('status', 'mensagem enviada');
   });
   // console.log(`${nickname} conectado`);
