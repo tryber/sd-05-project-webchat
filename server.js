@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     if (!nickname || !newMsg) {
       return socket.emit('status', 'Dados inválidos');
     }
-    //const time = new Date().toUTCString();
+    // const time = new Date().toUTCString();
     const now = new Date();
     const date = dateFormat(now, 'dd-mm-yyyy');
     const time = dateFormat(now, 'HH:mm:ss');

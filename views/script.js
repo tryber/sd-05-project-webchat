@@ -1,11 +1,11 @@
 window.onload = () => {
   const socket = window.io('http://localhost:3000');
-    // const socket = io(); //'http://localhost:3000'
+  // const socket = io(); //'http://localhost:3000'
 
   let userName = `Usuário ${Date.now()}`;
-  const nameBtn = document.getElementById('btn-name'); 
+  const nameBtn = document.getElementById('btn-name');
 
-  nameBtn.addEventListener('click', () => { 
+  nameBtn.addEventListener('click', () => {
     userName = document.getElementById('nickNameInput').value;
     alert(`nome ${userName} salvo`);
   });
@@ -25,20 +25,19 @@ window.onload = () => {
       // li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
       // messages.appendChild(li);
       socket.emit('message', { nickname: userName, newMsg: message.value });
-      console.log(`${userName} ${message.value}`)
-      message.value='';
+      // console.log(`${userName} ${message.value}`);
+      message.value = '';
     }
   });
 
-  const createMessage = (message) => {
+  const createMessage = (insertChat) => {
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'message');
-    li.innerHTML = message;
+    li.innerHTML = insertChat;
     messages.appendChild(li);
   };
 
   socket.on('message', (msg) => createMessage(msg));
-
 };
 // const handleClick = (e) => {
 //   e.preventDefault();
