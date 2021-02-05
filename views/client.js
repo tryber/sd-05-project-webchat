@@ -24,13 +24,6 @@ window.onload = () => {
     }
   };
 
-  // console.log(clientSocketIo.sessionid);
-
-  // clientSocketIo.on('newNickName', (nickname) => {
-  //   console.log({ nickname });
-  //   username.value = nickname;
-  // });
-
   sndBtn.addEventListener('click', () => {
     clientSocketIo.emit('message', {
       nickname: username.value,
@@ -89,12 +82,6 @@ window.onload = () => {
   clientSocketIo.on('putNewUserOnYourList', ({ userThatArrived }) => {
     const isThereAnElementWithThisNameId = element(userThatArrived);
 
-    console.log(users.childElementCount);
-
-    if (isThereAnElementWithThisNameId > 1) {
-      users.removeChild(users.lastChild);
-    }
-
     if (!isThereAnElementWithThisNameId) {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
@@ -119,8 +106,6 @@ window.onload = () => {
 
     users.append(li);
 
-    // console.log(firstNameOfTheList);
-
     const usersMapWithouHero = usersMap2.filter(
       (user) => user.name !== firstNameOfTheList,
     );
@@ -137,8 +122,12 @@ window.onload = () => {
     const userToRemoveFromList = element(oldNameToDelete);
     element.parentNode.removeChild(userToRemoveFromList);
   });
-  // ///////////////////////////////////////////
 
+  saveBTN.addEventListener('click', () => {
+    clientSocketIo.emit('changeNick', username.value);
+  });
+
+  // Não são importantes para o projeto
   clientSocketIo.on('userLeft', ({ fakename }) => {
     const message = document.createElement('div');
     message.setAttribute('class', 'userLeft');
@@ -146,16 +135,9 @@ window.onload = () => {
     messageList.appendChild(message);
     messageList.insertBefore(message, messageList.firstChild);
 
-    // TODO
+    const nameToBeRemoved = element(fakename);
 
-    // Remover LI que contenha a ID com o nome
-
-    const userToRemoveFromList = element(fakename);
-    element.parentNode.removeChild(userToRemoveFromList);
-  });
-
-  saveBTN.addEventListener('click', () => {
-    clientSocketIo.emit('changeNick', username.value);
+    nameToBeRemoved.remove();
   });
 
   clearBtn.addEventListener('click', () => {

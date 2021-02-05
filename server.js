@@ -32,61 +32,29 @@ app.use('/', express.static(path.join(__dirname, './views')));
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
-  // socket.emit('newNickName', fakename);
+  const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
 
-  res.render('index', { allMessages });
+  res.render('index', { allMessages, onlineUsers: usersMap });
 });
 
 io.on('connect', async (socket) => {
-
   let fakename = faker.name.firstName();
-
   const clientID = socket.id;
-
   addClientToMap(fakename, clientID);
-
-  // let map = new Map().set('a', 1).set('b', 2),
   const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
 
   socket.emit('newUser', { fakename, usersMap });
 
-  // io.emit('atualizaUsers', { usersMap2: usersMap, oldNameToDelete: fakename });
+  // ++++++
 
-  socket.on('newUserArrived', (userThatArrived) => {
-    io.emit('putNewUserOnYourList', userThatArrived);
-  });
-
-
-  // socket.emit('newNickName', fakename);
-  socket.on('changeNick', (newNick) => {
-    removeClientFromMap(fakename, clientID);
-    console.log({ fakename });
-    console.log({ newNick });
-    addClientToMap(newNick, clientID);
-
-    console.log(userSocketIdMap);
-    
-    const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
-    
-    console.log({ usersMap2 });
-
-    socket.emit('newUser', { fakename: newNick, usersMap: usersMap2 });
-
-    io.emit('atualizaUsers', { usersMap2, oldNameToDelete: fakename });
-    fakename = newNick;
-  });
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   socket.on('disconnect', () => {
-    // console.log('Got disconnect!');
-
     removeClientFromMap(fakename, clientID);
-    // userSocketIdMap.clear();
     io.emit('userLeft', { fakename, clientID });
     io.emit('status', `${fakename} left the chat.`);
   });
 
-  // Ao receber message, insere mensagem e emiti para o history novamente
+  // ++++++
+
   socket.on('message', async ({ nickname, chatMessage }) => {
     if (!nickname || !chatMessage) {
       return socket.emit('status', 'Digite seu nome ou mensagem');
@@ -100,16 +68,34 @@ io.on('connect', async (socket) => {
     io.emit('message', completeMessage);
     return socket.emit('status', 'Mensagem enviada');
   });
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  // Ao receber 'clear', deleta todas mensagens do banco
+  // ++++
+
+  socket.on('changeNick', (newNick) => {
+    removeClientFromMap(fakename, clientID);
+    addClientToMap(newNick, clientID);
+
+    const usersMap2 = Array.from(userSocketIdMap, ([name, id]) => ({
+      name,
+      id,
+    }));
+
+    socket.emit('newUser', { fakename: newNick, usersMap: usersMap2 });
+
+    io.emit('atualizaUsers', { usersMap2, oldNameToDelete: fakename });
+    fakename = newNick;
+  });
+
   socket.on('clear', async () => {
     await messagesModel.deleteAll();
     io.emit('cleared');
     userSocketIdMap.clear();
   });
 
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Teoricamente nao precisa do abaixo
+  socket.on('newUserArrived', (userThatArrived) => {
+    io.emit('putNewUserOnYourList', userThatArrived);
+  });
 });
 
 server.listen(PORT, () => {

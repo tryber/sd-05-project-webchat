@@ -22,7 +22,11 @@
     <div class="row">
       <ul id="users">
 
-
+        <% if (onlineUsers) {
+          onlineUsers.forEach((user) => {
+            %><li data-testid="online-user" id=<%= user.name %> ><%= user.nickname %></li><% 
+          })
+        } %>
         
       </ul>
       <div class="col-md-6 offset-md-3 col-sm-12">
