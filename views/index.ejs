@@ -1,12 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
-</head>
-<body>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webChat</title>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+    <form>
+      <div id="messages">
+        <% if (message) { %>
+            <% message.forEach((msg) => { %>
+              <li data-testid="message">
+                <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+              </li>
+            <% }) %>
+        <% } %>
+      </div>
+      <div>
+        <input data-testid="nickname-box" id="nickname" type="text" placeholder="Digite seu nick"/>
+        <button data-testid="nickname-save" id="btnName" type="button">Salvar</button>
+      </div>
+      <div class="messages"></div>
+      <div>
+        <input data-testid="message-box" id="message" type="text" placeholder="Digite sua mensagem">
+        <button data-testid="send-button" id="btnMsg" type="button">Enviar</button>
+      </div>
+    </form>
+  </body>
+  <script type="text/javascript">
+    const client = io('http://localhost:3000');
+
+    let name = `Guest #${Math.round(Math.random() * 1000)}`;
+    const nickname = document.getElementById('nickname');
+    const btnName = document.getElementById('btnName');
+
+    btnName.addEventListener('click', () => {
+      name.value = nickname.value;
+    });
+
+    const message = document.getElementById('message');
+    const btnMsg = document.getElementById('btnMsg');
+    const messages = document.getElementById('messages');
+    const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+     // moment do projeto crush manager
+    /* if (!moment(date.datedAt, 'DD/MM/AAAA').isValid()) {
+      res.status(400).json({ message: 'O campo "datedAt" deve ter o formato "dd/mm/aaaa"' });
+    } */
+
+    btnMsg.addEventListener('click', () => {
+      if (message.value.length) {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', message);
+        li.innerHTML = `${timestamp} - ${nickname.value}: ${message.value}`
+        messages.appendChild(li);
+      }
+
+      const send = {
+        nickname: nickname.value,
+        chatMessage: message.value,
+      };
+
+      client.emit('message', send);
+    });
+  </script>
 </html>

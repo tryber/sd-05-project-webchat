@@ -12,7 +12,7 @@ const createMessage = async ({ timeStamp, nickname, chatMessage }) => {
 
 const getAll = async () => {
   try {
-    const messages = await connection().then((db) => db.collection(messages).find().toArray());
+    const messages = await connection().then((db) => db.collection('messages').find().toArray());
     return messages;
   } catch (error) {
     console.error(error.message);

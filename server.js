@@ -39,10 +39,13 @@ client.on('connection', async (socket) => {
 
   // cada msg do client será composta pelo momento q enviou a msg, o nickname e a msg
   socket.on('message', async ({ nickname, chatMessage }) => {
-    const date = new Date().getTime();
-    const timeStamp = moment(date).format('DD-MM-yyyy hh:mm:ss');
-    const message = `${timeStamp} - ${nickname}: ${chatMessage}`;
-    await createMessage(timeStamp, nickname, chatMessage);
+    const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    // moment do projeto crush manager
+    /* if (!moment(date.datedAt, 'DD/MM/AAAA').isValid()) {
+      res.status(400).json({ message: 'O campo "datedAt" deve ter o formato "dd/mm/aaaa"' });
+    } */
+    const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+    await createMessage({ nickname, chatMessage, timestamp });
 
     // toda vez que o evento message for emitido vai renderizar a msg no padrão da const message
     socket.broadcast.emit('message', message);
