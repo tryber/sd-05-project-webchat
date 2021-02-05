@@ -16,18 +16,27 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'public'));
 
-app.engine('html', require('ejs').renderFile);
-
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-  res.render('index.ejs');
+const messagesModels = require('./models/messagesModel');
+
+app.get('/', async (req, res) => {
+  const history = await messagesModels.messagesHistory();
+  return res.render('index.ejs', { history });
 });
 
 io.on('connection', async (socket) => {
-  console.log(`Socket conectado ${socket.id}`);
-  socket.on('sendMessage', (data) => {
-    console.log(data);
+  console.log(`Socket ${socket.id} conectado`);
+  socket.on('disconnect', () => {
+    console.log(`Socket ${socket.id} desconectado`);
+  });
+
+  socket.on('message', async (message) => {
+    console.log(message);
+    const stored = await messagesModels.newMessage(message.nickname, message.chatMessage);
+    const text = `${stored.time} - ${stored.nickname}: ${stored.chatMessage}`;
+    console.log(text);
+    io.emit('message', text);
   });
 });
 

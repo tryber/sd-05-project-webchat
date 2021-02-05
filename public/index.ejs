@@ -9,14 +9,46 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <form id="char">
-        <input type="text" name="username" placeholder="Digite usuário">
-        <div class="messages"></div>
-        <input type="text" name="message" placeholder="Digite menssagem">
-        <button type="submit">Enviar</button>
+    <form id="chat">
+        <input type="text" data-testid="nickname-box" id="nickname-box" placeholder="Digite seu usuário">
+        <button type="button" data-testid="nickname-save" id="nickname-save">Insira seu Nickname</button>
+        <ul class="messages"></ul>
+        <input type="text" data-testid="text-input" id="text-input" placeholder="Digite sua menssagem">
+        <button type="button" data-testid="send-button" id="send-button">Enviar</button>
     </form>
     <script>
-        let socket = io();
+        const socket = io();
+        const nicknameBox = document.getElementById('nickname-box');
+        const nickButton = document.getElementById('nickname-save');
+        const textInput = document.getElementById('text-input');
+        const sendButton = document.getElementById('send-button');
+        let nickname = 'Carlos';
+
+        socket.on('message', (text) => {
+          const ul = document.getElementsByTagName('ul')[0];
+          console.log(ul)
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'message');
+          li.innerText = text;
+          console.log(text);
+          ul.appendChild(li);
+        })
+
+        nickButton.addEventListener('click', () => {
+            nickname = nicknameBox.value
+            nicknameBox.value = '';
+        })
+
+        sendButton.addEventListener('click', () => {
+            socket.emit('message', {
+                nickname,
+                chatMessage: textInput.value,
+            });
+            console.log(nickname)
+            textInput.value = '';
+        });
+
+
     </script>
 </body>
 </html>
