@@ -46,12 +46,12 @@
     const btnMsg = document.getElementById('btnMsg');
     const messages = document.getElementById('messages');
     const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
-     // moment do projeto crush manager
+    // moment do projeto crush manager
     /* if (!moment(date.datedAt, 'DD/MM/AAAA').isValid()) {
       res.status(400).json({ message: 'O campo "datedAt" deve ter o formato "dd/mm/aaaa"' });
     } */
-
-    btnMsg.addEventListener('click', () => {
+    
+    btnMsg.addEventListener('click', async () => { 
       if (message.value.length) {
         const li = document.createElement('li');
         li.setAttribute('data-testid', message);

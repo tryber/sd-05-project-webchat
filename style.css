@@ -8,13 +8,13 @@ html , body {
   padding: 0;
 }
 
-#messages {
+/* #messages {
   align-items: center;
   display: flex;
   flex-direction: column;
   height: 100%;
   justify-content: center;
-}
+} */
 
 input {
   border: 1px solid #ddd;
@@ -26,9 +26,8 @@ input {
 
 button {
   background: #069;
-  color: #ffffff;
+  color: white;
   font-size: 14px;
-  font-weight: bold;
   height: 50px;
   line-height: 50px;
   margin-top: 10px;
