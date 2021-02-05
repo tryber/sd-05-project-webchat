@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trybe WebChat</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+        integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+        crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <input type="text" id="input-nick" placeholder="Enter a username" />
+    <button id="btn-nick">Save</button>
+
+    <textarea data-testid="message-box" id="input-msg" placeholder="Type your messsage"></textarea>
+    <button data-testid="send-button" id="btn-msg">Send</button>
+
+    <div id='messageList' class="card-block">
+
+        <% if (historyMessage) {%>
+            <% historyMessage.forEach(({ nickname, chatMessage })=> { %>
+                <div data-testid="message">
+                    <%= nickname %>
+                        <%= chatMessage %>
+                </div>
+                <%})%>
+                    <% } %>
+
+    </div>
+</body>
+<script>
+    const client = io('http://localhost:3000');
+    console.log(client);
+    let nickname = '';
+
+    const nickBtn = document.getElementById('btn-nick');
+    const nickInput = document.getElementById('input-nick');
+    const msgInput = document.getElementById('input-msg');
+    const btnMessage = document.getElementById('btn-msg');
+    const listMessage = document.getElementById('messageList');
+
+
+    nickBtn.addEventListener('click', () => {
+        nickname = nickInput.value
+    });
+
+    btnMessage.addEventListener('click', () => {
+        const chatMessage = msgInput.value;
+
+        const li = document.createElement('li');
+        li.innerHTML = `${nickname}: ${chatMessage}`;
+        listMessage.appendChild(li);
+
+        const data = { nickname, chatMessage }
+        client.emit('message', data)
+
+    });
+
+
+</script>
+
+</html>
