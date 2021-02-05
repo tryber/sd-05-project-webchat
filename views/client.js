@@ -48,7 +48,7 @@ window.onload = () => {
   // ///////////////////////////////////////////
   clientSocketIo.on('newUser', ({ fakename, usersMap }) => {
     username.value = fakename;
-    users.innerHTML = '';
+    // users.innerHTML = '';
 
     // const createLI = (username) => {
     // }
@@ -59,23 +59,23 @@ window.onload = () => {
 
     li.textContent = fakename;
 
-    users.append(li);
+    users.prepend(li);
 
     // Tira o próprio usuário ;
 
-    const usersMapWithouHero = usersMap.filter(
-      (user) => user.name !== fakename,
-    );
+    // const usersMapWithouHero = usersMap.filter(
+    //   (user) => user.name !== fakename,
+    // );
 
-    // renderiza o restante
-    usersMapWithouHero.forEach((user) => {
-      li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.setAttribute('id', user.name);
-      li.textContent = user.name;
+    // // renderiza o restante
+    // usersMapWithouHero.forEach((user) => {
+    //   li = document.createElement('li');
+    //   li.setAttribute('data-testid', 'online-user');
+    //   li.setAttribute('id', user.name);
+    //   li.textContent = user.name;
 
-      users.append(li);
-    });
+    //   users.append(li);
+    // });
     clientSocketIo.emit('newUserArrived', { userThatArrived: fakename });
   });
   // ///////////////////////////////////////////
@@ -135,9 +135,9 @@ window.onload = () => {
     messageList.appendChild(message);
     messageList.insertBefore(message, messageList.firstChild);
 
-    const nameToBeRemoved = element(fakename);
-
-    nameToBeRemoved.remove();
+    // const nameToBeRemoved = element(fakename);
+    // console.log(nameToBeRemoved);
+    // nameToBeRemoved.remove();
   });
 
   clearBtn.addEventListener('click', () => {

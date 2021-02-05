@@ -22,9 +22,9 @@
     <div class="row">
       <ul id="users">
 
-        <% if (onlineUsers) {
-          onlineUsers.forEach((user) => {
-            %><li data-testid="online-user" id=<%= user.name %> ><%= user.nickname %></li><% 
+        <% if (usersMap) {
+          usersMap.forEach((user) => {
+            %><li data-testid="online-user" id=<%= user.id %> ><%= user.name %></li><% 
           })
         } %>
         
