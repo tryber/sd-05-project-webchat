@@ -13,7 +13,6 @@ require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
-const { createMessage, getMessages } = require('./models/messagesModel');
 
 // SET IO & CORS
 
@@ -27,6 +26,9 @@ const io = require('socket.io')(server);
 //     methods: ['GET', 'POST'],
 //   }
 app.use(cors());
+
+// MODEL
+const { createMessage, getMessages } = require('./models/messagesModel');
 
 // ENDPOINT
 

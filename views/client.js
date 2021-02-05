@@ -13,7 +13,7 @@ window.onload = () => {
   nicknameBtn.addEventListener('click', () => {
     nickname = chosenNickname.value;
   });
-  
+
   const sendBtn = document.getElementById('send');
   sendBtn.addEventListener('click', () => {
     const chatMessage = document.getElementById('message-input').value;
