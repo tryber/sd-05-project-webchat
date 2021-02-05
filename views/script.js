@@ -15,8 +15,6 @@ socket.on('message', (msg) => createMessage(msg));
 // window.onload = () => {
 //   socket.on('message', (msg) => createMessage(msg));
 // };
-// const handleClick = (e) => {
-  // const socket = io(); //'http://localhost:3000'
 
 let userName = `Usuário ${Date.now()}`;
 const nameBtn = document.getElementById('btn-name');
