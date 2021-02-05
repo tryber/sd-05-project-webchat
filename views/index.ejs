@@ -14,9 +14,13 @@
         <input data-testid="nickname-box" id="nickNameInput" autocomplete="off" type= "text" placeholder="Escreva seu nome aqui" class="col-3 form-control"/>
         <button data-testid="nickname-save" id="btn-name"" class="btn btn-primary" type="button">Salvar</button>
       </div>
-      <ul id="onlineUsers" class="list-unstyled">
-        <li>usuários on</li>
+      <div>
+        <h2>Usuários online:</h2>
+        <li id="userNickname" data-testid="online-user"></li>
+        <ul id="onlineUsers" class="list-unstyled">
       </ul>
+    </div>
+      <h2>Mensagens</h2>
       <ul class="list-unstyled" id="messageList">
         <% if (historyMessages) { %>
           <% historyMessages.forEach((msg) => { %>

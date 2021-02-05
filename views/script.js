@@ -16,12 +16,36 @@ socket.on('message', (msg) => createMessage(msg));
 //   socket.on('message', (msg) => createMessage(msg));
 // };
 
-let userName = `Usuário ${Date.now()}`;
+const userNickname = document.getElementById('userNickname');
+const insertNick = (nickname) => {
+  userNickname.innerHTML = nickname;
+};
+
+socket.on('nickname', (Nick) => insertNick(Nick))
+
+const users = document.getElementById('onlineUsers');
+
+const insertUser = (user) => {
+  const li = document.createElement('li');
+  li.setAttribute('id', 'otherUsers');
+  li.innerHTML = user;
+  users.appendChild(li);
+};
+
+socket.on('onlineUsers', (Nick) => insertUser(Nick));
+
+// userList = document.querySelectorAll(#otherUsers);
+// changeUser = userList.filter(innerHTML === nick);
+// changeUser.innerHTML = OnBick
+
+let userName = userNickname.innerHTML;
 const nameBtn = document.getElementById('btn-name');
 
 nameBtn.addEventListener('click', () => {
   userName = document.getElementById('nickNameInput').value;
+  insertNick(userName);
   // alert(`nome ${userName} salvo`);
+  socket.emit('nicknamechange', userName);
   document.getElementById('nickNameInput').value = '';
 });
 // const time = new Date().toUTCString();

@@ -35,7 +35,11 @@ app.use('/', express.static(path.join(__dirname, './views')));
 app.get('/', msgController.listMessages);
 
 io.on('connection', (socket) => {
-  console.log(`${socket.id} has connected`);
+  const Nick = `Usuário ${Date.now()}`;
+  // socket.id = Nick;
+  console.log(`${Nick} has connected`);
+  socket.broadcast.emit('onlineUsers', Nick);
+  socket.emit('nickname', Nick);
   // const nickname = 'usuário ' + users.length;
   // socket.nickname = nickname;
   // users.push(socket.nickname);
@@ -56,6 +60,10 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     return socket.emit('status', 'mensagem enviada');
   });
+
+    socket.on('nicknamechange', (userName) => {
+      socket.broadcast.emit('newNickname', Nick, userName);
+    });
   // console.log(`${nickname} conectado`);
 
   // socket.emit('ola', 'Bem vindo, fica mais um cadin, vai ter bolo :)' );
@@ -68,6 +76,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
+    socket.broadcast.emit('disconnectedUser', socket.id);
   });
 });
 
