@@ -5,7 +5,7 @@ const listMessages = async (req, res) => {
     const historyMessages = await messages.getMessages();
     res.render('index', { historyMessages });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
 };
 

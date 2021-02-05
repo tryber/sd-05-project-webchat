@@ -22,7 +22,8 @@
 //         inputMessage.value = ''
 //         return false;
 //       });
-// Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
+// Quando nosso evento `ola` for emitido, 
+// vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
 // socket.on('ola', (mensagem) => createMessage(mensagem));
 
 // <style>
