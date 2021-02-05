@@ -21,7 +21,7 @@ const io = require('socket.io')(server, {
 
 const messageModel = require('./models/messageModel');
 
-let onlineUsers = [];
+const onlineUsers = [];
 
 app.get('/', async (_req, res) => {
   const messageHistory = await messageModel.getMessagesHistory();
@@ -37,8 +37,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
-    onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
-    socket.broadcast.emit('user disconnected', socket.id);
+    // onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
+    const index = onlineUsers.findIndex((user) => user.id === socket.id);
+    onlineUsers.splice(index, 1);
+    io.emit('user disconnected', socket.id);
   });
 
   socket.on('message', async (message) => {
@@ -49,8 +51,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('user changed nickname', (nickname, userId) => {
-    onlineUsers = onlineUsers.filter((user) => user.id !== userId);
-    onlineUsers.push({ id: userId, nickname });
+    const index = onlineUsers.findIndex((user) => user.id === userId);
+    onlineUsers[index] = { id: userId, nickname };
+    // onlineUsers = onlineUsers.filter((user) => user.id !== userId);
+    // onlineUsers.push({ id: userId, nickname });
     socket.broadcast.emit('user changed nickname', { id: userId, nickname });
   });
 });
@@ -58,5 +62,3 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
-
-// Test
