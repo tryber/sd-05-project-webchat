@@ -7,11 +7,11 @@ window.onload = () => {
   let nickname = 'randomName';
   const chosenNickname = document.getElementById('nickname-input');
   const nicknameBtn = document.getElementById('nickname-save');
-  nicknameBtn.addEventListener('click', () => {
-    nickname = chosenNickname.value;
+  nicknameBtn.addEventListener('click', async () => {
+    nickname = await chosenNickname.value;
     clientSocketIo.emit('userChangedNickname', nickname);
   });
-  
+
   // [Req2] 1. User click send message
   const sendBtn = document.getElementById('send');
   sendBtn.addEventListener('click', () => {

@@ -117,4 +117,4 @@ server.listen(PORT, () => {
 //     origin: 'http://localhost:3000',
 //     methods: ['GET', 'POST'],
 //   }
-// V - Academic honesty: needed help from students Felipe, Dandrea, Cesar.
+// V - Academic honesty: needed help from students Felipe, Dandrea, Cesar, Hugo.
