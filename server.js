@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -21,11 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
-// https://www.youtube.com/watch?v=-jXfKDYJJvo
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'views')));
 app.set('view engine', 'ejs');
-app.engine('html', require('ejs').renderFile);
+app.set('views', './views');
+app.use(express.static('./'));
 
 let users = [];
 
@@ -41,27 +38,34 @@ server.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
 
-client.on('connection', async (socket) => {
-  console.log(`User (${socket.id}) has connected...`);
+client.on('connection', (socket) => {
+  socket.on('disconnect', () => {
+    console.log(`User (${socket.id}) has disconnected.`);
+    const filterUsers = users.filter((user) => user.id !== socket.id);
+    users = filterUsers;
 
-  socket.on('userLogin', async ({ nickname }) => {
-    await createUser({ nickname });
-    const users = await getAllUsers();
-    const onlineUsers = `${nickname.nickname}`;
-    users.push({ id: socket.id, nickname });
+    client.emit('updateUsers', { id: socket.id, users });
+  });
 
-    socket.broadcast.emit('updateUsers', { id: socket.id, onlineUsers });
+  socket.on('userLogin', ({ nickname }) => {
+    console.log(`User (${socket.id}) has connected...`);
+    users.unshift({ id: socket.id, nickname });
+
+    client.emit('updateUsers', { id: socket.id, users });
+  });
+
+  socket.on('updateNickname', ({ nickname }) => {
+    const userIndex = users.findIndex((user) => user.id === socket.id);
+    users[userIndex] = { id: socket.id, nickname };
+
+    client.emit('updateUsers', { id: socket.id, users });
   });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;
-    await createMessage({ nickname, chatMessage, timestamp });
+    await createMessage(nickname, chatMessage, timestamp);
 
-    socket.broadcast.emit('message', message);
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`User (${socket.id}) has disconnected.`);
+    client.emit('message', message);
   });
 });
