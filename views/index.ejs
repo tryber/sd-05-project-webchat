@@ -12,7 +12,7 @@
       <strong>Webchat</strong>
       <span>for Trybe's students</span>
     </h1>
-    <section id="messages">
+    <ul id="messages">
       <% if (messages) { %>
         <% messages.forEach((message) => { %>
           <li data-testid="message">
@@ -20,12 +20,12 @@
           </li>
        <% }) %>
       <% } %>
-    </section>
+    </ul>
     <form>
       <section>
         <input
           data-testid="nickname-box"
-          id="nickname"
+          id="nickname-box"
           type="text"
           placeholder="Type your name here"
         />
@@ -40,59 +40,78 @@
         />
         <button data-testid="send-button" id="btn-message" type="button">Send</button>
       </section>
-      <section id="users">
-        <% if(users.length > 0) { %>
+      <ul id="users">
+        <% if(users !== []) { %>
           <% users.forEach((user) => { %>
-            <li data-testid="online-user" class="onlineUser"><%= `${user.nickname}` %></li>
+            <li data-testid="online-user"><%= `${user.nickname}` %></li>
           <% }) %>
         <% } %>
-      </section>
+      </ul>
     </form>
   </body>
   <script type="text/javascript">
     const client = io('http://localhost:3000');
-
-    const nickname = document.getElementById('nickname');
-    const nameBtn = document.getElementById('btn-name');
-    let nick = `Guest #${Math.round(Math.random() * 1000)}`;
-    
     const message = document.getElementById('message');
     const messageBtn = document.getElementById('btn-message');
     const messages = document.getElementById('messages');
-    
-    const users = document.getElementById('users');
-    
-    nameBtn.addEventListener('click', () => {
-      if (nickname.value.length) {
-        nick = nickname.value;
+    const nameBox = document.getElementById('nickname-box');
+    const nameBtn = document.getElementById('btn-name');
+    const userList = document.getElementById('users');
+    let nickname = `Guest #${Math.round(Math.random() * 1000)}`;
+    let userId = '';
 
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'online-user');
-        li.innerHTML = nick ? nick : nickname.value;
-        users.appendChild(li);
-      }
-
-      const newUser = { nickname: nickname.value };
-
-      client.emit('userLogin', newUser);
-    });
-    
     messageBtn.addEventListener('click', () => {
       const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
-
+      
       if (message.value.length) {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
-        li.innerHTML = `${timestamp} - ${nickname.value}: ${message.value}`
+        li.innerHTML = `${timestamp} - ${nickname}: ${message.value}`
         messages.appendChild(li);
       }
-
+      
       const sendMessage = {
-        nickname: nickname.value,
+        nickname,
         chatMessage: message.value,
       };
-
+      
       client.emit('message', sendMessage);
+      
+      message.value = '';
+      return false;
     });
-  </script>
+    
+    nameBtn.addEventListener('click', () => {
+      nickname = nameBox.value;
+      
+      client.emit('updateNickname', { nickname })
+    });
+    
+    function renderOnlineUsers(users) {
+      userList.innerText = '';
+      
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerHTML = nickname;
+      userList.appendChild(li);
+      
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = user.nickname;
+        userList.appendChild(li);
+      });
+    }
+
+    client.emit('userLogin', { nickname });
+    
+    client.on('updateUsers', ({ id, users }) => {
+      if (userId === '') {
+        userId = id;
+      }
+
+      const filterUsers = users.filter((user) => user.id !== userId);
+      renderOnlineUsers(filterUsers);
+    });
+    </script>
 </html>
