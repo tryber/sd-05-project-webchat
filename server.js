@@ -1,4 +1,3 @@
-// const client = require('socket.io').listen(4000).sockets;
 const socketIO = require('socket.io');
 const http = require('http');
 const cors = require('cors');
@@ -19,7 +18,6 @@ const io = socketIO(server);
 
 const PORT = 3000;
 
-// app.use(express.urlencoded());
 app.use(cors());
 
 app.set('view engine', 'ejs');
@@ -27,9 +25,6 @@ app.set('views', './views');
 
 app.use('/', express.static(path.join(__dirname, './views')));
 
-// const fakename = faker.name.firstName();
-
-// let onlineUsers = [];
 app.get('/', async (req, res) => {
   const allMessages = await messagesModel.getAll();
 
@@ -38,8 +33,6 @@ app.get('/', async (req, res) => {
     id,
   }));
   res.render('index', { allMessages, usersMap });
-
-  console.log('entrou no get');
 });
 
 io.on('connect', async (socket) => {
@@ -48,27 +41,17 @@ io.on('connect', async (socket) => {
 
   let fakename = faker.name.firstName();
   const clientID = socket.id;
-  console.log(clientID);
   addClientToMap(fakename, clientID);
-  console.log('map depois de adicionar novo user');
-  console.log(userSocketIdMap);
-  console.log('==================================================');
   const usersMap = Array.from(userSocketIdMap, ([name, id]) => ({ name, id }));
-
-  // onlineUsers.push({ id: socket.id, nickname: fakename });
 
   socket.emit('newUser', { fakename, usersMap });
 
   // ++++++
 
   socket.on('disconnect', () => {
-    // console.log('map antes de user sair');
-    // console.log(userSocketIdMap);
     removeClientFromMap(fakename, clientID);
-    // console.log('map depois de removido');
-    // console.log(userSocketIdMap);
     io.emit('userLeft', { fakename, clientID });
-    io.emit('status', `${fakename} left the chat.`);
+    // io.emit('status', `${fakename} left the chat.`);
   });
 
   // ++++++
@@ -105,12 +88,6 @@ io.on('connect', async (socket) => {
 
     io.emit('atualizaUsers', { usersMap2, oldNameToDelete: fakename });
     fakename = newNick;
-  });
-
-  socket.on('clear', async () => {
-    await messagesModel.deleteAll();
-    io.emit('cleared');
-    userSocketIdMap.clear();
   });
 
   // Teoricamente nao precisa do abaixo
