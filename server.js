@@ -52,9 +52,9 @@ io.on('connection', async (socket) => {
   // send to onlineUsers array, to render in ejs (need to refresh)
   onlineUsers.unshift({ id: currentUserId, nickname: defaultNickname });
   // send to client, to render in dom manipulation (real time)
+  // problem: has to be in first position too!
   io.emit('userConnected', currentUserId, defaultNickname);
-  io.emit('showAnotherUserChanging', socket.id, defaultNickname);
-  // to differenciate if another one, using socket.id instead of currentUserId
+  io.emit('otherUserConnected', socket.id, defaultNickname);
 
   socket.on('userChangedNickname', (newNickname) => {
     // [Req4] when user changes from random nickname to chosen nickname, it is replaced
@@ -70,9 +70,7 @@ io.on('connection', async (socket) => {
     });
     // refresh also client dom
     io.emit('showChangedNickname', currentUserId, newNickname);
-    // could also be showAnotherUserChanging which is basically same event
-    // Do we need both?
-    // io.emit('showAnotherUserChanging', socket.id, newNickname);
+    io.emit('showAnotherUserChanging', socket.id, newNickname);
   });
 
   // [Req2] 2. Receive 'message' emitted by client and emit back the formatted one

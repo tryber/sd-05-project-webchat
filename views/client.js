@@ -28,31 +28,51 @@ window.onload = () => {
     divMessages.append(li);
   });
 
-  // [Req4] Adapt dom whenever users connect, change nickname and disconnect
+  // [Req4] Adapt dom everytime users change something
 
+  // when current user connects
   clientSocketIo.on('userConnected', (id, nickname) => {
-    const divUsers = document.getElementById('users');
+    // TODO: we want the new user to be displayed top of the list
+    const divUsers = document.getElementById('top-user');
     const li = document.createElement('li');
     li.setAttribute('data-tested', 'online-user');
     li.setAttribute('id', `${id}`);
     li.textContent = nickname;
     divUsers.append(li);
-    // this way, last connected goes at the end of the list
   });
 
+  // when another user connects
+  clientSocketIo.on('otherUserConnected', (idOther, nickname) => {
+    // we want the other user to be displayed last on the list
+    const divUsers = document.getElementById('users');
+    const li = document.createElement('li');
+    li.setAttribute('data-tested', 'online-user');
+    li.setAttribute('id', `${idOther}`);
+    li.textContent = nickname;
+    divUsers.append(li);
+  });
+
+  // when current user changes nickname
   clientSocketIo.on('showChangedNickname', (id, nickname) => {
     const liToChange = document.getElementById(`${id}`); // or querySelector?
     liToChange.innerHTML = nickname;
   });
 
+  // when another user changes nickname
   clientSocketIo.on('showAnotherUserChanging', (idOther, nickname) => {
     const liToChange = document.getElementById(`${idOther}`);
     liToChange.innerHTML = nickname;
   });
 
+  // when any user disconnects
   clientSocketIo.on('userDisconnected', (id) => {
     const liToDelete = document.getElementById(`${id}`);
     // liToDelete.innerHTML = ''; need this?
     liToDelete.remove();
   });
 };
+
+// 05.01 night, pending backlog:
+// - be able to put users in right order
+// - not being an array
+// - fix the time out & protocol erros, received both on req2&4
