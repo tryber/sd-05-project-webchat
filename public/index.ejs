@@ -12,8 +12,15 @@
     <form id="chat">
         <input type="text" data-testid="nickname-box" id="nickname-box" placeholder="Digite seu usuário">
         <button type="button" data-testid="nickname-save" id="nickname-save">Insira seu Nickname</button>
-        <ul class="messages"></ul>
-        <input type="text" data-testid="text-input" id="text-input" placeholder="Digite sua menssagem">
+        <!-- <ul class="messages"></ul> -->
+        <ul class="messages">
+            <% if (history) {
+              history.forEach((message) => {
+                %><li data-testid="message"><%= message %></li><% 
+              })
+            } %>
+          </ul>
+        <input type="text" data-testid="message-box" id="text-input" placeholder="Digite sua menssagem">
         <button type="button" data-testid="send-button" id="send-button">Enviar</button>
     </form>
     <script>
