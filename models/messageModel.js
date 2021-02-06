@@ -14,6 +14,19 @@ const createMessage = async ({ nickname, chatMessage, timestamp }) => {
   }
 };
 
+async function getAllMessages() {
+  try {
+    const messages = await connection().then((db) => db.collection('messages').find().toArray());
+
+    return messages;
+  } catch (error) {
+    console.error(error.message);
+
+    return error.message;
+  }
+}
+
 module.exports = {
   createMessage,
+  getAllMessages,
 };

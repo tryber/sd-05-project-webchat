@@ -18,6 +18,13 @@
   <body>
     <ul id="users"></ul>
     <ul id="messages"></ul>
+    <% if (messages) { %>
+      <% messages.forEach((message) => { %>
+        <li data-testid="message">
+          <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+        </li>
+     <% }) %>
+    <% } %>
     <form id="form" action="">
       <input data-testid="nickname-box" id="nickname" type="text" value="Guest<%= Math.round(Math.random() * 1000) %>" />
       <button data-testid="nickname-save">Save</button>
