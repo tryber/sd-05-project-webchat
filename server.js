@@ -22,15 +22,24 @@ app.set('view engine', 'ejs');
 
 const messagesModels = require('./models/messagesModel');
 
+let onlineUsers = [];
+
 app.get('/', async (req, res) => {
   const history = await messagesModels.messagesHistory();
-  return res.render('index.ejs', { history });
+  return res.render('index.ejs', { history, onlineUsers });
 });
 
 io.on('connection', async (socket) => {
   console.log(`Socket ${socket.id} conectado`);
+  const username = `User ${Math.trunc(Math.random() * 100)}`;
+  onlineUsers.push({ id: socket.id, nickname: username });
+  socket.emit('connected', socket.id, username);
+  io.emit('connection', socket.id, username);
+
   socket.on('disconnect', () => {
     console.log(`Socket ${socket.id} desconectado`);
+    onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
+    socket.broadcast.emit('user disconnected', socket.id);
   });
 
   socket.on('message', async (message) => {
@@ -39,6 +48,12 @@ io.on('connection', async (socket) => {
     const text = `${stored.time} - ${stored.nickname}: ${stored.chatMessage}`;
     console.log(text);
     io.emit('message', text);
+  });
+
+  socket.on('user changed nickname', (nickname, userId) => {
+    onlineUsers = onlineUsers.filter((user) => user.id !== userId);
+    onlineUsers.push({ id: userId, nickname });
+    socket.broadcast.emit('user changed nickname', { id: userId, nickname });
   });
 });
 
