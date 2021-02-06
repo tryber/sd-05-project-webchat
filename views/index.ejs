@@ -23,15 +23,24 @@
     <section class="chat-inputs">
       <div class="nickname-stuff">
         <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
-        <button type="button" data-testid="nickname-save" id="nickname-save" type="button">Save nickname</button>
+        <button data-testid="nickname-save" type="button" id="nickname-save">Save nickname</button>
       </div>
       <div class="message-stuff">
         <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
-        <button type="button" data-testid="send-button" id="send">Send message</button>
+        <button data-testid="send-button" type="button" id="send">Send message</button>
       </div>
     </section>
     <!-- if using form tag, remember type="button" and preventDefault
     so as not to default to cleaning screen and method get -->
+    <ul class="users" id="users">
+      <% if (onlineUsers && onlineUsers.length > 0) { %>
+        <% onlineUsers.forEach((user) => { %>
+          <li data-testid="online-user" id="<%=user.userId %>">
+            <%= user.nickname%>
+          </li>
+       <% }) %>
+      <% } %>
+    </ul>
   </body>
   <!-- Connect with client.js and right port -->
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
@@ -44,20 +53,7 @@
       const inputMessage = document.querySelector('#mensagemInput')
       form.addEventListener('submit', (e) =>{
         e.preventDefault();
-        socket.emit('mensagem', inputMessage.value);
-        inputMessage.value = ''
-        return false;
+        and so on with dom manipulation
       });
-      // cria uma `li` e coloca dentro da `ul` com `id` mensagens
-      const createMessage = (message) => {
-        const messagesUl = document.querySelector('#mensagens');
-        const li = document.createElement('li');
-        li.innerText = message;
-        messagesUl.appendChild(li);
-      }
-      // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
-      socket.on('ola', (mensagem) => createMessage(mensagem));
-      // Aqui o evento é recebido da mesma maneira do último, mas este não é recebido pelo cliente que enviou o mesmo
-      socket.on('mensagemServer', (objeto) => createMessage(objeto.mensagem));
     </script> -->
 </html>

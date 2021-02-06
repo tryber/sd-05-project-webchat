@@ -4,7 +4,6 @@
 
 const express = require('express');
 const path = require('path');
-// const faker = require('faker');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 require('dotenv').config();
@@ -19,50 +18,65 @@ app.use(bodyParser.json());
 const server = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(server);
-// No need for the following specifications
-// , {
-//   cors: {
-//     origin: 'http://localhost:3000',
-//     methods: ['GET', 'POST'],
-//   }
+
 app.use(cors());
 
 // MODEL
 const { createMessage, getMessages } = require('./models/messagesModel');
+const { emit } = require('process');
 
 // ENDPOINT
 
 app.use(express.static(path.join(__dirname, 'views')));
 // informing express to use static file inside views directory
-// Here debate about architecture good practices:
-// - "views" is what interacts with user so it fits;
-// - but "public" is where static is supposed to be.
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+let onlineUsers = [];
+
 app.get('/', async (_req, res) => {
   const allMessages = await getMessages();
-  res.render('index', { allMessages });
-  // to be able to pass data from the db to index.ejs, like passing a props
-  res.render('index');
+  res.render('index', { allMessages, onlineUsers });
+  // to be able to pass data to index.ejs, like passing a props
 });
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
 
 io.on('connection', async (socket) => {
-  console.log(`User ${socket.id} connected`);
+  const currentUserId = socket.id;
+  const defaultNickname = 'randomName';
 
-  // 2. Receive 'message' emitted by client and emit back the formatted one
+  console.log(`User ${currentUserId} connected`);
+
+  // [Req4] Take id and default nickname of connecting users
+  // send to onlineUsers array, to render in ejs (need to refresh)
+  onlineUsers.unshift({ id: currentUserId, nickname: defaultNickname });
+  // send to client, to render in dom manipulation (real time)
+  io.emit('userConnected', currentUserId, defaultNickname);
+  io.emit('showAnotherUserChanging', socket.id, defaultNickname);
+  // to differenciate if another one, using socket.id instead of currentUserId
+
+  socket.on('userChangedNickname', (newNickname) => {
+    // [Req4] when user changes from random nickname to chosen nickname, it is replaced
+    // refresh onlineUsers
+    onlineUsers = onlineUsers.map((user) => {
+      // remembering objects inside array onlineUsers have values id and nickname
+      if (user.id === currentUserId) {
+        const userToChange = user;
+        userToChange.nickname = newNickname;
+        return userToChange;
+      }
+      return user;
+    });
+    // refresh also client dom
+    io.emit('showChangedNickname', currentUserId, newNickname);
+    // could also be showAnotherUserChanging which is basically same event
+    // Do we need both?
+    // io.emit('showAnotherUserChanging', socket.id, newNickname);
+  });
+
+  // [Req2] 2. Receive 'message' emitted by client and emit back the formatted one
   socket.on('message', async ({ chatMessage, nickname }) => {
-    // Failed to use faker package because name came empty
-    // const defaultNickname = faker.name.firstName();
-    // let finalNickname = '';
-    // if (nickname.length > 0) {
-    //   finalNickname = nickname;
-    // } else {
-    //   finalNickname = defaultNickname;
-    //   console.log(defaultNickname);
-    // }
     const dateNow = new Date().getTime();
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
@@ -71,7 +85,14 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`User ${socket.id} disconnected`);
+    console.log(`User ${currentUserId} disconnected`);
+    // [Req4] When user disconnects and needs to disappear from the list of online users
+    // refresh onlineUsers
+    if (onlineUsers & (onlineUsers.length > 0)) {
+      onlineUsers = onlineUsers.filter((user) => user.id !== currentUserId);
+    }
+    // refresh also client dom
+    io.emit('userDisconnected', currentUserId);
   });
 });
 
@@ -80,3 +101,20 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server listening to port ${PORT}`);
 });
+
+// General project comments:
+// I - Default nickname could have been:
+// - with package faker const defaultNickname = faker.name.firstName();
+// - with formula `User${Math.round(Math.random() * 1000)}`
+// II - Good practice of architecture: view vs public directory
+// - "views" is what interacts with user so it fits (chosen one here);
+// - but "public" could have been better, it is where static is supposed to be.
+// III - Chosing in which position to push a new element within an array:
+// - unshift to push at the beginning, ref https://www.w3schools.com/jsref/jsref_unshift.asp
+// IV - Declaring io with specifics (were not needed here, l20)
+// , {
+//   cors: {
+//     origin: 'http://localhost:3000',
+//     methods: ['GET', 'POST'],
+//   }
+// V - Academic honesty: needed help from students Felipe, Dandrea, Cesar.
