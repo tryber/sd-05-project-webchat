@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
     const time = dateFormat(now, 'HH:mm:ss');
 
     console.log(`Mensagem ${time} ${nickname} ${chatMessage}`);
-    await msgModel.create({ date, time, nickname, chatMessage }); // não precisa passar pelo controller né?
+    await msgModel.create({ date, time, nickname, chatMessage }); // precisa controller?
     socket.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     return socket.emit('status', 'mensagem enviada');

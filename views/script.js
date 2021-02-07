@@ -21,7 +21,7 @@ const insertNick = (nickname) => {
   userNickname.innerHTML = nickname;
 };
 
-socket.on('nickname', (Nick) => insertNick(Nick))
+socket.on('nickname', (Nick) => insertNick(Nick));
 
 const users = document.getElementById('onlineUsers');
 
