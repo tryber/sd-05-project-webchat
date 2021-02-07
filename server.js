@@ -2,18 +2,19 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-
 const server = require('http').createServer(app);
 
+const PORT = process.env.PORT || 3000;
 const controller = require('./controllers');
 const connection = require('./models/connection.model');
+const users = {};
 
 app.use(cors());
 app.set('view engine', 'ejs');
 
-controller.run(server)(connection);
-controller.view(app)(connection);
+controller.run(server)(connection, users);
+controller.view(app)(connection, users);
 
-server.listen(3000, () => {
-  console.log(`Rodando na porta ${3000}`);
+server.listen(PORT, () => {
+  console.log(`Rodando na porta ${PORT}`);
 });

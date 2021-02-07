@@ -6,11 +6,11 @@
 </head>
 <body class="container">
   <main>
-    <div class="col s12 m7">
+    <div class="col s12 row">
       <div class="header">
         <%- include('./components/nickname'); %>
       </div>
-      <div class="card horizontal">
+      <div class="card horizontal col s12 m8">
         <div class="card-stacked">
           <div id="board" class="card-content">
           <% messages.forEach(({ nickname, at, chatMessage }) => { %>
@@ -23,6 +23,18 @@
           </div>
           <div class="card-action">
             <%- include('./components/form'); %>
+          </div>
+        </div>
+      </div>
+      <div class="card horizontal col s12 m3">
+        <div class="card-stacked">
+          <div class="card-action">
+            Users Online:
+          </div>
+          <div class="card-content" id="online-board">
+            <% Object.values(users).forEach((user) => { %>
+              <p data-testid="online-user"><%= user %></p>
+            <% }); %>
           </div>
         </div>
       </div>

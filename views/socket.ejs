@@ -26,6 +26,18 @@
     socket.emit('change_nickname', nickname);
   }
 
+  const setOnlineUsers = (usersList) => {
+    const board = document.querySelector('#online-board');
+    board.innerHTML = '';
+    Object.values(usersList)
+      .forEach((user) => {
+        const p = document.createElement('p');
+        p.innerHTML = user;
+        p.setAttribute('data-testid', 'online-user');
+        board.appendChild(p);
+      });
+  }
+
   window.onload = () => {
     const socket = io('http://localhost:3000');
     const btnSend = document.querySelector('#btn_send');
@@ -45,6 +57,10 @@
 
     socket.on('message', (response) => {
       receiveMessage(response);
+    });
+
+    socket.on('online_users', (list) => {
+      setOnlineUsers(list);
     });
 
   }
