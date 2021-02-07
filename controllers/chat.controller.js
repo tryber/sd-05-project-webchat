@@ -3,12 +3,13 @@ const socketIo = require('socket.io');
 const { randomNameGenerator } = require('../utils/helpers.util');
 
 const now = moment(new Date()).format('DD-MM-yyyy h:mm:ss A');
+const users = {};
 
 const formatMessage = (name, message) => (
   `${now} - ${name}: ${message}`
 );
 
-module.exports = (server) => async (connection, users) => {
+const run = (server) => async (connection) => {
   const messageCollection = await connection('messages');
   const io = socketIo(server, {
     cors: {
@@ -51,4 +52,9 @@ module.exports = (server) => async (connection, users) => {
       io.emit('online_users', users);
     });
   });
+};
+
+module.exports = {
+  users,
+  run,
 };
