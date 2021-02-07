@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const moment = require('moment');
+const faker = require('faker');
 
 const PORT = process.env.PORT || 3000;
 
@@ -31,18 +32,21 @@ const { createMessage } = require('./models/MessageModel');
 
 app.use('/', messageController);
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log(`${socket.id} connected`);
 
+  socket.emit('nickname', faker.name.firstName());
+
   socket.on('nickname', async (nickname) => {
-    console.log(nickname);
     socket.emit('nickname', nickname);
   });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const timestamp = moment(new Date().getTime()).format('DD-MM-yyyy hh:mm:ss');
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+
     await createMessage({ nickname, chatMessage, timestamp });
+
     socket.broadcast.emit('message', message);
   });
 
