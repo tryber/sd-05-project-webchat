@@ -2,21 +2,34 @@
 <html lang="en">
 <head>
   <%- include('./head'); %>
+  <%- include('./socket'); %>
 </head>
 <body class="container">
-  <header>
-      
-  </header>
   <main>
-    <div class="chatscreen jumbotron">
-      <h1>This is great</h1>
-      <p>Mensagens:</p>
-      <%= messages %>
+    <div class="col s12 m7">
+      <div class="header">
+        <%- include('./components/nickname'); %>
+      </div>
+      <div class="card horizontal">
+        <div class="card-stacked">
+          <div id="board" class="card-content">
+          <% messages.forEach(({ nickname, at, chatMessage }) => { %>
+            <!-- <p data-testid="message">
+              <img src="https://ui-avatars.com/api/?name=<%= nickname %>e&size=24">
+              <small><%= at %></small>&nbsp;<strong><%= nickname %></strong>&nbsp;<%= chatMessage %>
+            </p> -->
+            <p data-testid="message"><%= at %> - <%= nickname %>: <%= chatMessage %></p>
+          <% }); %>
+          </div>
+          <div class="card-action">
+            <%- include('./components/form'); %>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   <footer>
       
   </footer>
 </body>
-<%- include('./socket'); %>
 </html>

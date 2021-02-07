@@ -1,0 +1,51 @@
+<script>
+  const receiveMessage = (data) => {
+    const p = document.createElement('p');
+    const board = document.querySelector('#board');
+    /*
+    const span = document.createElement('span');
+    const avatar = document.createElement('img');
+    avatar.src = `https://ui-avatars.com/api/?name=${data[2]}e&size=24`;
+    span.innerHTML = `<small>${data[0]}</small> <strong>${data[2]}</strong> ${data[3]}`;
+    p.appendChild(avatar);
+    p.appendChild(span);
+    board.appendChild(p);
+    */
+    p.innerHTML = data;
+    p.setAttribute('data-testid', 'message');
+    board.appendChild(p);
+  }
+  
+  const sendMessage = (socket) => (chatMessage) => {
+    if (!chatMessage.length) return;
+    socket.emit('message', { chatMessage });
+  }
+
+  const changeNickname = (socket) => (nickname) => {
+    if (!nickname.length) return;
+    socket.emit('change_nickname', nickname);
+  }
+
+  window.onload = () => {
+    const socket = io('http://localhost:3000');
+    const btnSend = document.querySelector('#btn_send');
+    const inputMessage = document.querySelector('#input_message');
+    const btnNickname = document.querySelector('#btn_nickname');
+    const inputNickname = document.querySelector('#input_nickname');
+
+    btnSend.addEventListener('click', () => {
+      sendMessage(socket)(inputMessage.value);
+      inputMessage.value = '';
+    });
+
+    btnNickname.addEventListener('click', () => {
+      changeNickname(socket)(inputNickname.value);
+      inputNickname.value = '';
+    });
+
+    socket.on('message', (response) => {
+      receiveMessage(response);
+    });
+
+  }
+</script>

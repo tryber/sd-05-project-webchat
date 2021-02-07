@@ -1,19 +1,31 @@
 <meta charset="UTF-8">
 <title>ChaTrybe</title>
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
->
+
+<!-- Compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 <style>
     body { padding-top: 50px; }
-    .chatscreen { height: 80vh; }
+    .card-content { min-height: calc(70vh - 100px); }
+    .card-content > p > img {
+      margin-right: 16px;
+    }
+    .card-content > p {
+      display: flex;
+      align-items: center;
+    }
+    .form {
+      display: flex;
+      align-items: center;
+    }
+    .form.message {
+      justify-content: space-between;
+    }
+    .form > .message-field {
+      width: 80%;
+    }
 </style>
-<script src="https://cdn.socket.io/socket.io-3.0.4.js"></script>
-<script>
-  // console.log(socket);
-  window.onload = () => {
-    console.log(io())
-    //const socket = io();
-    // socket.emit('new_guest');
-  }
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>

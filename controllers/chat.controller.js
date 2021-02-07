@@ -1,3 +1,13 @@
+const { randomNameGenerator } = require('../utils/helpers.util');
+const moment = require('moment');
+
+const users = {};
+const now = moment(new Date()).format('DD-MM-yyyy h:mm:ss A');
+
+const formatMessage = (name, message) => (
+  `${now} - ${name}: ${message}`
+);
+
 module.exports = (server) => async (connection) => {
   const io = require('socket.io')(server, {
     cors: {
@@ -8,16 +18,29 @@ module.exports = (server) => async (connection) => {
 
   const collection = await connection('messages');
 
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     console.log('Novo usuário conectado');
-
-    //default username
-    socket.username = "Anonymous"
+    users[socket.id] = randomNameGenerator();
 
     //listen new players
-    socket.on('new_guest', async () => {
-      // const messages = await collection.find({}).toArray();
-      console.log(messages);
+    // io.emit('message', formatMessage(users[socket.id], 'acabou de entrar!'));
+
+    socket.on('message', async ({ chatMessage, nickname = null }) => {
+      const sentMessage = {
+        at: now,
+        nickname: nickname || users[socket.id],
+        chatMessage,
+      };
+      try {
+        await collection.insertOne(sentMessage);
+        io.emit('message', formatMessage(sentMessage.nickname, sentMessage.chatMessage));
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    socket.on('change_nickname', (nickname) => {
+      users[socket.id] = nickname;
     });
   });
 };
