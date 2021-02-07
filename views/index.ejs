@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webchat</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+  </head>
+  <body>
+    <h1>Sala em Grupo</h1>
+    <div id="users"></div>
+    <input id="userInput" type="text" name="userInput" placeholder="Insira seu Nickname" autocomplete="off">
+    <button id="buttonUsuário">Criar usuário</button>
+    <ul id="mensagens">
+      <% if (message) { %>
+        <% message.forEach((msg) => { %>
+          <li data-testid="message">
+            <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+          </li>
+        <% }) %>
+      <% } %>
+    </ul>
+    <input id="mensagemInput" type="text" name="mensagemInput" placeholder="Digite seu texto aqui..." autocomplete="off">
+    <button id="buttonMensagens">Enviar</button>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script defer src="./client.js"></script>
+  <script type="text/javascript">
+    const SocketIo = io('http://localhost:3000');
+    document.getElementById('buttonMensagens').addEventListener('click', async () => {
+      const nicknameDoc = document.querySelector('#users');
+      const chatMessageDoc = document.querySelector('#mensagemInput');
+      const timestamp = moment(new Date().getTime()).format('DD-MM-yyyy hh:mm:ss');
+      const nickname = nicknameDoc.innerHTML;
+      console.log(nickname);
+      const chatMessage = chatMessageDoc.value;
+      console.log(chatMessage);
+      if (chatMessage) {
+        SocketIo.emit('message', { nickname, chatMessage });
+        chatMessageDoc.value = '';
+      }
+      const messageUl = document.querySelector('#mensagens');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', chatMessage);
+      li.innerText = `${timestamp} - ${nickname}: ${chatMessage}`;
+      messageUl.appendChild(li);
+    });
+  </script>
+</html>
