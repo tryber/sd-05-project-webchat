@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const dateFormat = require('dateformat');
 // https://www.npmjs.com/package/dateformat, um oferecimento de Paulo D'Andrea
 
-const model = require('./models/messages');
+const msgModel = require('./models/messages');
 const msgController = require('./controllers/messagesController');
 
 // const io = require('socket.io')(http, {
@@ -35,11 +35,12 @@ app.use('/', express.static(path.join(__dirname, './views')));
 app.get('/', msgController.listMessages);
 
 io.on('connection', (socket) => {
-  const Nick = `Usuário ${Date.now()}`;
+  const ID = `Usuário ${Date.now()}`;
   // socket.id = Nick;
-  console.log(`${Nick} has connected`);
-  socket.broadcast.emit('onlineUsers', Nick);
-  socket.emit('nickname', Nick);
+  console.log(`${ID} has connected`);
+  // socket.broadcast.emit('onlineUsers', ID);
+  socket.emit('nickname', ID);
+  socket.broadcast.emit('onlineUsers', ID, ID);
   // const nickname = 'usuário ' + users.length;
   // socket.nickname = nickname;
   // users.push(socket.nickname);
@@ -55,20 +56,19 @@ io.on('connection', (socket) => {
     const time = dateFormat(now, 'HH:mm:ss');
 
     console.log(`Mensagem ${time} ${nickname} ${chatMessage}`);
-    await model.create({ date, time, nickname, chatMessage }); // ou precisa passar pelo controller?
+    await msgModel.create({ date, time, nickname, chatMessage }); // não precisa passar pelo controller né?
     socket.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     socket.broadcast.emit('message', (`${date} ${time} - ${nickname}: ${chatMessage}`));
     return socket.emit('status', 'mensagem enviada');
   });
 
-    socket.on('nicknamechange', (userName) => {
-      socket.broadcast.emit('newNickname', Nick, userName);
-    });
+  socket.on('nicknamechange', (userName) => {
+    socket.broadcast.emit('newNickname', ID, userName);
+  });
+
   // console.log(`${nickname} conectado`);
 
   // socket.emit('ola', 'Bem vindo, fica mais um cadin, vai ter bolo :)' );
-
-  // socket.broadcast.emit('onlineUsers', { mensagem: ' ira! Fulano acabou de se conectar :D'});
 
   // socket.on('mensagemParaTodos', (msg)=> {
   //   io.broadcast('mensagemParaTodos', msg)
@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
-    socket.broadcast.emit('disconnectedUser', socket.id);
+    socket.broadcast.emit('disconnectedUser', ID);
   });
 });
 
