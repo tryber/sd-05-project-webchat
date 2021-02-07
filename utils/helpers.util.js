@@ -22,9 +22,9 @@ const lastNameList = [
 const randomNameGenerator = () => {
   const name = nameList[Math.floor(Math.random() * nameList.length)];
   const lastName = lastNameList[Math.floor(Math.random() * nameList.length)];
-  return `${name.split(';')[0]} ${lastName.replace('?', name.split(';')[1])}`
+  return `${name.split(';')[0]} ${lastName.replace('?', name.split(';')[1])}`;
 };
 
 module.exports = {
   randomNameGenerator,
-}
+};

@@ -1,5 +1,4 @@
 const { MongoClient } = require('mongodb');
-
 require('dotenv').config();
 
 const DB_NAME = process.env.DB_NAME || 'webchat';
@@ -10,11 +9,10 @@ module.exports = async (collection) => {
   try {
     connection = connection || await MongoClient.connect(
       DB_URL,
-      { useUnifiedTopology: true, useNewUrlParser: true }
+      { useUnifiedTopology: true, useNewUrlParser: true },
     );
     return await connection.db(DB_NAME).collection(collection);
-  } catch {
-    await client.close();
+  } catch (err) {
+    console.error(err);
   }
 };
-

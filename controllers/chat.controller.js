@@ -1,5 +1,6 @@
-const { randomNameGenerator } = require('../utils/helpers.util');
 const moment = require('moment');
+const socketIo = require('socket.io');
+const { randomNameGenerator } = require('../utils/helpers.util');
 
 const users = {};
 const now = moment(new Date()).format('DD-MM-yyyy h:mm:ss A');
@@ -9,11 +10,11 @@ const formatMessage = (name, message) => (
 );
 
 module.exports = (server) => async (connection) => {
-  const io = require('socket.io')(server, {
+  const io = socketIo(server, {
     cors: {
       origin: 'http://localhost:3000',
-      methods: [ 'GET', 'POST' ],
-    }
+      methods: ['GET', 'POST'],
+    },
   });
 
   const collection = await connection('messages');
@@ -22,7 +23,7 @@ module.exports = (server) => async (connection) => {
     console.log('Novo usuário conectado');
     users[socket.id] = randomNameGenerator();
 
-    //listen new players
+    // listen new players
     // io.emit('message', formatMessage(users[socket.id], 'acabou de entrar!'));
 
     socket.on('message', async ({ chatMessage, nickname = null }) => {
