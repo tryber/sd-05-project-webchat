@@ -23,12 +23,12 @@ app.use(cors());
 
 // MODEL
 const { createMessage, getMessages } = require('./models/messagesModel');
-const { emit } = require('process');
+// const { emit } = require('process');
 
 // ENDPOINT
 
 app.use(express.static(path.join(__dirname, 'views')));
-// informing express to use static file inside views directory
+// informing express to use static file inside specified directory
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
@@ -42,7 +42,7 @@ app.get('/', async (_req, res) => {
 
 // IO LISTENERS - INTERACTION WITH CLIENT SIDE
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
   const currentUserId = socket.id;
   const defaultNickname = 'randomName';
 
@@ -51,16 +51,14 @@ io.on('connection', async (socket) => {
   // [Req4] Take id and default nickname of connecting users
   // send to onlineUsers array, to render in ejs (need to refresh)
   onlineUsers.unshift({ id: currentUserId, nickname: defaultNickname });
-  // send to client, to render in dom manipulation (real time)
-  // problem: has to be in first position too!
+  // also send to client, to render in dom manipulation (real time)
+  socket.emit('seeUserId', currentUserId);
   io.emit('userConnected', currentUserId, defaultNickname);
-  io.emit('otherUserConnected', socket.id, defaultNickname);
 
   socket.on('userChangedNickname', (newNickname) => {
     // [Req4] when user changes from random nickname to chosen nickname, it is replaced
     // refresh onlineUsers
     onlineUsers = onlineUsers.map((user) => {
-      // remembering objects inside array onlineUsers have values id and nickname
       if (user.id === currentUserId) {
         const userToChange = user;
         userToChange.nickname = newNickname;
@@ -70,7 +68,6 @@ io.on('connection', async (socket) => {
     });
     // refresh also client dom
     io.emit('showChangedNickname', currentUserId, newNickname);
-    io.emit('showAnotherUserChanging', socket.id, newNickname);
   });
 
   // [Req2] 2. Receive 'message' emitted by client and emit back the formatted one
@@ -79,16 +76,14 @@ io.on('connection', async (socket) => {
     const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
     const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
     await createMessage({ dateFormat, nickname, chatMessage });
-    io.emit('message', fullMessage); // to have messages displayed for all users
+    io.emit('message', fullMessage);
   });
 
   socket.on('disconnect', () => {
     console.log(`User ${currentUserId} disconnected`);
     // [Req4] When user disconnects and needs to disappear from the list of online users
     // refresh onlineUsers
-    if (onlineUsers & (onlineUsers.length > 0)) {
-      onlineUsers = onlineUsers.filter((user) => user.id !== currentUserId);
-    }
+    onlineUsers = onlineUsers.filter((user) => user.id !== currentUserId);
     // refresh also client dom
     io.emit('userDisconnected', currentUserId);
   });

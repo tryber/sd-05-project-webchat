@@ -10,7 +10,7 @@
   </head>
   <body>
     <h2>Welcome to the WebChien Chat</h2>
-    <!-- Both lists here: from new messages & from bd historic -->
+    <!-- Both lists here: from new messages socketio & from bd -->
     <ul class="messages" id="messages">
       <% if (allMessages) { %>
         <% allMessages.forEach((msg) => { %>
@@ -32,13 +32,10 @@
     </section>
     <!-- if using form tag, remember type="button" and preventDefault
     so as not to default to cleaning screen and method get -->
-    <ul id="top-user"></ul>
     <ul class="users" id="users">
       <% if (onlineUsers && onlineUsers.length > 0) { %>
         <% onlineUsers.forEach((user) => { %>
-          <li data-testid="online-user" id="<%=user.userId %>">
-            <%= user.nickname%>
-          </li>
+          <li data-testid="online-user" id="<%=user.id %>"><%=user.nickname%></li>
        <% }) %>
       <% } %>
     </ul>
