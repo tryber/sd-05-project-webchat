@@ -10,190 +10,81 @@
   </head>
   <body>
     <form class="chat">
-      <div class="online-users">
-        <div>
-          <div class="pvt-chat-user" id="user"></div>
-          <% if (onlineUsers) {%>
-            <% onlineUsers.forEach(user => { %>
-              <div class="pvt-chat-box">
-                <p data-testid="online-user" id="a<%=user.userId %>"><%= user.nickname%></p>
-                <button type="button" class="pvt-chat-btn" id="<%= user.userId %>">Pvt</button>
-              </div>
-            <%})%>
-          <% } %>
-        </div>
-        <div class="chat-mode">
-          <button class="chat-mode-btn" type="button" id="public" data-testid="public">public</button>
-          <button class="chat-mode-btn" type="button" id="private" data-testid="private">private</button>
-        </div>
+      <div>
+        <input data-testid="nickname-box" id="nickname-box" />
+        <button data-testid="nickname-save" id="nickname-save" type="button">Trocar</button>
       </div>
-      <div class="right-box">
-        <div class="input-box">
-          <input
-            data-testid="nickname-box"
-            id="nickname"
-            type="text"
-            placeholder="Digite seu nickname"
-          />
-          <button class="chatBtn" data-testid="nickname-save" id="nickBtn" type="button">Trocar</button>
-        </div>
-        <div class="messages">
-          <% if (messages) {%>
-            <% messages.forEach(message => { %>
-              <li data-testid="message">
-                <%= message.date %> - <%= message.nickname %>: <%= message.chatMessage%>
-              </li>
-            <%})%>
-          <% } %>
-        </div>
-        <div class="private-messages">
-
-        </div>
-        <div class="input-box">
-          <input
-            data-testid="message-box"
-            id="message"
-            type="text"
-            name="message"
-            placeholder="Digite sua mensagem"
-          />
-          <button data-testid="send-button" class="chatBtn" id="submitBtn" type="button">Enviar</button>
-        </div>
+      <div id="online-users">
+        <%onlineUsers.forEach((user) => { %>
+          <li data-testid="online-user" id="<%=user.userId%>"><%=user.nickname%></li>
+        <% }) %>
+      </div>
+      <div id="messages">
+        <% messages.forEach((msg) => { %>
+        <li data-testid="message"><%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%></li>
+        <% }) %>
+      </div>
+      <div>
+        <input data-testid="message-box" id="message-box" type="text" />
+        <button data-testid="send-button" id="send-button" type="button">Enviar</button>
       </div>
     </form>
   </body>
   <script>
-    const socket = io();
+    const client = io();
+    let userId;
+    let nickname;
 
-    /**
+    const sendButton = document.getElementById('send-button');
+    const messageBox = document.getElementById('message-box');
+    const nicknameBox = document.getElementById('nickname-box');
+    const nicknameSave = document.getElementById('nickname-save');
+    const onlineUsers = document.getElementById('online-users');
 
-        sockets
-
-    **/
-
-    /**
-      usuário logou
-    **/
-    const user = document.querySelector('#user');
-    let nickInUse;
-    let UserId;
-    socket.on('userLogedIn', (randomNick, userId) => {
-      if (!UserId) {
-        nickInUse = randomNick;
-        UserId = userId;
-      }
-      const p = document.createElement('p');
-      p.setAttribute('data-testid', 'online-user');
-      p.setAttribute('id', `a${userId}`);
-      p.innerHTML = randomNick;
-      user.appendChild(p);
+    client.on('connected', (id, nick) => {
+      userId = id;
+      nickname = nick;
     });
 
-    /**
-      outro usuário trocou nick
-    **/
-    socket.on('anotherUserChangedNick', (nickname, userId) => {
-      const p = document.querySelector(`#a${userId}`);
-      p.innerHTML = nickname;
-    });
-
-    /**
-      usuário enviou msg
-    **/
-    socket.on('message', (message) => {
-      renderMessage(message);
-    });
-
-    /**
-      Outro usuário desconectou
-    **/
-
-    socket.on('quit', (userId) => {
-      console.log('quitou');
-      const p = document.querySelector(`#a${userId}`);
-      p.innerHTML = '';
-      p.remove();
-    });
-
-    /**
-
-        renderiza mensagem no chat
-
-    **/
-    const messages = document.querySelector('.messages');
-
-    function renderMessage(message) {
+    client.on('userConnected', (id, nick) => {
       const li = document.createElement('li');
-      li.innerHTML = message;
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${id}`);
+      li.innerHTML = nick;
+      if (userId === id) {
+        onlineUsers.prepend(li);
+      } else {
+        onlineUsers.append(li);
+      }
+    })
+
+    client.on('nickChange', (nick, id) => {
+      const nickChangeUser = document.getElementById(id);
+      console.log('nickChange ON', nickChangeUser)
+      nickChangeUser.innerHTML = nick;
+    });
+
+    client.on('message', (msg) => {
+      const messagesBox = document.getElementById('messages');
+      const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
-      messages.appendChild(li);
-    }
-
-    /**
-
-        botões
-
-    **/
-
-    /**
-      chat privado
-    **/
-    let to;
-    const pvtMsgs = document.querySelector('.private-messages');
-    const pvtBtn = document.querySelector('#private');
-    pvtBtn.addEventListener('click', () => {
-      if (messages.style.display = "block") {
-        messages.style.display === "none"
-        pvtMsgs.style.display = "block"
-      }
-    })
-
-
-    /**
-      chat publico
-    **/
-    const pubBtn = document.querySelector('#public');
-    pubBtn.addEventListener('click', () => {
-      if (pvtMsgs.style.display = "block") {
-        pvtMsgs.style.display === "none"
-        messages.style.display = "block"
-      }
-    })
-
-    /**
-      troca de nick
-    **/
-    const nick = document.querySelector('#nickname');
-    const nickBtn = document.querySelector('#nickBtn');
-    nickBtn.addEventListener('click', () => {
-      if (nick.value.length) {
-        nickInUse = nick.value;
-        nick.value = '';
-        const p = document.querySelector(`#a${UserId}`);
-        p.innerHTML = nickInUse;
-        socket.emit('nickChange', nickInUse);
-      }
+      li.innerHTML = msg;
+      messagesBox.append(li);
     });
 
-    /**
-      envia msg
-    **/
-    const msginput = document.querySelector('#message');
-    const button = document.querySelector('#submitBtn');
-
-    button.addEventListener('click', () => {
-      if (msginput.value.length) {
-        const chatMessage = msginput.value;
-        const nickname = nickInUse;
-
-        const dateTime = new Date().getTime();
-        const date = moment(dateTime).format('DD-MM-yyyy h:mm:ss A');
-
-        const sendMessage = { chatMessage, nickname, date };
-
-        socket.emit('message', sendMessage, to, UserId);
-        msginput.value = '';
-      }
+    client.on('userDisconnected', (id) => {
+      const disconnectedUser = document.getElementById(id);
+      disconnectedUser.remove();
     });
+
+    sendButton.addEventListener('click', () => {
+      const chatMessage = messageBox.value;
+      client.emit('message', { nickname, chatMessage });
+    });
+
+    nicknameSave.addEventListener('click', () => {
+      nickname = nicknameBox.value;
+      client.emit('nickChange', nickname, userId);
+    })
   </script>
 </html>
