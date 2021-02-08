@@ -59,17 +59,9 @@ nameBtn.addEventListener('click', () => {
   socket.emit('nicknamechange', userName);
   document.getElementById('nickNameInput').value = '';
 });
-// const time = new Date().toUTCString();
-// const now = new Date();
-// const date = dateFormat(now, 'dd-mm-yyyy');
-// const time = dateFormat(now, 'HH:mm:ss');
 
 messageBtn.addEventListener('click', () => {
   if (message.value.length) {
-    // const li = document.createElement('li');
-    // li.setAttribute('data-testid', 'message');
-    // li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
-    // messages.appendChild(li);
     const nickname = userName;
     const chatMessage = message.value;
     socket.emit('message', { chatMessage, nickname });

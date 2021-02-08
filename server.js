@@ -8,7 +8,8 @@ const dateFormat = require('dateformat');
 // https://www.npmjs.com/package/dateformat, um oferecimento de Paulo D'Andrea
 
 const msgModel = require('./models/messages');
-const msgController = require('./controllers/messagesController');
+const userModel = require('./models/users');
+const controller = require('./controllers/controller');
 
 // const io = require('socket.io')(http, {
 //   cors: {
@@ -24,7 +25,7 @@ const io = socketIO(server);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(cors()); // Permite recursos restritos na página web serem pedidos a domínio externo
+app.use(cors());
 
 app.set('view engine', 'ejs');
 
@@ -32,19 +33,15 @@ app.set('views', './views');
 
 app.use('/', express.static(path.join(__dirname, './views')));
 
-app.get('/', msgController.listMessages);
+app.get('/', controller.listMessagesAndUsers);
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   const ID = `Usuário ${Date.now()}`;
-  // socket.id = Nick;
   console.log(`${ID} has connected`);
   // socket.broadcast.emit('onlineUsers', ID);
   socket.emit('nickname', ID);
   socket.broadcast.emit('onlineUsers', ID, ID);
-  // const nickname = 'usuário ' + users.length;
-  // socket.nickname = nickname;
-  // users.push(socket.nickname);
-  // recebe msg + nick, insere no banco e devolve para a view:
+  await userModel.create({ id: ID, nickname: ID }); // precisa controller?
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     if (!nickname || !chatMessage) {
@@ -62,21 +59,15 @@ io.on('connection', (socket) => {
     return socket.emit('status', 'mensagem enviada');
   });
 
-  socket.on('nicknamechange', (userName) => {
+  socket.on('nicknamechange', async (userName) => {
     socket.broadcast.emit('newNickname', ID, userName);
+    await userModel.updateUser(ID, userName);
   });
 
-  // console.log(`${nickname} conectado`);
-
-  // socket.emit('ola', 'Bem vindo, fica mais um cadin, vai ter bolo :)' );
-
-  // socket.on('mensagemParaTodos', (msg)=> {
-  //   io.broadcast('mensagemParaTodos', msg)
-  // })
-
-  socket.on('disconnect', () => {
+  socket.on('disconnect',async () => {
     console.log(`${socket.id} disconnected`);
     socket.broadcast.emit('disconnectedUser', ID);
+    await userModel.excludeUser(ID);
   });
 });
 

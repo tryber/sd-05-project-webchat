@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>Cduessel - WebChat</title>
-    <!-- <link rel="stylesheet" href="style.css" type="text/css" media="screen"> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
@@ -18,6 +17,13 @@
         <h2>Usuários online:</h2>
         <li id="userNickname" data-testid="online-user"></li>
         <ul id="onlineUsers" class="list-unstyled">
+          <% if (onlineUsers) { %>
+            <% onlineUsers.forEach((user) => { %>
+              <li data-testid="online-user">
+                <%= `${user.nickname}` %>
+              </li>
+            <% }) %>
+            <% }%>
         </ul>
     </div>
       <h2>Mensagens</h2>
@@ -42,47 +48,5 @@
     </div>
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script defer src="/script.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
     </body>
-   <!-- <script type="text/javascript">
-    const socket = io(); //'http://localhost:3000'
-    const dateFormat = require('dateformat');
-
-    let userName = `Usuário ${Date.now()}`;
-    const nameBtn = document.getElementById('btn-name'); 
-
-    nameBtn.addEventListener('click', () => { 
-      userName = document.getElementById('nickNameInput').value;
-      // alert(`nome ${userName} salvo`);
-    });
-
-    const message = document.getElementById('inputMessage');
-    const messageBtn = document.getElementById('send-button');
-    const messages = document.getElementById('messageList');
-    // const time = new Date().toUTCString();
-    const now = new Date();
-    const date = dateFormat(now, 'dd-mm-yyyy');
-    const time = dateFormat(now, 'HH:mm:ss');
-
-   messageBtn.addEventListener('click', () => {
-      if (message.value.length) {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'message');
-        li.innerHTML = `${date} ${time} - ${userName}: ${message.value}`
-        messages.appendChild(li);
-        socket.emit('message', { nickname: userName, newMsg: message.value });
-        console.log(`${userName} ${message.value}`)
-        message.value='';
-      }
-    });
-
-    const createMessage = (message) => {
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'message');
-      li.innerHTML = message;
-      messages.appendChild(li);
-    };
-
-    socket.on('message', (msg) => createMessage(msg));
-  </script> -->
 </html>
