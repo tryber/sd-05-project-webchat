@@ -25,25 +25,24 @@ const create = async ({ id, nickname }) => {
 const getById = async (id) => {
   try {
     const getOne = getCollection('users').then((db) => db.findOne(id));
-    return getOne;    
+    return getOne;
   } catch (error) {
     console.log('deu ruim buscar ID', error.message);
     return error.message;
   }
-}
+};
 // if (!ObjectId.isValid(id)) return null;
 
 const updateUser = async (id, nickname) => {
   try {
     const user = await getCollection('users')
       .then((users) => users.updateOne({ id }, { $set: { nickname } }));
-  
     console.log(user);
     return user;
-    
   } catch (error) {
     console.log('deu ruim buscar update', error.message);
-    return error.message;  }
+    return error.message;
+  }
 };
 
 const excludeUser = async (id) => {
@@ -64,5 +63,3 @@ module.exports = {
   updateUser,
   excludeUser,
 };
-
- "Usuário 1612814604749", "Usuário 1612814800459", "Usuário 1612814932598"
