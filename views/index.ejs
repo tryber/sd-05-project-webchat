@@ -7,10 +7,13 @@
     <!-- <link rel="stylesheet" href="style.css"> -->
   </head>
   <body>
-    <h1>Sala em Grupo</h1>
+    <h1>Bate-papo Trybe</h1>
     <div id="users"></div>
     <input data-testid="nickname-box" id="userInput" type="text" name="userInput" placeholder="Altere seu Nickname" autocomplete="off">
     <button data-testid="nickname-save" id="buttonUsuário">Criar usuário</button>
+    <h3>Participantes Online</h3>
+    <div id="onlineUser">
+    </div>
     <ul data-testid="message" id="mensagens">
       <% if (message) { %>
         <% message.forEach((msg) => { %>
@@ -26,6 +29,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script defer src="./client.js"></script>
+  <script defer src="./onlineUsers.js"></script>
   <script type="text/javascript">
     const SocketIo = io('http://localhost:3000');
 
