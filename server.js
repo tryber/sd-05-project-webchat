@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const bodyParser = require('body-parser');
+
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -11,13 +13,17 @@ require('dotenv').config();
 const io = socketIo(httpServer);
 
 const messagesModels = require('./models/messagesModel');
+const controllers = require('./controllers');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/', express.static(path.join(__dirname, 'views')));
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 let listNamesConverted = [];
+
+app.get('/', controllers.usersController.usersList());
 
 io.on('connection', async (socket) => {
   socket.on('dateUser', (dateUser) => {
