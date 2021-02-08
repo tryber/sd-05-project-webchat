@@ -64,7 +64,7 @@ io.on('connection', async (socket) => {
     await userModel.updateUser(ID, userName);
   });
 
-  socket.on('disconnect',async () => {
+  socket.on('disconnect', async () => {
     console.log(`${socket.id} disconnected`);
     socket.broadcast.emit('disconnectedUser', ID);
     await userModel.excludeUser(ID);

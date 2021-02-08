@@ -36,8 +36,9 @@ const getById = async (id) => {
 const updateUser = async (id, nickname) => {
   try {
     const user = await getCollection('users')
-      .then((users) => users.updateOne({ id: id }, { $set: { nickname } }));
+      .then((users) => users.updateOne({ id }, { $set: { nickname } }));
   
+    console.log(user);
     return user;
     
   } catch (error) {
@@ -47,12 +48,13 @@ const updateUser = async (id, nickname) => {
 
 const excludeUser = async (id) => {
   try {
-    const excluded = getCollection('users')
-    .then((users) => users.deleteOne({ id }));
+    const excluded = await getCollection('users').then((users) => users.deleteOne({ id }));
+    console.log(excluded.result);
     return excluded;
   } catch (error) {
     console.log('deu ruim excluir', error.message);
-    return error.message;  }
+    return error.message;
+  }
 };
 
 module.exports = {
@@ -62,3 +64,5 @@ module.exports = {
   updateUser,
   excludeUser,
 };
+
+ "Usuário 1612814604749", "Usuário 1612814800459", "Usuário 1612814932598"
