@@ -37,12 +37,12 @@ window.onload = () => {
   });
 
   // when user connects
-  clientSocketIo.on('userConnected', (id, nickname) => {
+  clientSocketIo.on('userConnected', (id, name) => {
     const divUsers = document.getElementById('users');
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
     li.setAttribute('id', `${id}`);
-    li.textContent = nickname;
+    li.textContent = name;
     if (id === currentId) {
       divUsers.prepend(li);
       // https://developer.mozilla.org/fr/docs/Web/API/ParentNode/prepend
@@ -52,9 +52,9 @@ window.onload = () => {
   });
 
   // when user changes nickname
-  clientSocketIo.on('showChangedNickname', (id, nickname) => {
+  clientSocketIo.on('showChangedNickname', (id, nick) => {
     const liToChange = document.getElementById(id); // or querySelector?
-    liToChange.innerHTML = nickname;
+    liToChange.innerHTML = nick;
   });
 
   // when user disconnects
