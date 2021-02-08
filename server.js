@@ -44,13 +44,11 @@ io.on('connection', async (socket) => {
   socket.on('nicknameOnline', async (nickname) => {
     io.emit('nicknameOnline', nickname);
   });
-  
+
   socket.on('message', async ({ nickname, chatMessage }) => {
     const timestamp = moment(new Date().getTime()).format('DD-MM-yyyy hh:mm:ss');
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;
-    
     await createMessage({ timestamp, nickname, chatMessage });
-    
     socket.broadcast.emit('message', message);
   });
 

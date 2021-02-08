@@ -14,10 +14,10 @@
     <h3>Participantes Online</h3>
     <div id="onlineUser">
     </div>
-    <ul data-testid="message" id="mensagens">
+    <ul id="mensagens">
       <% if (message) { %>
         <% message.forEach((msg) => { %>
-          <li>
+          <li data-testid="message">
             <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
           </li>
         <% }) %>
@@ -29,9 +29,10 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script defer src="./client.js"></script>
+  <script defer src="./messageList.js"></script>
   <script defer src="./onlineUsers.js"></script>
   <script type="text/javascript">
-    const SocketIo = io('http://localhost:3000');
+    const SocketIo = io();
 
     document.getElementById('buttonMensagens').addEventListener('click', async () => {
       const nicknameDoc = document.querySelector('#users');
@@ -45,13 +46,12 @@
         SocketIo.emit('message', { nickname, chatMessage });
         chatMessageDoc.value = '';
       }
-      const messageUl = document.querySelector('#mensagens');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', chatMessage);
-      li.innerText = `${timestamp} - ${nickname}: ${chatMessage}`;
-      messageUl.appendChild(li);
-
-      SocketIo.on('message', (message) => { document.getElementById('mensagens').li.innerText = message; });
+      
+      message = `${timestamp} - ${nickname}: ${chatMessage}`;
+      messageList(message);
     });
+    
+    SocketIo.on('message', (message) => messageList(message));
+
   </script>
 </html>
