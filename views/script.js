@@ -80,7 +80,7 @@ socket.on('dataUserEdited', (dataUser) => {
   } else {
     document.querySelectorAll('.p-user').forEach((user) => {
       if (user.getAttribute('id') === dataUser.id) {
-        let textUser = user;
+        const textUser = user;
         textUser.textContent = dataUser.nickname;
       }
     });
