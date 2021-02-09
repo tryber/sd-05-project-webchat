@@ -23,7 +23,29 @@ const add = async (id, nickname) => {
   }
 };
 
-module.exports =  {
+const update = async (id, nickname) => {
+  try {
+    const db = await connection();
+    await db.collection('users').updateOne({ id }, { $set: { nickname } });
+    return true;
+  } catch (err) {
+    return null;
+  }
+};
+
+const exclude = async (id) => {
+  try {
+    const db = await connection();
+    await db.collection('users').deleteOne({ id });
+    return true;
+  } catch (err) {
+    return null;
+  }
+};
+
+module.exports = {
   add,
   getAll,
+  update,
+  exclude,
 };

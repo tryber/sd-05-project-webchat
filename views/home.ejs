@@ -12,12 +12,12 @@
   <div class="contianer-users">
     <ul id="listUsers">
       <Li>
-        <p data-testid="online-user" class="li-user-session"></p>
+        <p data-testid="online-user" class="p-user-session"></p>
       </Li>
       <% if (users) { %>
       <% users.forEach((user) => { %>
       <li>
-        <p data-testid="online-user" class="li-user" value=<%=user.id%>>
+        <p data-testid="online-user" class="p-user" id=<%=user.id%>>
           <%= user.nickname %>
         </p>
       </li>

@@ -8,7 +8,6 @@ socket.on('connect', () => {
   socket.id = {
     id: socket.id,
     nickname: sessionStorageNickname || nameRandom,
-    idPrivateRecipient: '',
   };
   sessionStorage.setItem('nickname', socket.id.nickname);
   socket.emit('dateUser', socket.id);
@@ -43,7 +42,7 @@ function emitMessage() {
 
 emitMessage();
 
-function createItensList(data, list, dataTestid, liClass) {
+/* function createItensList(data, list, dataTestid, liClass) {
   const li = document.createElement('li');
   li.classList.add(liClass);
   const pMessage = document.createElement('p');
@@ -51,7 +50,7 @@ function createItensList(data, list, dataTestid, liClass) {
   pMessage.textContent = data.nickname || data;
   li.appendChild(pMessage);
   list.appendChild(li);
-}
+} */
 
 const listMessages = document.getElementById('listMessages');
 
@@ -69,15 +68,15 @@ const listUsers = document.getElementById('listUsers');
 
 socket.on('newUser', (newUser) => {
   if (newUser.id === socket.id.id) {
-    const userSession = document.querySelector('.li-user-session');
+    const userSession = document.querySelector('.p-user-session');
     userSession.innerText = newUser.nickname;
     userSession.setAttribute('id', newUser.id);
   } else {
     const li = document.createElement('li');
-    li.classList.add('li-user');
     const pMessage = document.createElement('p');
     pMessage.setAttribute('data-testid', 'online-user');
     pMessage.setAttribute('id', newUser.id);
+    pMessage.classList.add('p-user');
     pMessage.textContent = newUser.nickname;
     li.appendChild(pMessage);
     listUsers.appendChild(li);
@@ -85,6 +84,27 @@ socket.on('newUser', (newUser) => {
 });
 
 socket.on('dataUserEdited', (dataUser) => {
-  const userSession = document.querySelector('.li-user-session');
-  userSession.innerText = dataUser.nickname;
+  if (dataUser.id === socket.id.id) {
+    const userSession = document.querySelector('.p-user-session');
+    userSession.innerText = dataUser.nickname;
+  } else {
+    document.querySelectorAll('.p-user').forEach((user) => {
+      if (user.getAttribute('id') === dataUser.id) {
+        user.textContent = dataUser.nickname;
+      }
+    });
+  }
 });
+
+socket.on('userDisconnect', (userId) => {
+  document.querySelectorAll('.p-user').forEach((user) => {
+    if(user.getAttribute('id') === userId) {
+      user.parentNode.remove();
+    }
+  })
+});
+
+
+window.onbeforeunload = () => {
+  socket.close();
+}; 

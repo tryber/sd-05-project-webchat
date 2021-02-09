@@ -2,8 +2,6 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const bodyParser = require('body-parser');
-
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -26,16 +24,12 @@ app.set('views', './views');
 const viewsUrl = path.join(__dirname, '/views');
 app.use(express.static(viewsUrl));
 
-
-let listNamesConverted = [];
-
 app.get('/', controllers.chatController.getAll);
 
 io.on('connection', async (socket) => {
   socket.on('dateUser', async (dateUser) => {
     try {
-      const addUser = await usersModel.add(dateUser.id, dateUser.nickname);
-      console.log(addUser)
+      await usersModel.add(dateUser.id, dateUser.nickname);
       socket.emit('newUser', dateUser);
       socket.broadcast.emit('newUser', dateUser);
     } catch (err) {
@@ -43,14 +37,17 @@ io.on('connection', async (socket) => {
     }
   });
 
-  socket.on('dataUserEdit', (dataUser) => {
+  socket.on('dataUserEdit', async (dataUser) => {
+    await usersModel.update(dataUser.id, dataUser.nickname);
     socket.emit('dataUserEdited', dataUser);
     socket.broadcast.emit('dataUserEdited', dataUser);
   });
 
-  socket.on('disconnect', () => {
-    listNamesConverted = listNamesConverted.filter((user) => user.id !== socket.id);
-    socket.broadcast.emit('listNamesConverted', listNamesConverted);
+  socket.on('disconnect', async () => {
+    const userId = socket.id;
+    socket.emit('userDisconnect', userId);
+    socket.broadcast.emit('userDisconnect', userId);
+    await usersModel.exclude(userId);
   });
 
   let message;
