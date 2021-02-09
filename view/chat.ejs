@@ -6,8 +6,8 @@
   </head>
   <body>
     <div>
-      <input placeholder="Quero ser chamado de" id="nicknameBox" />
-      <button id='nickNameButton'>
+      <input data-testid="nickname-box" placeholder="Quero ser chamado de" id="nicknameBox" />
+      <button data-testid="nickname-save" id='nickNameButton'>
         Salvar
       </button>
     </div>
@@ -15,7 +15,7 @@
       <ul>
         <% if (allMessages) { %>
           <% allMessages.forEach((item) => { %>
-            <li>
+            <li data-testid="message">
               <%= `${item.data} - ${item.nickname}: ${item.chatMessage}` %>
             </li>
           <% }) %>
@@ -23,13 +23,14 @@
       </ul>
     </div>
     <div>
-      <input placeholder="Mande sua mensagem!" id="message-box"  />
-      <button id="send-button">Enviar</button>
+      <input data-testid="message-box" placeholder="Mande sua mensagem!" id="message-box"  />
+      <button id="send-button" data-testid="send-button">Enviar</button>
     </div>
       <script>
         const createMessage = (message) => {
           const li = document.createElement('li');
             li.innerHTML = message;
+            li.setAttribute('data-testid', 'message')
             const ul = document.querySelector('ul');
             ul.appendChild(li);
         }
