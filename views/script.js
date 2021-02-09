@@ -72,4 +72,4 @@ messageBtn.addEventListener('click', () => {
 
 window.onbeforeunload = () => {
   socket.close();
-}
+};
