@@ -1,7 +1,7 @@
+const moment = require('moment');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const moment = require('moment');
 
 const app = express();
 const socketIoServer = require('http').createServer(app);
