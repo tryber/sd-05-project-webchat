@@ -17,9 +17,7 @@
       <% if (users) { %>
       <% users.forEach((user) => { %>
       <li>
-        <p data-testid="online-user" class="p-user" id=<%=user.id%>>
-          <%= user.nickname %>
-        </p>
+        <p data-testid="online-user" class="p-user" id=<%=user.id%>><%= user.nickname %></p>
       </li>
       <% }) %>
       <% } %>
