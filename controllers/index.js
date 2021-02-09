@@ -1,5 +1,5 @@
-const usersController = require('./usersController');
+const chatController = require('./chatController');
 
 module.exports = {
-  usersController,
+  chatController,
 };

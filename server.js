@@ -13,33 +13,39 @@ require('dotenv').config();
 const io = socketIo(httpServer);
 
 const messagesModels = require('./models/messagesModel');
+const usersModel = require('./models/usersModel');
 const controllers = require('./controllers');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+const viewsUrl = path.join(__dirname, '/views');
+app.use(express.static(viewsUrl));
+
+
 let listNamesConverted = [];
 
-app.get('/', controllers.usersController.usersList());
+app.get('/', controllers.chatController.getAll);
 
 io.on('connection', async (socket) => {
-  socket.on('dateUser', (dateUser) => {
-    listNamesConverted = [...listNamesConverted, dateUser];
-    socket.emit('listNamesConverted', listNamesConverted);
-    socket.broadcast.emit('listNamesConverted', listNamesConverted);
+  socket.on('dateUser', async (dateUser) => {
+    try {
+      const addUser = await usersModel.add(dateUser.id, dateUser.nickname);
+      console.log(addUser)
+      socket.emit('newUser', dateUser);
+      socket.broadcast.emit('newUser', dateUser);
+    } catch (err) {
+      console.log(err);
+    }
   });
 
-  socket.on('dataUserEdit', (dataUserEdit) => {
-    listNamesConverted.forEach((user, index) => {
-      if (user.id === dataUserEdit.id) {
-        listNamesConverted.splice(index, 1, dataUserEdit);
-      }
-    });
-    socket.emit('listNamesConverted', listNamesConverted);
-    socket.broadcast.emit('listNamesConverted', listNamesConverted);
+  socket.on('dataUserEdit', (dataUser) => {
+    socket.emit('dataUserEdited', dataUser);
+    socket.broadcast.emit('dataUserEdited', dataUser);
   });
 
   socket.on('disconnect', () => {
@@ -64,15 +70,6 @@ io.on('connection', async (socket) => {
       console.log(e.message);
     }
   });
-  try {
-    const messages = await messagesModels.getAll();
-    messages.forEach((item) => {
-      message = `${item.dateMessage} - ${item.nickname}: ${item.chatMessage}`;
-      socket.emit('message', message);
-    });
-  } catch (e) {
-    console.log(e.message);
-  }
 });
 
 const PORT = process.env.PORT || 3000;
