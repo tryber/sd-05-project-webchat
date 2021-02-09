@@ -10,23 +10,34 @@
   </head>
   <body>
     <form class="chat">
-      <div>
-        <input data-testid="nickname-box" id="nickname-box" />
-        <button data-testid="nickname-save" id="nickname-save" type="button">Trocar</button>
+      <div class="online-users">
+        <div id="online-users">
+          <%onlineUsers.forEach((user) => { %>
+          <div class="pvt-chat-box">
+            <li data-testid="online-user" id="<%=user.userId%>"><%=user.nickname%></li>
+            <button class="pvt-chat-btn" type="button" id="private-btn">pvt</button>
+          </div>
+          <% }) %>
+        </div>
+        <div class="chat-mode">
+          <button class="chat-mode-btn" data-testid="private" id="private" type="button">Private</button>
+          <button class="chat-mode-btn" data-testid="public" id="public" type="button">Public</button>
+        </div>
       </div>
-      <div id="online-users">
-        <%onlineUsers.forEach((user) => { %>
-          <li data-testid="online-user" id="<%=user.userId%>"><%=user.nickname%></li>
-        <% }) %>
-      </div>
-      <div id="messages">
-        <% messages.forEach((msg) => { %>
-        <li data-testid="message"><%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%></li>
-        <% }) %>
-      </div>
-      <div>
-        <input data-testid="message-box" id="message-box" type="text" />
-        <button data-testid="send-button" id="send-button" type="button">Enviar</button>
+      <div class="right-box">
+        <div class="input-box">
+          <input data-testid="nickname-box" id="nickname-box" />
+          <button class="chatBtn" data-testid="nickname-save" id="nickname-save" type="button">Trocar</button>
+        </div>
+        <div id="messages" class="messages">
+          <% messages.forEach((msg) => { %> <% if (!msg.to) { %>
+          <li data-testid="message"><%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%></li>
+          <% } %> <% }) %>
+        </div>
+        <div class="input-box">
+          <input data-testid="message-box" id="message-box" type="text" />
+          <button class="chatBtn" data-testid="send-button" id="send-button" type="button">Enviar</button>
+        </div>
       </div>
     </form>
   </body>
@@ -34,16 +45,30 @@
     const client = io();
     let userId;
     let nickname;
+    let from;
+    let to;
 
+    const allpvtBtns = document.querySelectorAll('#private-btn');
     const sendButton = document.getElementById('send-button');
     const messageBox = document.getElementById('message-box');
     const nicknameBox = document.getElementById('nickname-box');
     const nicknameSave = document.getElementById('nickname-save');
     const onlineUsers = document.getElementById('online-users');
+    const publicButton = document.getElementById('public');
+    const privateButton = document.getElementById('private');
+    const chat = document.getElementById('messages');
+
+    allpvtBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        to = e.target.previousSibling.previousSibling.id;
+        client.emit('getPvtHistory', userId, to);
+      });
+    });
 
     client.on('connected', (id, nick) => {
       userId = id;
       nickname = nick;
+      from = id;
     });
 
     client.on('userConnected', (id, nick) => {
@@ -51,40 +76,85 @@
       li.setAttribute('data-testid', 'online-user');
       li.setAttribute('id', `${id}`);
       li.innerHTML = nick;
+      const div = document.createElement('div');
+      div.setAttribute('class', 'pvt-chat-box');
+      div.append(li);
       if (userId === id) {
-        onlineUsers.prepend(li);
+        onlineUsers.prepend(div);
       } else {
-        onlineUsers.append(li);
+        const btn = document.createElement('button');
+        btn.addEventListener('click', (e) => {
+          to = id;
+          client.emit('getPvtHistory', userId, to);
+        });
+        btn.innerHTML = 'pvt';
+        btn.setAttribute('class', 'pvt-chat-btn');
+        // btn.setAttribute('data-testid', 'private');
+        btn.setAttribute('type', 'button');
+        btn.setAttribute('id', 'private-btn');
+        div.append(btn);
+        onlineUsers.append(div);
       }
-    })
+    });
 
     client.on('nickChange', (nick, id) => {
       const nickChangeUser = document.getElementById(id);
-      console.log('nickChange ON', nickChangeUser)
       nickChangeUser.innerHTML = nick;
     });
 
     client.on('message', (msg) => {
-      const messagesBox = document.getElementById('messages');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'message');
-      li.innerHTML = msg;
-      messagesBox.append(li);
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = msg;
+        chat.append(li);
     });
 
     client.on('userDisconnected', (id) => {
-      const disconnectedUser = document.getElementById(id);
+      const disconnectedUser = document.getElementById(id).parentNode;
       disconnectedUser.remove();
+    });
+
+    client.on('history', (history) => {
+      chat.innerHTML = '';
+      history.forEach((msg) => {
+        if (!msg.to) {
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'message');
+          li.innerHTML = `${msg.date} - ${msg.nickname}: ${msg.chatMessage}`;
+          chat.append(li);
+        }
+      });
+    });
+
+    client.on('pvtHistory', (history) => {
+      chat.innerHTML = '';
+      history.forEach((msg) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${msg.date} - ${msg.nickname} (private): ${msg.chatMessage}`;
+        chat.append(li);
+      });
     });
 
     sendButton.addEventListener('click', () => {
       const chatMessage = messageBox.value;
-      client.emit('message', { nickname, chatMessage });
+      messageBox.value = '';
+      client.emit('message', { nickname, chatMessage, to, from });
     });
 
     nicknameSave.addEventListener('click', () => {
       nickname = nicknameBox.value;
       client.emit('nickChange', nickname, userId);
-    })
+    });
+
+    publicButton.addEventListener('click', () => {
+      client.emit('getMsgHistory');
+      to = null;
+    });
+
+    privateButton.addEventListener('click', () => {
+      to = document.querySelectorAll('[data-testid="online-user"]')[1].id;
+      client.emit('getPvtHistory', userId, to);
+    });
   </script>
 </html>
