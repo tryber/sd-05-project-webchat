@@ -15,7 +15,7 @@ const add = async (id, nickname) => {
     const db = await connection();
     const addUser = await db.collection('users').insertOne({
       id,
-      nickname
+      nickname,
     });
     return addUser.ops[0];
   } catch (e) {

@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = window.io('http://localhost:3000');
 
 const listNameRandom = ['Bane', 'Bruce Wayne', 'Batman', 'Alfred', 'Robin', 'Coringa', 'Espantalho', 'Batgirl', 'Hera Venenosa', 'Mulher-Gato', 'Ras al Ghul', 'Asa Noturna', 'Lucius Fox'];
 
@@ -98,13 +98,12 @@ socket.on('dataUserEdited', (dataUser) => {
 
 socket.on('userDisconnect', (userId) => {
   document.querySelectorAll('.p-user').forEach((user) => {
-    if(user.getAttribute('id') === userId) {
+    if (user.getAttribute('id') === userId) {
       user.parentNode.remove();
     }
-  })
+  });
 });
-
 
 window.onbeforeunload = () => {
   socket.close();
-}; 
+};
