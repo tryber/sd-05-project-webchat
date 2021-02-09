@@ -42,16 +42,6 @@ function emitMessage() {
 
 emitMessage();
 
-/* function createItensList(data, list, dataTestid, liClass) {
-  const li = document.createElement('li');
-  li.classList.add(liClass);
-  const pMessage = document.createElement('p');
-  pMessage.setAttribute('data-testid', dataTestid);
-  pMessage.textContent = data.nickname || data;
-  li.appendChild(pMessage);
-  list.appendChild(li);
-} */
-
 const listMessages = document.getElementById('listMessages');
 
 socket.on('message', (message) => {
@@ -90,7 +80,8 @@ socket.on('dataUserEdited', (dataUser) => {
   } else {
     document.querySelectorAll('.p-user').forEach((user) => {
       if (user.getAttribute('id') === dataUser.id) {
-        user.textContent = dataUser.nickname;
+        let textUser = user;
+        textUser.textContent = dataUser.nickname;
       }
     });
   }
