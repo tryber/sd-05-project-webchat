@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Web Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div>
+      <input placeholder="Quero ser chamado de" id="nicknameBox" />
+      <button id='nickNameButton'>
+        Salvar
+      </button>
+    </div>
+    <div>
+      <ul>
+        <% if (allMessages) { %>
+          <% allMessages.forEach((item) => { %>
+            <li>
+              <%= `${item.data} - ${item.nickName}: ${item.message}` %>
+            </li>
+          <% }) %>
+        <% } %>
+      </ul>
+    </div>
+    <div>
+      <input placeholder="Mande sua mensagem!" id="message-box"  />
+      <button id="send-button">Enviar</button>
+    </div>
+      <script>
+        const createMessage = (message) => {
+          const li = document.createElement('li');
+            li.innerHTML = `${ message.data } - ${ message.nickName }: ${ message.message }`
+            const ul = document.querySelector('ul');
+            ul.appendChild(li);
+        }
+        const socket = io();
+        const nickButton = document.querySelector('#nickNameButton');
+        const nickBox = document.querySelector('#nicknameBox');
+        const messageButton = document.querySelector('#send-button');
+        const messageBox = document.querySelector('#message-box');
+        let nickName = 'Anônimo';
+        let message = '';
+        nickBox.addEventListener('change', (e) => nickName = e.target.value);
+        messageBox.addEventListener('change', (e) => message = e.target.value);
+        messageButton.addEventListener('click', () => {
+          socket.emit('chat', { nickName, message });
+          createMessage({ nickName, message });
+          messageBox.value = '';
+        })
+        socket.on('chat', (message) => {
+            createMessage(message);
+        });
+      </script>
+  </body>
+</html>
