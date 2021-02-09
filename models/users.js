@@ -37,7 +37,7 @@ const updateUser = async (id, nickname) => {
   try {
     const user = await getCollection('users')
       .then((users) => users.updateOne({ id }, { $set: { nickname } }));
-    console.log(user);
+    console.log(user.result);
     return user;
   } catch (error) {
     console.log('deu ruim buscar update', error.message);
@@ -48,6 +48,7 @@ const updateUser = async (id, nickname) => {
 const excludeUser = async (id) => {
   try {
     const excluded = await getCollection('users').then((users) => users.deleteOne({ id }));
+    // const excludeAll= await getCollection('users').then((users) => users.deleteMany({}));
     console.log(excluded.result);
     return excluded;
   } catch (error) {

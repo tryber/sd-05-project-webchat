@@ -69,3 +69,7 @@ messageBtn.addEventListener('click', () => {
     message.value = '';
   }
 });
+
+window.onbeforeunload = () => {
+  socket.close();
+}

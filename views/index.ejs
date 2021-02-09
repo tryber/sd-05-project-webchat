@@ -16,12 +16,10 @@
       <div>
         <h2>Usuários online:</h2>
         <ul id="onlineUsers" class="list-unstyled">
-          <li id="userNickname" data-testid="online-user"></li>
+          <li id="userNickname" data-testid="online-user">Estou online!</li>
           <% if (onlineUsers) { %>
             <% onlineUsers.forEach((user) => { %>
-              <li data-testid="online-user">
-                <%= `${user.nickname}` %>
-              </li>
+            <li data-testid="online-user"><%=user.nickname%></li>
             <% }) %>
             <% }%>
         </ul>
