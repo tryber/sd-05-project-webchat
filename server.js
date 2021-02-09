@@ -14,11 +14,11 @@ const onlineUsers = [];
 
 io.on('connect', (socket) => {
   console.log('usuario conectado');
-  socket.on('chat', async (message) => {
+  socket.on('message', async (message) => {
     const dateNow = new Date().getTime();
     const data = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
-    createMessage(message);
-    socket.emit('chat', { ...message, data });
+    createMessage({ ...message, data });
+    io.emit('message', `${data} - ${message.nickname}: ${message.chatMessage}`);
   });
 });
 

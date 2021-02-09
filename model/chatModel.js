@@ -7,9 +7,9 @@ const getAllMessages = async () => {
   return allMessages;
 };
 
-const createMessage = async ({ nickName, message, data }) => {
+const createMessage = async ({ nickname, chatMessage, data }) => {
   await connection().then((db) => {
-    db.collection('messages').insertOne({ nickName, message, data });
+    db.collection('messages').insertOne({ nickname, chatMessage, data });
   });
 };
 

@@ -16,7 +16,7 @@
         <% if (allMessages) { %>
           <% allMessages.forEach((item) => { %>
             <li>
-              <%= `${item.data} - ${item.nickName}: ${item.message}` %>
+              <%= `${item.data} - ${item.nickname}: ${item.chatMessage}` %>
             </li>
           <% }) %>
         <% } %>
@@ -29,7 +29,7 @@
       <script>
         const createMessage = (message) => {
           const li = document.createElement('li');
-            li.innerHTML = `${ message.data } - ${ message.nickName }: ${ message.message }`
+            li.innerHTML = message;
             const ul = document.querySelector('ul');
             ul.appendChild(li);
         }
@@ -38,16 +38,15 @@
         const nickBox = document.querySelector('#nicknameBox');
         const messageButton = document.querySelector('#send-button');
         const messageBox = document.querySelector('#message-box');
-        let nickName = 'Anônimo';
-        let message = '';
-        nickBox.addEventListener('change', (e) => nickName = e.target.value);
-        messageBox.addEventListener('change', (e) => message = e.target.value);
+        let nickname = 'Anônimo';
+        let chatMessage = '';
+        nickBox.addEventListener('change', (e) => nickname = e.target.value);
+        messageBox.addEventListener('change', (e) => chatMessage = e.target.value);
         messageButton.addEventListener('click', () => {
-          socket.emit('chat', { nickName, message });
-          createMessage({ nickName, message });
+          socket.emit('message', { nickname, chatMessage });
           messageBox.value = '';
         })
-        socket.on('chat', (message) => {
+        socket.on('message', (message) => {
             createMessage(message);
         });
       </script>
