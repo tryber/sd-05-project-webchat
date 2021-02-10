@@ -1,9 +1,9 @@
 const connection = require('../tests/helpers/db');
 
-const createMessage = async ({ dateFormat, nickname, chatMessage }) => {
+const createMessage = async (message) => {
   try {
     const newMessage = await connection().then((db) =>
-      db.collection('messages').insertOne({ dateFormat, nickname, chatMessage }));
+      db.collection('messages').insertOne(message));
     return newMessage.ops[0];
   } catch (err) {
     console.log(err);

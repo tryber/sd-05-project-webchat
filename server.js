@@ -1,3 +1,5 @@
+// Muito suporte do repositório da Juliette, Dandrea e do Felipão!
+
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -28,12 +30,16 @@ app.get('/', async (_req, res) => {
 });
 
 io.on('connection', (socket) => {
-  userNumber++;
+  userNumber += 1;
 
   const currentUserId = socket.id;
   const userName = `User ${userNumber}`;
 
-  onlineUsers.push({ id: currentUserId, nickname: userName });
+  onlineUsers.unshift({ id: currentUserId, nickname: userName });
+
+  socket.emit('seeUserId', currentUserId);
+
+  socket.emit('seeUserName', userName);
 
   io.emit('userConnected', currentUserId, userName);
 
@@ -50,15 +56,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const dateNow = new Date().getTime();
-    const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
-    const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
-    await createMessage({ dateFormat, nickname, chatMessage });
+    const dateNow = new Date();
+    const date = dateformat(dateNow, 'dd-mm-yyyy');
+    const hour = dateformat(dateNow, 'HH:mm:ss');
+    const fullMessage = `${date} ${hour} - ${nickname}: ${chatMessage}`;
+    await createMessage({ date, hour, nickname, chatMessage });
     io.emit('message', fullMessage);
   });
 
   socket.on('disconnect', () => {
-    console.log(`User ${currentUserId} disconnected`);
     onlineUsers = onlineUsers.filter((user) => user.id !== currentUserId);
     io.emit('userDisconnected', currentUserId);
   });
