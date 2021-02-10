@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
   userNumber += 1;
 
   const currentUserId = socket.id;
-  const userName = `User ${userNumber}`
+  const userName = `User ${userNumber}`;
   // const userName = 'Visitante';
 
   onlineUsers.push({ id: currentUserId, nickname: userName });
