@@ -31,9 +31,10 @@
       </ul>
     </div>
     <form>
-      <input data-testid="nickname-box" type="text" placeholder="Digite seu nick" name="nickname" maxlength="15" id="nickname" />
-      <textarea data-testid="message-box" type="text" placeholder="Digite sua mensagem" name="mensagem" maxlength="50" class="textarea"></textarea>
-      <button data-testid="send-button" data-testid="nickname-save" id="btn-enviar" type="button">Enviar Mensagem</button>
+      <input data-testid="nickname-box" type="text" placeholder="Digite seu nick" name="nickname" id="nickname" />
+      <button data-testid="nickname-save" id="save-nickname" type="button">Salvar nickname</button>
+      <input data-testid="message-box" type="text" placeholder="Digite sua mensagem" name="mensagem" class="textarea" />
+      <button data-testid="send-button" id="btn-enviar" type="button">Enviar Mensagem</button>
     </form>
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>

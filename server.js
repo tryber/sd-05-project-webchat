@@ -33,9 +33,10 @@ io.on('connection', (socket) => {
   userNumber += 1;
 
   const currentUserId = socket.id;
-  const userName = `User ${userNumber}`;
+  const userName = `User ${userNumber}`
+  // const userName = 'Visitante';
 
-  onlineUsers.unshift({ id: currentUserId, nickname: userName });
+  onlineUsers.push({ id: currentUserId, nickname: userName });
 
   socket.emit('seeUserId', currentUserId);
 

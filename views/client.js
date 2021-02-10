@@ -1,11 +1,24 @@
 window.onload = () => {
   const clientSocketIo = window.io();
 
-  let currentUserName = '';
+  let nickname = '';
   clientSocketIo.on('seeUserName', (userName) => {
-    currentUserName = userName;
+    nickname = userName;
   });
 
+  const nicknameBtn = document.querySelector('#save-nickname');
+  nicknameBtn.addEventListener('click', () => {
+    nickname = document.querySelector('#nickname').value;
+    clientSocketIo.emit('userChangedNickname', nickname);
+  });
+
+  const sendBtn = document.querySelector('#btn-enviar');
+  sendBtn.addEventListener('click', () => {
+    const chatMessage = document.querySelector('.textarea').value;
+    clientSocketIo.emit('message', { chatMessage, nickname });
+  });
+
+  /*
   const btnEnviar = document.querySelector('#btn-enviar');
   btnEnviar.addEventListener('click', () => {
     let nickname = document.querySelector('#nickname').value;
@@ -17,6 +30,7 @@ window.onload = () => {
     }
     clientSocketIo.emit('message', { chatMessage, nickname });
   });
+  */
 
   clientSocketIo.on('message', (fullMessage) => {
     const li = document.createElement('li');
