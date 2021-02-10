@@ -16,6 +16,15 @@
 </head>
 
 <body>
+
+    <small>Online</small>
+    <ul id="online-users">
+        <% if (onlineUsers) { onlineUsers.forEach((user)=> {
+            %><li data-testid="online-user" id=<%=user.id %> > <%= user.nickname %>
+            </li>
+            <% }) } %>
+    </ul>
+
     <input data-testid="nickname-box" type="text" id="input-name" placeholder="Enter a username" />
     <button data-testid="nickname-save" id="btn-name">Save</button><br>
 
@@ -38,40 +47,54 @@
 </body>
 <script>
     const client = io('http://localhost:3000');
-    // console.log(client);
-    // let nickname = '';
 
-    // const nameBtn = document.getElementById('btn-name');
+    let nickname = '';
+    let userId;
+
+    const nameBtn = document.getElementById('btn-name');
     const nameInput = document.getElementById('input-name');
     const msgInput = document.getElementById('input-msg');
     const btnMessage = document.getElementById('btn-msg');
     const listMessage = document.getElementById('messageList');
+    const listUsers = document.getElementById('online-users');
     const timestamp = moment(new Date())
 
+    nameBtn.addEventListener('click', () => {
+        nickname = nameInput.value;
+        nameInput.value = '';
+        console.log(nickname, ' edited');
+        client.emit('change nickname', nickname);
+    });
 
-    // nameBtn.addEventListener('click', () => {
-    //     nickname = nameInput.value
-    // });
+    client.on('users updated', ({ id, onlineUsers }) => {
+        console.log(onlineUsers);
+
+        listUsers.innerText = '';
+        // const li = document.createElement('li');
+        // li.setAttribute('data-testid', 'online-user');
+        // li.innerHTML = nickname;
+        // listUsers.appendChild(li);
+
+        const updatedUsers = onlineUsers.filter(user => user.id !== userId);
+        updatedUsers.forEach(user => {
+            const li = document.createElement('li');
+            li.setAttribute('data-testid', 'online-user');
+            li.innerHTML = user.nickname;
+            listUsers.appendChild(li);
+
+        })
+    })
 
     btnMessage.addEventListener('click', () => {
         const chatMessage = msgInput.value;
-        const nickname = nameInput.value
-        // const li = document.createElement('li');
-        // li.innerHTML = `${nickname}: ${chatMessage}`;
-        // listMessage.appendChild(li);
-
         const data = { nickname, chatMessage }
         client.emit('message', data)
-
     });
 
     client.on('message', (message) => {
-
         const li = document.createElement('li');
         li.innerHTML = message;
         li.setAttribute('data-testid', 'message');
-        // console.log({ timestamp, nickname, chatMessage });
-        // li.innerHTML = `${timestamp} - ${nickname}: ${chatMessage} [egg]`;
         listMessage.appendChild(li);
     });
 

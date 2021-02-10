@@ -26,16 +26,36 @@ app.use(express.static(path.join(__dirname, 'views')));
 
 app.get('/', async (req, res) => {
   const historyMessage = await messagesModel.getAll();
-  res.render('index', { historyMessage });
+  res.render('index', { historyMessage, onlineUsers });
 });
 
+let onlineUsers = [];
+
 io.on('connection', (socket) => {
-  console.log(`${socket.id} now connected`);
   const fake = faker.name.firstName();
+  onlineUsers.push({ id: socket.id, nickname: fake });
+  // console.log(`${socket.id} now connected`);
+  console.log(onlineUsers);
+  
+  // socket.emit('connection', socket.id, fake);
+
+  io.emit('users updated', {id: socket.id, onlineUsers} );
+
   socket.emit('welcome', `Welcome to server, ${fake}!!`);
 
+  socket.on('change nickname', (nickname) => {
+    const userIndex = onlineUsers.findIndex( user => user.id === socket.id );
+    onlineUsers[userIndex] = { id: socket.id, nickname}
+    console.log(nickname, ' changed');
+    console.log(onlineUsers)
+    io.emit('users updated', {id: socket.id, onlineUsers});
+  });
+
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log(`${socket.id}: disconnected`);
+    const updatedUsers = onlineUsers.filter( (user) => user.id !== socket.id );
+    onlineUsers = updatedUsers;
+    io.emit('users updated', {id: socket.id, onlineUsers} );
   });
 
   socket.on('message', async (message) => {
@@ -44,7 +64,7 @@ io.on('connection', (socket) => {
     const post = { ...message, timestamp };
 
     await messagesModel.postMessage(post);
-    const formattedPost = `${message.timestamp} - ${message.nickname || fake}: ${message.chatMessage}`;
+    const formattedPost = `${post.timestamp} - ${post.nickname || fake}: ${post.chatMessage}`;
     io.emit('message', formattedPost);
     // socket.broadcast.emit('message', message);
   });
