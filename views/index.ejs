@@ -20,8 +20,7 @@
     <small>Online</small>
     <ul id="online-users">
         <% if (onlineUsers) { onlineUsers.forEach((user)=> {
-            %><li data-testid="online-user" id=<%=user.id %> > <%= user.nickname %>
-            </li>
+            %><li data-testid="online-user" id=<%=user.id %> ><%= user.nickname %></li>
             <% }) } %>
     </ul>
 
@@ -49,7 +48,6 @@
     const client = io('http://localhost:3000');
 
     let nickname = '';
-    let userId;
 
     const nameBtn = document.getElementById('btn-name');
     const nameInput = document.getElementById('input-name');
@@ -62,26 +60,18 @@
     nameBtn.addEventListener('click', () => {
         nickname = nameInput.value;
         nameInput.value = '';
-        console.log(nickname, ' edited');
         client.emit('change nickname', nickname);
     });
 
     client.on('users updated', ({ id, onlineUsers }) => {
-        console.log(onlineUsers);
-
+        onlineUsers.unshift(onlineUsers.find(user => user.id === client.id));
+        const updatedUsers = [ ...new Set(onlineUsers) ]    // remove duplicates
         listUsers.innerText = '';
-        // const li = document.createElement('li');
-        // li.setAttribute('data-testid', 'online-user');
-        // li.innerHTML = nickname;
-        // listUsers.appendChild(li);
-
-        const updatedUsers = onlineUsers.filter(user => user.id !== userId);
         updatedUsers.forEach(user => {
             const li = document.createElement('li');
             li.setAttribute('data-testid', 'online-user');
             li.innerHTML = user.nickname;
             listUsers.appendChild(li);
-
         })
     })
 
