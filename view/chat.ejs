@@ -25,6 +25,17 @@
     <div>
       <input data-testid="message-box" placeholder="Mande sua mensagem!" id="message-box"  />
       <button id="send-button" data-testid="send-button">Enviar</button>
+      <div>
+        Usuários online:
+        <ul id="onlineUsers">
+          <% if (onlineUsers && onlineUsers.length > 0) { %>
+            <% onlineUsers.forEach((user) => { %>
+              <li data-testid="online-user" id="<%=user.id %>"><%=user.nickname%></li>
+           <% }) %>
+          <% } %>
+        </ul>
+            </ul>
+          </div>
     </div>
       <script>
         const createMessage = (message) => {
@@ -34,15 +45,27 @@
             const ul = document.querySelector('ul');
             ul.appendChild(li);
         }
+        const onlineUser = async (nickname, id) => {
+            const li = document.createElement('li');
+            li.innerHTML = nickname;
+            li.setAttribute('data-testid', 'online-user');
+            li.setAttribute('id', id);
+            const ul = document.querySelector('#onlineUsers');
+            ul.appendChild(li);
+          }
+
         const socket = io();
         const nickButton = document.querySelector('#nickNameButton');
         const nickBox = document.querySelector('#nicknameBox');
         const messageButton = document.querySelector('#send-button');
         const messageBox = document.querySelector('#message-box');
-        let nickname = 'Anônimo';
+        let nickname = '';
         let chatMessage = '';
         nickBox.addEventListener('change', (e) => nickname = e.target.value);
         messageBox.addEventListener('change', (e) => chatMessage = e.target.value);
+        nickButton.addEventListener('click', () => {
+          socket.emit('userChange', nickname);
+        })
         messageButton.addEventListener('click', () => {
           socket.emit('message', { nickname, chatMessage });
           messageBox.value = '';
@@ -50,6 +73,17 @@
         socket.on('message', (message) => {
             createMessage(message);
         });
+        socket.on('user', async (user) => {
+          await onlineUser(user.nickname, user.id);
+        })
+        socket.on('userDis', async (id) => {
+          const user = await document.querySelector(`#${ id }`);
+          user.parentNode.removeChild(user);
+        })
+        socket.on('userChange', (user) => {
+          const element = document.querySelector(`#${ user.id }`);
+          element.innerHTML = user.nickname;
+        })
       </script>
   </body>
 </html>
