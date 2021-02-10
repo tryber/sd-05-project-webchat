@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebChat</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h2>WebChat</h2>
+    <div>
+      <h3>Usuários Online</h3>
+      <ul class="users" id="users">
+        <% if (onlineUsers && onlineUsers.length > 0) { %>
+          <% onlineUsers.forEach((user) => { %>
+            <li data-testid="online-user" id="<%=user.id %>"><%=user.nickname%></li>
+        <% }) %>
+        <% } %>
+      </ul>
+    </div>
+    <div>
+      <h3>Mensagens</h3>
+      <ul class="messages" id="messages">
+        <% if (allMessages) { %>
+          <% allMessages.forEach((msg) => { %>
+            <li data-testid="message">
+              <%= `${msg.dateFormat} - ${msg.nickname}: ${msg.chatMessage}` %>
+            </li>
+        <% }) %>
+        <% } %>
+      </ul>
+    </div>
+    <form>
+      <input data-testid="nickname-box" type="text" placeholder="Digite seu nick" name="nickname" maxlength="15" />
+      <textarea data-testid="message-box" type="text" placeholder="Digite sua mensagem" name="mensagem" maxlength="50" class="textarea"></textarea>
+      <button data-testid="nickname-save send-button" type="button">Enviar Mensagem</button>
+    </form>
+  </body>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="/client.js"></script>
+</html>
