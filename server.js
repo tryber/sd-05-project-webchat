@@ -1,25 +1,71 @@
 require('dotenv').config();
-const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
-const http = require('http');
-const socketIo = require('socket.io');
+// Conteúdo dia 32.3 - https://app.betrybe.com/course/back-end/nodejs/socketio/conteudo/show-me-the-code?use_case=side_bar
+const app = require('express')();
+const http = require('http').createServer(app);
+const cors = require('cors');
+const io = require('socket.io')(http, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 
 const PORT = process.env.PORT || 3000;
 
-const app = express();
-
 app.use(bodyParser.json());
+app.use(cors());
+
+// app.use(express.static(path.join(__dirname, 'views')));
+// // informing express to use static file inside specified directory
+// app.set('view engine', 'ejs');
+// app.set('views', './views');
+
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.post('/message', (req, res) => {
+  const { chatMessage, nickname } = req.body;
+
+  if (!chatMessage || !nickname) {
+    return res.status(422).json({ message: 'Missing information' });
+  }
+
+  // Evento personalizado que dispara para todos os clients.
+  // primeiro parametro, nome do evento, segundo, ação que o client deve fazer/dados enviados.
+  io.emit('message', { chatMessage, nickname });
+
+  res.status(200).json({ message: `${nickname} enviou: ${chatMessage}` });
+});
 
 // Servidor express
 // app.listen(3000, () => {
 //   console.log('app on 3000')
 // })
 
-// Servidor Socket (e express no mesmo servidor)
-const socketIOServer = http.createServer(app);
-const io = socketIo(socketIOServer);
+io.on('connection', (socket) => {
+  const userId = socket.id;
+  console.log(`${userId} conectou`);
 
-socketIOServer.listen(PORT, () => {
+  socket.emit(userId);
+
+  socket.on('usuarioAlterouNickname', (nickname) => {
+    console.log('Alguem mudou nickname para', nickname);
+  });
+
+  socket.on('enviaMensagem', (message) => {
+    io.emit('message', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} desconectou`);
+  });
+});
+
+// Servidor Socket (e express no mesmo servidor)
+http.listen(PORT, () => {
   console.log(`Servidores ouvindo na porta ${PORT}`);
 });
