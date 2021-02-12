@@ -1,9 +1,10 @@
 require('dotenv').config();
 const bodyParser = require('body-parser');
 const path = require('path');
+const express = require('express');
 
 // Conteúdo dia 32.3 - https://app.betrybe.com/course/back-end/nodejs/socketio/conteudo/show-me-the-code?use_case=side_bar
-const app = require('express')();
+const app = express();
 const http = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(http, {
@@ -13,18 +14,21 @@ const io = require('socket.io')(http, {
   },
 });
 
+const { createMessage, getAllMessages  } = require('./models/chatModel');
+
 const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(cors());
 
-// app.use(express.static(path.join(__dirname, 'views')));
-// // informing express to use static file inside specified directory
-// app.set('view engine', 'ejs');
-// app.set('views', './views');
+app.use(express.static(path.join(__dirname, 'views')));
+// informing express to use static file inside specified directory
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
-app.get('/', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/', async (_req, res) => {
+  const allMessages = await getAllMessages();
+  res.render('chat', { allMessages });
 });
 
 app.post('/message', (req, res) => {

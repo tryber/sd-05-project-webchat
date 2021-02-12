@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebChat Project - By Aula 32.2 / t3</title>
+    <!-- Carrega o socket.io -->
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <input data-testid="nickname-box" id="nickname" name="nickname" type="text" placeholder="Digite seu novo nickname" />
+      <button data-testid="nickname-save" id="nickname-save" >Salvar</button>
+    </div>
+    <div>
+      <ul id="mensagens"></ul>
+    </div>
+    <textarea data-testid="message-box" id="message-input"></textarea>
+    <button data-testid="send-button" id="send-message">Enviar mensagem</button>
+  </body>
+
+  <!-- Configura interação com servidor -->
+  <script>
+    const socket = io('http://localhost:3000')
+
+    const nicknameInput = document.getElementById('nickname');
+    const nicknameBtn = document.getElementById('nickname-save');
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message');
+
+    let nickname = 'random';
+    let message = '';
+
+    messageInput.addEventListener('change', (e) => message = e.target.value)
+
+    nicknameBtn.addEventListener('click', () => {
+      nickname = nicknameInput.value;
+      socket.emit('usuarioAlterouNickname', nickname)
+    })
+
+    sendMessageBtn.addEventListener('click', () => {
+      // const message = messageInput.value;
+      socket.emit('enviaMensagem', message)
+    })
+
+    socket.on('message', (data) => {
+      const li = document.createElement('li')
+      li.setAttribute = ('data-testid', 'message')
+      li.textContent = data
+      document.getElementById('mensagens').appendChild(li)
+    })
+  </script>
+</html>

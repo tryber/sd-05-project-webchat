@@ -14,7 +14,15 @@
       <button data-testid="nickname-save" id="nickname-save" >Salvar</button>
     </div>
     <div>
-      <ul id="mensagens"></ul>
+      <ul id="mensagens">
+        <% if (allMessages) { %>
+          <% allMessages.map((m) => { %>
+            <li data-testid="message">
+              <%= `${m.dateFormat} - ${m.nickname}: ${m.chatMessage}`%>
+            </li>
+          <% }) %>
+        <% } %>
+      </ul>
     </div>
     <textarea data-testid="message-box" id="message-input"></textarea>
     <button data-testid="send-button" id="send-message">Enviar mensagem</button>
