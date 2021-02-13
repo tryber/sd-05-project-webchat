@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebChat Project - By Aula 32.2 / t3</title>
+    <title>WebChat Project - Salinha do Bate Papo</title>
     <!-- Carrega o socket.io -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   </head>
@@ -38,7 +38,7 @@
 
   <!-- Configura interação com servidor -->
   <script>
-    const socket = io('http://localhost:3000')
+    const socket = io();
 
     const nicknameInput = document.getElementById('nickname');
     const nicknameBtn = document.getElementById('nickname-save');
@@ -54,8 +54,8 @@
 
     messageInput.addEventListener('change', (e) => chatMessage = e.target.value)
 
-    nicknameBtn.addEventListener('click', () => {
-      socket.nickname = nicknameInput.value;
+    nicknameBtn.addEventListener('click', async () => {
+      socket.nickname = await nicknameInput.value;
       socket.emit('changedNickname', socket.nickname)
     })
 
