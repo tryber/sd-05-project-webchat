@@ -14,9 +14,10 @@
       <button data-testid="nickname-save" id="nickname-save" >Salvar</button>
     </div>
     <ul id="online-users-list">
-      <% if (onlineUsers.length > 0) { %>
-        <% onlineUsers.map((u) => { %>
-          <li data-testid="online-user" id="<%=u.userId %>"><%=u.nickname%></li>
+      <% if (usersOnline.length > 0) { %>
+        <% usersOnline.map((u) => { %>
+          <!-- <li data-testid="online-user" id="<%=u.userId %>"><%=u.nickname%></li> -->
+          <li data-testid="online-user"><%= `${u.nickname}` %></li>
         <% }) %>
       <% } %>
     </ul>
@@ -41,58 +42,73 @@
     const socket = io();
 
     const nicknameInput = document.getElementById('nickname');
-    const nicknameBtn = document.getElementById('nickname-save');
     const messageInput = document.getElementById('message-input');
+    const nicknameBtn = document.getElementById('nickname-save');
     const sendMessageBtn = document.getElementById('send-message');
     const userList = document.getElementById('online-users-list');
 
-    let idUser;
-    let nickname;
+    let clientId = '';
+    let nickname = `User ${Math.round(Math.random() * 1000)}`;
     let chatMessage = '';
 
-    console.log('socket no client', socket);
+    // Função que irá lidar com todas as alterações do user (login, mudança de nome e logout).
+    function renderOnlineUsers(usersOnline) {
+      // Limpa a lista de users para não repetir a informação.
+      userList.innerText = '';
+
+      // Coloca como primeiro na lista de users online, o user do socket.
+      usersOnline.forEach((u) => {
+        if (u.userId === clientId) {
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'online-user');
+          li.innerHTML = u.nickname;
+          userList.appendChild(li);
+        }
+      })
+
+      // Renderiza o resto da lista com os outros users;
+      usersOnline.forEach((user) => {
+        if (user.userId !== clientId) {
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'online-user');
+          li.innerHTML = user.nickname;
+          userList.appendChild(li);
+        }
+      });
+    }
+
+    // Eventos do html (inputs e botões) e emissões do socket;
 
     messageInput.addEventListener('change', (e) => chatMessage = e.target.value)
 
-    nicknameBtn.addEventListener('click', async () => {
-      socket.nickname = await nicknameInput.value;
-      socket.emit('changedNickname', socket.nickname)
+    nicknameBtn.addEventListener('click', () => {
+      socket.nickname = nicknameInput.value;
+      socket.emit('changedNickname', socket.nickname);
     })
 
     sendMessageBtn.addEventListener('click', () => {
-      socket.emit('message', { chatMessage, nickname: socket.nickname })
+      socket.emit('message', { chatMessage, nickname: socket.nickname });
+      messageInput.value = '';
     })
 
-    socket.on('connected', ((userId) => idUser = userId ))
+    socket.emit('userLogin', { nickname });
 
-    socket.on('userConnected', (userId) => {
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.setAttribute('id', `${userId}`);
-      li.innerHTML = userId;
+    // Escutas do socket.
 
-      if (userId === idUser) {
-        // https://stackoverflow.com/questions/2007357/how-to-set-dom-element-as-the-first-child
-        userList.prepend(li);
-      } else {
-        userList.append(li);
+    socket.on('updateUsersList', ({ id, usersOnline }) => {
+      if (clientId === '') {
+        clientId = id;
       }
-    })
 
-    socket.on('changedNickname', ({ userId, nickname}) => {
-      const user = document.getElementById(userId);
-      user.innerText = nickname;
+      renderOnlineUsers((usersOnline));
     })
 
     socket.on('message', (data) => {
-      const li = document.createElement('li')
-      li.setAttribute = ('data-testid', 'message')
-      li.textContent = data
-      document.getElementById('mensagens').appendChild(li)
+      const li = document.createElement('li');
+      li.setAttribute = ('data-testid', 'message');
+      li.textContent = data;
+      document.getElementById('mensagens').appendChild(li);
     })
 
-    socket.on('disconnectedUser', (userId) => {
-      document.getElementById(userId).remove();
-    })
   </script>
 </html>

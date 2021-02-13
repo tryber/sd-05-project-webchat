@@ -31,7 +31,7 @@ app.set('views', './views');
 
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
-  res.render('chat', { allMessages, onlineUsers: usersOnline });
+  res.render('chat', { allMessages, usersOnline });
 });
 
 app.post('/message', (req, res) => {
@@ -50,23 +50,27 @@ app.post('/message', (req, res) => {
 
 io.on('connection', (socket) => {
   const userId = socket.id;
-  usersOnline.unshift({ userId, nickname: userId });
 
-  console.log(`${userId} conectou`);
+  // Socket emit um evento de login inicial, com o nickname random gerado no chat.ejs.
+  socket.on('userLogin', ({ nickname }) => {
+    // Mensagem para o server.
+    console.log(`${userId} se conectou`);
 
-  socket.emit('connected', userId);
-  io.emit('userConnected', userId);
+    // Ajuste a ordenação da lista é feita no front (chat.ejs).
+    usersOnline.push({ userId, nickname });
+
+    io.emit('updateUsersList', { id: userId, usersOnline });
+  });
 
   socket.on('changedNickname', (nickname) => {
-    console.log(nickname, 'nickname');
     usersOnline = usersOnline.map((u) => {
       if (u.userId === userId) {
         return { ...u, nickname };
       }
       return u;
     });
-    console.log('usersOnline', usersOnline);
-    io.emit('changedNickname', ({ userId, nickname }));
+
+    io.emit('updateUsersList', { id: userId, usersOnline });
   });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
@@ -81,9 +85,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    usersOnline = usersOnline.filter((u) => u.userId !== socket.id);
-    console.log(`${socket.id} desconectou`);
-    io.emit('disconnectedUser', socket.id);
+    usersOnline = usersOnline.filter((u) => u.userId !== userId);
+
+    // Mensagem para o server.
+    console.log(`${userId} desconectou`);
+
+    io.emit('updateUsersList', { id: userId, usersOnline });
   });
 });
 
