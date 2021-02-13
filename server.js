@@ -19,17 +19,19 @@ const { createMessage, getAllMessages } = require('./models/chatModel');
 
 const PORT = process.env.PORT || 3000;
 
+let usersOnline = [];
+
 app.use(bodyParser.json());
 app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'views')));
-// informing express to use static file inside specified directory
+
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
-  res.render('chat', { allMessages });
+  res.render('chat', { allMessages, onlineUsers: usersOnline });
 });
 
 app.post('/message', (req, res) => {
@@ -46,19 +48,25 @@ app.post('/message', (req, res) => {
   res.status(200).json({ message: `${nickname} enviou: ${chatMessage}` });
 });
 
-// Servidor express
-// app.listen(3000, () => {
-//   console.log('app on 3000')
-// })
-
 io.on('connection', (socket) => {
   const userId = socket.id;
+  usersOnline.unshift({ userId, nickname: userId });
+
   console.log(`${userId} conectou`);
 
-  socket.on('usuarioAlterouNickname', (nickname) => {
-    console.log('Alguem mudou nickname para', nickname);
+  socket.emit('connected', userId);
+  io.emit('userConnected', userId);
 
-    console.log(socket);
+  socket.on('changedNickname', (nickname) => {
+    console.log(nickname, 'nickname');
+    usersOnline = usersOnline.map((u) => {
+      if (u.userId === userId) {
+        return { ...u, nickname };
+      }
+      return u;
+    });
+    console.log('usersOnline', usersOnline);
+    io.emit('changedNickname', ({ userId, nickname }));
   });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
@@ -73,7 +81,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    usersOnline = usersOnline.filter((u) => u.userId !== socket.id);
     console.log(`${socket.id} desconectou`);
+    io.emit('disconnectedUser', socket.id);
   });
 });
 

@@ -13,6 +13,13 @@
       <input data-testid="nickname-box" id="nickname" name="nickname" type="text" placeholder="Digite seu novo nickname" />
       <button data-testid="nickname-save" id="nickname-save" >Salvar</button>
     </div>
+    <ul id="online-users-list">
+      <% if (onlineUsers.length > 0) { %>
+        <% onlineUsers.map((u) => { %>
+          <li data-testid="online-user" id="<%=u.userId %>"><%=u.nickname%></li>
+        <% }) %>
+      <% } %>
+    </ul>
     <div>
       <ul id="mensagens">
         <% if (allMessages) { %>
@@ -37,21 +44,44 @@
     const nicknameBtn = document.getElementById('nickname-save');
     const messageInput = document.getElementById('message-input');
     const sendMessageBtn = document.getElementById('send-message');
+    const userList = document.getElementById('online-users-list');
 
-    let nickname = socket.id;
+    let idUser;
+    let nickname;
     let chatMessage = '';
+
+    console.log('socket no client', socket);
 
     messageInput.addEventListener('change', (e) => chatMessage = e.target.value)
 
     nicknameBtn.addEventListener('click', () => {
-      // nickname = nicknameInput.value;
       socket.nickname = nicknameInput.value;
-      console.log('socket dps do nick', socket);
-      socket.emit('usuarioAlterouNickname', socket.nickname)
+      socket.emit('changedNickname', socket.nickname)
     })
 
     sendMessageBtn.addEventListener('click', () => {
       socket.emit('message', { chatMessage, nickname: socket.nickname })
+    })
+
+    socket.on('connected', ((userId) => idUser = userId ))
+
+    socket.on('userConnected', (userId) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${userId}`);
+      li.innerHTML = userId;
+
+      if (userId === idUser) {
+        // https://stackoverflow.com/questions/2007357/how-to-set-dom-element-as-the-first-child
+        userList.prepend(li);
+      } else {
+        userList.append(li);
+      }
+    })
+
+    socket.on('changedNickname', ({ userId, nickname}) => {
+      const user = document.getElementById(userId);
+      user.innerText = nickname;
     })
 
     socket.on('message', (data) => {
@@ -59,6 +89,10 @@
       li.setAttribute = ('data-testid', 'message')
       li.textContent = data
       document.getElementById('mensagens').appendChild(li)
+    })
+
+    socket.on('disconnectedUser', (userId) => {
+      document.getElementById(userId).remove();
     })
   </script>
 </html>
