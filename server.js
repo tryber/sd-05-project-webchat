@@ -2,6 +2,7 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 const path = require('path');
 const express = require('express');
+const moment = require('moment');
 
 // Conteúdo dia 32.3 - https://app.betrybe.com/course/back-end/nodejs/socketio/conteudo/show-me-the-code?use_case=side_bar
 const app = express();
@@ -14,7 +15,7 @@ const io = require('socket.io')(http, {
   },
 });
 
-const { createMessage, getAllMessages  } = require('./models/chatModel');
+const { createMessage, getAllMessages } = require('./models/chatModel');
 
 const PORT = process.env.PORT || 3000;
 
@@ -54,14 +55,21 @@ io.on('connection', (socket) => {
   const userId = socket.id;
   console.log(`${userId} conectou`);
 
-  socket.emit(userId);
-
   socket.on('usuarioAlterouNickname', (nickname) => {
     console.log('Alguem mudou nickname para', nickname);
+
+    console.log(socket);
   });
 
-  socket.on('enviaMensagem', (message) => {
-    io.emit('message', message);
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const formatedDate = moment(new Date().getTime()).format('DD-MM-yyyy HH:mm:ss');
+    await createMessage({
+      dateFormat: formatedDate,
+      nickname,
+      chatMessage,
+    });
+
+    io.emit('message', `${formatedDate} - ${nickname}:  ${chatMessage}`);
   });
 
   socket.on('disconnect', () => {

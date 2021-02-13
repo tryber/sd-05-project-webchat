@@ -14,7 +14,16 @@
       <button data-testid="nickname-save" id="nickname-save" >Salvar</button>
     </div>
     <div>
-      <ul id="mensagens"></ul>
+      <ul id="mensagens">
+        <% if (allMessages) { %>
+          <% console.log(allMessages) %>
+          <% allMessages.map((m) => { %>
+            <li data-testid="message">
+              <%= `${m.dateFormat} - ${m.nickname}: ${m.chatMessage}`%>
+            </li>
+          <% }) %>
+        <% } %>
+      </ul>
     </div>
     <textarea data-testid="message-box" id="message-input"></textarea>
     <button data-testid="send-button" id="send-message">Enviar mensagem</button>
@@ -29,19 +38,20 @@
     const messageInput = document.getElementById('message-input');
     const sendMessageBtn = document.getElementById('send-message');
 
-    let nickname = 'random';
-    let message = '';
+    let nickname = socket.id;
+    let chatMessage = '';
 
-    messageInput.addEventListener('change', (e) => message = e.target.value)
+    messageInput.addEventListener('change', (e) => chatMessage = e.target.value)
 
     nicknameBtn.addEventListener('click', () => {
-      nickname = nicknameInput.value;
-      socket.emit('usuarioAlterouNickname', nickname)
+      // nickname = nicknameInput.value;
+      socket.nickname = nicknameInput.value;
+      console.log('socket dps do nick', socket);
+      socket.emit('usuarioAlterouNickname', socket.nickname)
     })
 
     sendMessageBtn.addEventListener('click', () => {
-      // const message = messageInput.value;
-      socket.emit('enviaMensagem', message)
+      socket.emit('message', { chatMessage, nickname: socket.nickname })
     })
 
     socket.on('message', (data) => {

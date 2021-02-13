@@ -22,10 +22,9 @@ const getAllMessages = async () => {
   } catch (e) {
     console.log(e);
   }
-}
-
+};
 
 module.exports = {
   createMessage,
   getAllMessages,
-}
+};
