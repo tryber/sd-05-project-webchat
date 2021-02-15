@@ -30,7 +30,7 @@ app.get('/', async (req, res) => {
 
 io.on('connection', (socket) => {
   const socketId = socket.id;
-  const userNickname = `Guest${Math.round(Math.random() * 1000)}`
+  const userNickname = `Guest${Math.round(Math.random() * 1000)}`;
   console.log('A user connected.');
 
   socket.on('updateNickname', (newNickname) => {
