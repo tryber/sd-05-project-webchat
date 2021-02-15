@@ -16,8 +16,14 @@
     </style>
   </head>
   <body>
-    <ul id="users"></ul>
-    <ul id="messages"></ul>
+    <ul id="online-users-list">
+      <% if(usersOnline !== []) { %>
+        <% usersOnline.forEach((user) => { %>
+          <li data-testid="online-user" id=<%= `${user.socketId}` %> ><%= `${user.nickname}` %></li>
+        <% }) %>
+      <% } %>
+    </ul>
+    <ul id="messages">
     <% if (messages) { %>
       <% messages.forEach((message) => { %>
         <li data-testid="message">
@@ -25,9 +31,10 @@
         </li>
      <% }) %>
     <% } %>
+  </ul>
     <form id="form" action="">
-      <input data-testid="nickname-box" id="nickname" type="text" value="Guest<%= Math.round(Math.random() * 1000) %>" />
-      <button data-testid="nickname-save">Save</button>
+      <input data-testid="nickname-box" id="nickname" type="text" />
+      <button data-testid="nickname-save" id="save-nickname">Save</button>
       <input data-testid="message-box" id="input" autocomplete="off" />
       <button data-testid="send-button">Send</button>
     </form>
@@ -40,12 +47,45 @@
     const input = document.getElementById('input');
     const nickname = document.getElementById('nickname');
     const messages = document.getElementById('messages');
+    const onlineUsers = document.getElementById('online-users-list');
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       if (nickname.value && input.value) {
         client.emit('message', { nickname: nickname.value, chatMessage: input.value })
         input.value = '';
+      }
+    });
+
+    document.getElementById('save-nickname').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (nickname.value) {
+        client.emit('updateNickname', nickname.value )
+      }
+    });
+
+    client.on('updateNickname', (nick, id) => {
+      const liToChange = document.getElementById(id);
+      liToChange.innerHTML = nick;
+    });
+
+    /* client.emit('userLoggedIn', nickname.value); */
+
+    let currentId = '';
+      client.on('saveCurrentId', (id) => {
+      currentId = id;
+    });
+
+    client.on('usersList', (nickname, socketId) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${socketId}`);
+      li.textContent = nickname;
+      // logica de prepend e append vista no repo da Juliette Beaudett
+        if (socketId === currentId) {
+          onlineUsers.prepend(li);
+      } else {
+          onlineUsers.append(li);
       }
     });
 
@@ -57,14 +97,10 @@
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    /*
-    document.getElementById('send').addEventListener('click', () => {
-      const message = document.getElementById('message').value;
-      const li = document.createElement('li');
-      li.textContent = `${formattedDateNow} ${formattedTimeNow} - ${nickname.value}: ${message.value}`
-      messages.appendChild(li);
-      client.emit('message', message)
-    }); */
-  
+    client.on('userDisconnected', (id) => {
+      const disconnectedUser = document.getElementById(id);
+      console.log(disconnectedUser)
+      disconnectedUser.remove();
+    });
   </script>
 </html>
