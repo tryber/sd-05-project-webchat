@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat</title>
+  </head>
+  <body>
+    <h1>WEB Chat bombando - <span><%= id %></span></h1>
+    <form action="">
+      <input id="inputText" type="text" />
+      <button id="buttonText" type="button">Enviar</button>
+    </form>
+    <ul id="chat"></ul>
+  </body>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
+    const appendMessage = (destiny, message) => {
+      const chat = document.getElementById(destiny);
+      const li = document.createElement('li');
+      li.innerHTML = message;
+      chat.appendChild(li);
+    };
+    let nickname = `Quest ${'<%= id %>'}`;
+    const socket = io('http://localhost:3000');
+    socket.on('oldMessages', (oldMessages) => {
+      oldMessages.forEach(({message}) => {
+        appendMessage('chat', message);
+      });
+    });
+    socket.on('message', (newMessage) => appendMessage('chat', newMessage));
+    const buttonText = document.getElementById('buttonText');
+    buttonText.addEventListener('click', () => {
+      const chatMessage = document.getElementById('inputText').value;
+      if (!chatMessage) return false;
+      socket.emit('message', { chatMessage, nickname });
+    });
+  </script>
+</html>
