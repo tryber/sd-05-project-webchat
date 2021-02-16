@@ -38,14 +38,17 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.get('/', async (req, res) => {
-  res.status(200).render('index', { id: GiveId.next().value });
+  const allMessages = await connection().then((db) =>
+    db.collection('messages').find().toArray());
+  console.log(allMessages);
+  res.status(200).render('index', { id: GiveId.next().value, allMessages });
 });
 io.on('connection', async (socket) => {
-  connection()
+  /* connection()
     .then((db) => db.collection('messages').find().toArray())
     .then((allMessages) => {
       socket.emit('oldMessages', allMessages);
-    });
+    }); */
   socket.on('message', ({ chatMessage, nickname }) => {
     console.log(`aqui ===>${chatMessage} ${nickname}`);
 

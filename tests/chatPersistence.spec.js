@@ -106,6 +106,7 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     const response = await axios.get('http://localhost:3000/');
     const $ = cheerio.load(response.data);
     const message = $('[data-testid="message"]').html();
+    console.log('message===>', message)
     expect(message.includes(nickname)).toBeTruthy();
     expect(message.includes(chatMessage)).toBeTruthy();
   });

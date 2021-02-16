@@ -15,11 +15,20 @@
         Mudar NickName
       </button>
     </form>
-    <ul id="chat"></ul>
+    <ul id="chat">
+      
+        <% if(allMessages) { %>
+        <% allMessages.forEach(({message:oldMessage})=> { %>
+        <li data-testid="message"><%= oldMessage %></li>
+        <%})%>
+        
+        <% } %>
+    </ul>
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
   <script>
+    console.log( '<%=allMessages[0]%>')  
     const appendMessage = (destiny, message) => {
       const chat = document.getElementById(destiny);
       // usei jquerry pq estava dificil colocar o data-testid =D
@@ -34,14 +43,19 @@
       if (!nickname) return false;
       document.getElementById('nick').innerHTML = nickname;
     });
+    
     const socket = io('http://localhost:3000');
+
     socket.on('oldMessages', (oldMessages) => {
       oldMessages.forEach(({ message }) => {
         appendMessage('chat', message);
       });
     });
+
     socket.on('message', (newMessage) => appendMessage('chat', newMessage));
+
     const buttonText = document.getElementById('buttonText');
+
     buttonText.addEventListener('click', () => {
       const chatMessage = document.getElementById('inputText').value;
       if (!chatMessage) return false;
