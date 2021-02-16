@@ -53,22 +53,21 @@ describe('Crie um frontend para que as pessoas interajam com o chat', () => {
   it('Será validado que é possível enviar mensagem após alterar o nickname', async () => {
     const chatMessage = 'Fala pessoal';
     const nickname = 'Fernando';
-
     await page.goto(BASE_URL);
-
+    
     const nicknameBox = await page.$('[data-testid=nickname-box]');
     await nicknameBox.type(nickname);
-
+    
     const saveButton = await page.$('[data-testid=nickname-save]');
     await saveButton.click();
-
+    
     const messageBox = await page.$('[data-testid=message-box]');
     await messageBox.type('Fala pessoal');
-
+    
     const sendButton = await page.$('[data-testid=send-button]');
     await sendButton.click();
     await page.waitForSelector(dataTestid('message'));
-
+    console.log('AQUI')
     const messages = await page.$$eval(dataTestid('message'), (nodes) => nodes.map((n) => n.innerText));
     expect(messages.length).toBeGreaterThanOrEqual(1);
     expect(_.last(messages)).toMatch(RegExp(nickname));

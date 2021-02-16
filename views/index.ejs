@@ -4,25 +4,39 @@
     <title>WebChat</title>
   </head>
   <body>
-    <h1>WEB Chat bombando - <span><%= id %></span></h1>
+    <h1>WEB Chat bombando - <span id="nick"><%= id %></span></h1>
     <form action="">
-      <input id="inputText" type="text" />
-      <button id="buttonText" type="button">Enviar</button>
+      <input id="inputText" type="text" data-testid="message-box" />
+      <button id="buttonText" type="button" data-testid="send-button">Enviar</button>
+    </form>
+    <form action="">
+      <input id="inputNickname" type="text" data-testid="nickname-box" />
+      <button id="buttonNickName" type="button" data-testid="nickname-save">
+        Mudar NickName
+      </button>
     </form>
     <ul id="chat"></ul>
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
   <script>
     const appendMessage = (destiny, message) => {
       const chat = document.getElementById(destiny);
-      const li = document.createElement('li');
-      li.innerHTML = message;
-      chat.appendChild(li);
+      // usei jquerry pq estava dificil colocar o data-testid =D
+      // https://api.jquery.com/jquery/
+      const teste = $(`<li data-testid="message">${message}</li>`);
+      chat.appendChild(teste[0]);
     };
     let nickname = `Quest ${'<%= id %>'}`;
+    const buttonNickname = document.getElementById('buttonNickName');
+    buttonNickname.addEventListener('click', () => {
+      nickname = document.getElementById('inputNickname').value;
+      if (!nickname) return false;
+      document.getElementById('nick').innerHTML = nickname;
+    });
     const socket = io('http://localhost:3000');
     socket.on('oldMessages', (oldMessages) => {
-      oldMessages.forEach(({message}) => {
+      oldMessages.forEach(({ message }) => {
         appendMessage('chat', message);
       });
     });
