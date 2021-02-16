@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webchat da uou</title>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
+</head>
+  
+<body>
+  <form>
+    <label>Nome
+      <input type='text'> 
+    </label>
+    <ul>
+
+    </ul>
+    <input type='text' id= 'text-input' placeholder="digite a msg">
+    <button type='button' id= 'send-btn'>Enviar</button>
+    <button type='button'>Salvar nome</button>
+  </form>
+  <script>
+    const socket= io();
+    const textInput = document.getElementById('text-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    let nickname;
+    let userId;
+    socket.on('connected', (username, id) => {
+      userId=id
+      nickname=username
+    })
+    socket.on('message', (text) => {
+      const list = document.getElementsByTagName('ul')[0];
+      const line = document.createElement('li');
+      line.setAttribute('data-testid', 'message');
+      line.innerText = text;
+      list.appendChild(line);
+    })
+    sendBtn.addEventListener('click',() =>{
+      socket.emit('message', {
+        nickname,
+        chatMessage: textInput.value,
+      });
+      textInput.value = '';
+    })
+  </script>
+</body>
+</html>
