@@ -14,7 +14,8 @@ const createMessage = async (nickname, chatMessage) => {
 };
 
 const getMessages = async () => {
-  const getM = await getCollection.collection('messages').find().sort({ time: 1 }).toArray();
+  const con = await getCollection();
+  const getM = await con.collection('messages').find().sort({ time: 1 }).toArray();
   return getM.map((message) => `${message.time} - ${message.nickname}: ${message.chatMessage}`);
 };
 module.exports = {
