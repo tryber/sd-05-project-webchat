@@ -16,7 +16,7 @@ const io = require('socket.io')(server, {
 const messageModel = require('./models/messageModel');
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views')));
 app.set('views', './public');
 app.set('view engine', 'ejs');
 
