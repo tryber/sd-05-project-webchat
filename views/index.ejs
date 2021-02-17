@@ -12,22 +12,28 @@
 <body>
   <form>
     <label>Nome
-      <input type='text'> 
+      <input data-testid="nickname-box" id=inputName type='text'> 
     </label>
+    <button type='button' data-testid="nickname-save" id='savename' >Salvar nome</button>
     <ul>
-
+      <% if (getM) {
+        getM.forEach((data) => {
+      %>
+          <li data-testid="message"><%= data %></li><%
+        })
+      }%>
     </ul>
-    <input type='text' id= 'text-input' placeholder="digite a msg">
-    <button type='button' id= 'send-btn'>Enviar</button>
-    <button type='button'>Salvar nome</button>
+    <input type='text' data-testid="message-box" id= 'text-input' placeholder="digite a msg">
+    <button type='button' data-testid='send-button' id='send-btn'>Enviar</button>
   </form>
   <script>
     const socket= io();
     const textInput = document.getElementById('text-input');
     const sendBtn = document.getElementById('send-btn');
-
-    let nickname;
+    const nickname = document.getElementById('inputName');
+   
     let userId;
+
     socket.on('connected', (username, id) => {
       userId=id
       nickname=username
@@ -39,12 +45,14 @@
       line.innerText = text;
       list.appendChild(line);
     })
+    
     sendBtn.addEventListener('click',() =>{
       socket.emit('message', {
-        nickname,
+        nickname: nickname.value,
         chatMessage: textInput.value,
       });
       textInput.value = '';
+      console.log(nickname.value)
     })
   </script>
 </body>

@@ -51,9 +51,10 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     const firstMessageToSend = { chatMessage: 'bora meu povo', nickname: 'jorge' };
 
     client1.emit('message', firstMessageToSend);
-
     await page.goto(BASE_URL);
+    console.log("Cheguei na 55")
     await page.waitForSelector('[data-testid=message]');
+    console.log("Cheguei na 56")
     await page.waitForTimeout(1000);
     const messages = await page.$$eval('[data-testid=message]', (nodes) => nodes.map((n) => n.innerText));
     expect(messages.length).toBeGreaterThanOrEqual(1);
