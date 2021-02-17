@@ -17,7 +17,7 @@ const messageModel = require('./models/messageModel');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'views')));
-app.set('views', './public');
+app.set('views', './views');
 app.set('view engine', 'ejs');
 
 app.get('/', async (req, res) => {
