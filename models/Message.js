@@ -1,6 +1,6 @@
 const connection = require('./connection');
 
-const createMessage = async ({ timestamp, nickname, chatMessage }) => {
+const createMessage = async (timestamp, nickname, chatMessage) => {
   try {
     const message = await connection().then((db) => db.collection('messages').insertOne({ timestamp, nickname, chatMessage }));
     return message.ops[0];
@@ -15,8 +15,8 @@ const getAll = async () => {
     const messages = await connection().then((db) => db.collection('messages').find().toArray());
     return messages;
   } catch (error) {
-    console.error(error.message);
-    return error.message;
+    console.error(error.messages);
+    return error.messages;
   }
 };
 
