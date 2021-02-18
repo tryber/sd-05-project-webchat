@@ -11,11 +11,20 @@
   
 <body>
   <form>
+    <h1>Lista de Usuários</h1>
+    <ul id= onlineUsers>
+      <% if (online) {
+        online.forEach((onlineUser) => {
+      %>
+        <li data-testid="online-user" id=<%= onlineUser.id %> ><%= onlineUser.nickname %></li><%
+        })
+      } %>
+    </ul>
     <label>Nome
       <input data-testid="nickname-box" id=inputName type='text'> 
     </label>
     <button type='button' data-testid="nickname-save" id='savename' >Salvar nome</button>
-    <ul>
+    <ul id= chatList>
       <% if (getM) {
         getM.forEach((data) => {
       %>
@@ -30,29 +39,60 @@
     const socket= io();
     const textInput = document.getElementById('text-input');
     const sendBtn = document.getElementById('send-btn');
-    const nickname = document.getElementById('inputName');
+    const saveBtn = document.getElementById('savename');
+    const nameInput = document.getElementById('inputName');
    
     let userId;
+    let nickname;
 
-    socket.on('connected', (username, id) => {
+    socket.on('connected', (id, username) => {
       userId=id
       nickname=username
     })
     socket.on('message', (text) => {
-      const list = document.getElementsByTagName('ul')[0];
+      const list = document.getElementById('chatList')
       const line = document.createElement('li');
       line.setAttribute('data-testid', 'message');
       line.innerText = text;
       list.appendChild(line);
     })
-    
+    socket.on('connection', (id, username) =>{
+      const ul = document.getElementById('onlineUsers')
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      console.log(username)
+      li.innerText = username;
+      li.setAttribute('id', id);
+      ul.appendChild(li);
+    })
+    socket.on('user disconnected', (id) =>{
+      console.log(`ID ${id}`)
+      const li = document.getElementById(id)
+      console.log(`LI${li}`)
+      li.remove();
+    })
+
     sendBtn.addEventListener('click',() =>{
       socket.emit('message', {
-        nickname: nickname.value,
+        nickname,
         chatMessage: textInput.value,
       });
       textInput.value = '';
-      console.log(nickname.value)
+    })
+    saveBtn.addEventListener('click', () => {
+      nickname = nameInput.value
+      nameInput.value = '';
+      // const li = document.querySelector(`#${userId}`);
+      const li = document.getElementById(userId)
+
+      li.innerHTML = nickname;
+      console.log(nickname)
+      socket.emit('change name', nickname, userId);
+    })
+    socket.on('change name', (user) => {
+      const li = document.getElementById(user.id)
+      li.innerHTML = user.nickname;
+      console.log(li)
     })
   </script>
 </body>

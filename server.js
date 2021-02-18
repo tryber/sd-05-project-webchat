@@ -19,17 +19,30 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'views')));
 app.set('views', './views');
 app.set('view engine', 'ejs');
+// array para armazenar o id e nome do usuário que conectar
+let online = [];
 
 app.get('/', async (req, res) => {
   const getM = await messageModel.getMessages();
-  return res.render('index.ejs', { getM });
+  return res.render('index.ejs', { getM, online });
 });
 
 io.on('connection', async (socket) => {
-  socket.on('disconnect', () => {
-    socket.broadcast.emit('user disconnected', socket.id);
-  });
+  console.log('Conectou');
+  const username = `User ${Math.trunc(Math.random() * 100)}`;
+  online.push({ id: socket.id, nickname: username });
+  socket.emit('connected', socket.id, username);
+  io.emit('connection', socket.id, username);
 
+  socket.on('disconnect', () => {
+    online = online.filter((user) => user.id !== socket.id);
+    io.emit('user disconnected', socket.id);
+  });
+  socket.on('change name', (nickname, userId) => {
+    online = online.filter((user) => user.id !== userId);
+    online.push({ id: userId, nickname });
+    socket.broadcast.emit('change name', { id: userId, nickname });
+  });
   socket.on('message', async (message) => {
     const createMessage = await messageModel.createMessage(message.nickname, message.chatMessage);
     const formatedMessage = `${createMessage.time}- ${createMessage.nickname}: ${createMessage.chatMessage}`;
