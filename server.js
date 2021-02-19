@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timestamp = dateFormated(new Date());
     await chatHistoryModel.create(nickname, chatMessage, timestamp);
-    io.emit('mensagemServer', `${timestamp} ${nickname}: ${chatMessage}`);
+    io.emit('message', `${timestamp} ${nickname}: ${chatMessage}`);
   });
 });
 

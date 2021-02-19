@@ -95,7 +95,7 @@
         li.innerHTML = `<div data-testid="message">${message}</div>`;
         messagesUl.appendChild(li);
       }
-      socket.on('mensagemServer', (mensagem) => createMessage(mensagem));
+      socket.on('message', (mensagem) => createMessage(mensagem));
     </script>
   </body>
 </html>
