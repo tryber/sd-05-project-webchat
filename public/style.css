@@ -6,40 +6,40 @@
 body {
   font: 13px Helvetica, Arial;
 }
-form[class=mensagensForm] {
-  background: #000;
+form[ class = "mensagensForm" ] {
+  background: black;
   bottom: 0;
   padding: 3px;
   position: fixed;
   width: 90%;
 }
-form input[class=mensagensForm] {
+form input[ class = "mensagensForm" ] {
   border: 0;
   margin-right: 0.5%;
   padding: 10px;
   width: 90%;
 }
-form button[class=mensagensForm] {
+form button[ class = "mensagensForm" ] {
   background: rgb(130, 224, 255);
   border: none;
   padding: 10px;
   width: 9%;
 }
 
-form[class=userForma] {
-  background: #000;
+form[ class = "userForma" ] {
+  background: black;
   bottom: 40px;
   padding: 3px;
   position: absolute;
   width: 40%;
 }
-form input[class=userForm] {
+form input[ class = "userForm" ] {
   border: 0;
   margin-right: 0.5%;
   padding: 10px;
   width: 65%;
 }
-form button[class=btnSnick] {
+form button[ class = "btnSnick" ] {
   background: rgb(130, 224, 255);
   border: none;
   margin-left: 2%;
