@@ -66,9 +66,36 @@
       #mensagens {
         margin-bottom: 40px;
       }
+      .boxonline {
+        background-color: antiquewhite;
+        width: 200px;
+        min-height: 400px;
+        position: absolute;
+        top: 30%;
+        right: 0;
+      }
+      .ulbox {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      .ulbox li {
+        padding: 5px 10px;
+      }
     </style>
   </head>
   <body>
+    <div class="boxonline"><center>Lista de pessoas online:</center><br>
+      <ul class="ulbox">
+        <% if (usersOnline !== [] ) {%>
+          <% usersOnline.forEach(user => { %>
+              <li>
+                <div data-testid="online-user"><%=user %></div>
+              </li>
+            <%})%>
+        <% } %>
+      </ul>
+    </div>
     <form action="" class="userForma">
       <input id="useForm" class="userForm" autocomplete="off" data-testid="nickname-box" /> <button data-testid="nickname-save" class="btnSnick">Salvar Nickname</button>
     </form>
@@ -91,13 +118,18 @@
       const inputMessage = document.querySelector('#mensagemInput');
       const inputNickname = document.querySelector('#useForm');
       const formNickName = document.querySelector('.userForma');
-      let nickname = 'NomeInicial';
+      let nickname;
+
+      socket.on('initialNickname', (nickInicial) => {
+        nickname = nickInicial;
+      });
 
       formNickName.addEventListener('submit', (e) => {
         e.preventDefault();
-        console.log('eis o inputName.value', inputNickname.value);
+        const oldNickname = nickname;
         nickname = inputNickname.value;
         inputNickname.value = '';
+        socket.emit('changeNickName', { oldNickname, nicknameAtual: nickname } );
       });
 
       form.addEventListener('submit', (e) =>{
@@ -113,7 +145,25 @@
         li.innerHTML = `<div data-testid="message">${message}</div>`;
         messagesUl.appendChild(li);
       }
+
+      const createOnlineList = (lista) => {
+        const boxOnlineUl = document.querySelector('.ulbox');
+        boxOnlineUl.innerHTML = '';
+        const li = document.createElement('li');
+        li.innerHTML = `<div data-testid="online-user">${nickname}</div>`;
+        boxOnlineUl.appendChild(li);
+        lista.forEach((item) => {
+          if (item !== nickname) {
+            const li = document.createElement('li');
+            li.innerHTML = `<div data-testid="online-user">${item}</div>`;
+            boxOnlineUl.appendChild(li);
+          }
+        });
+
+      };
+
       socket.on('message', (mensagem) => createMessage(mensagem));
+      socket.on('listUsersOnline', (uai) => createOnlineList(uai));
     </script>
   </body>
 </html>
