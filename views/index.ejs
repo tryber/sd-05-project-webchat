@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <title>Socket io</title>
+    <style>
+      #mensagensContainer {
+        height: 300px;
+      }
+      .userLeft {
+        color: red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="d-flex flex-row justify-content-around">
+      <div class="col-md-8">
+        <h1 class="text-center">Chat</h1>
+        <div id="status"></div>
+        <div class="chat">
+          <div class="nickname flex">
+            <input
+              data-testid="nickname-box"
+              placeholder="Digite seu nickname"
+              type="text"
+              id="nicknameInput"
+              class="form-control"
+              onfocus="this.value=''"
+            />
+            <button
+              class="btn btn-success"
+              data-testid="nickname-save"
+              id="alteraNick"
+            >
+              Save
+            </button>
+          </div>
+          <div class="card">
+            <div id="mensagensContainer" class="card-block">
+              <ul id="mensagens">
+                <% if(formatedMessages) {
+                  formatedMessages.forEach((each) => {
+                  %>
+                    <li data-testid="message"><%=each%></li><%
+                  })
+                }%>
+              </ul>
+            </div>
+          </div>
+          <br />
+          <textarea
+            data-testid="message-box"
+            id="mensagemInput"
+            class="form-control"
+            placeholder="Digite sua mensagem"
+          ></textarea>
+          <button class="btn btn-warning" data-testid="send-button" id="enviar">
+            Enviar
+          </button>
+        </div>
+      </div>
+      <div class="col-md-2 usuarios">
+        <ul id="users">
+          <% if(onlineUsers) {
+            onlineUsers.forEach((each) => {
+            %>
+              <li data-testid="online-user" id=<%=each.id%>><%=each.nickname%></li><%
+            })
+          }%>
+        </ul>
+      </div>
+    </div>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+  </body>
+</html>
