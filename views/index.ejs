@@ -31,7 +31,7 @@
         padding: 10px;
       }
 
-      form[class=userForm] {
+      form[class=userForma] {
         background: #000;
         padding: 3px;
         position: absolute;
@@ -44,7 +44,7 @@
         width: 65%;
         margin-right: 0.5%;
       }
-      form button[class=userForm] {
+      form button[class=btnSnick] {
         width: 30%;
         background: rgb(130, 224, 255);
         border: none;
@@ -70,22 +70,32 @@
   </head>
   <body>
     <ul id="mensagens"></ul>
-    <form action="" class="userForm">
-      <input class="userForm" autocomplete="off" data-testid="nickname-box" /> <button data-testid="nickname-save" class="userForm">Salvar Nickname</button>
+    <form action="" class="userForma">
+      <input id="useForm" class="userForm" autocomplete="off" data-testid="nickname-box" /> <button data-testid="nickname-save" class="btnSnick">Salvar Nickname</button>
     </form>
     <form action="" class="mensagensForm">
-      <input id="mensagemInput" autocomplete="off" data-testid="message-box"class="mensagensForm"/><button data-testid="send-button" class="mensagensForm">Send</button>
+      <input id="mensagemInput" autocomplete="off" data-testid="message-box" class="mensagensForm"/><button data-testid="send-button" class="mensagensForm">Send</button>
     </form>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();
-      const form = document.querySelector('.mensagensForm')
-      const inputMessage = document.querySelector('#mensagemInput')
+      const form = document.querySelector('.mensagensForm');
+      const inputMessage = document.querySelector('#mensagemInput');
+      const inputNickname = document.querySelector('#useForm');
+      const formNickName = document.querySelector('.userForma');
       let nickname = 'NomeInicial';
+
+      formNickName.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log('eis o inputName.value', inputNickname.value);
+        nickname = inputNickname.value;
+        inputNickname.value = '';
+      });
+
       form.addEventListener('submit', (e) =>{
         e.preventDefault();
         socket.emit('message', { chatMessage: inputMessage.value, nickname });
-        inputMessage.value = ''
+        inputMessage.value = '';
         return false;
       });
 
