@@ -10,6 +10,8 @@ const socketIo = require('socket.io');
 
 const cors = require('cors');
 
+const dateFormat = require('dateformat');
+
 app.use(cors());
 
 const io = socketIo(server, {
@@ -31,8 +33,17 @@ app.get('/fut', (_req, res) => {
   res.status(200).render('test');
 });
 
-io.on('connection', (_socket) => {
+io.on('connection', (socket) => {
   console.log('Alguém conectou');
+  socket.on('disconnect', () => console.log('Alguém desconectou'));
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const agora = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
+    io.emit('new message', (`${agora} ${nickname} ${chatMessage}`));
+    // socket.broadcast.emit('RESPOSTA', 'BLOQUEADO'+num)
+    // socket.emit responde apenas para ele mesmo
+    // io.emit responde para todos os sockets
+    // socket.broadcast.emit responde para todos os sockets menos ele mesmo
+  });
 });
 
 server.listen(3000, () => console.log('msn na porta 3000'));

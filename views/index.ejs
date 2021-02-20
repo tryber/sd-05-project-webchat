@@ -7,13 +7,41 @@
   <title>Document</title>
 </head>
 <body>
+
   <h1>Olá</h1>
+
+  <button id="clique">Clique</button>
+
+  <input type="text" id="texto">
+
+  <ul id="chatList"></ul>
+
 </body>
 
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
 <script>
+  const nickname = 'usuário ' + Math.round(Math.random()*1000);
+
   const socket = io('http://localhost:3000');
+
+  const botao = document.getElementById('clique');
+
+  botao.addEventListener('click', () => {
+    const chatMessage = document.getElementById('texto').value
+    socket.emit('message', { chatMessage, nickname })
+  }); // emit = emite uma msg
+
+  socket.on('new message', (newMessage) => {
+    const message = document.createElement('li');
+    message.innerHTML = newMessage;
+    document.getElementById('chatList').appendChild(message);
+
+    console.log(newMessage)
+  });
+
+  socket.on('RESPOSTA', (resp) => console.log(resp));
+
 </script>
 
 </html>
