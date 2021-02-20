@@ -1,50 +1,50 @@
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 body {
   font: 13px Helvetica, Arial;
 }
 form[class=mensagensForm] {
   background: #000;
+  bottom: 0;
   padding: 3px;
   position: fixed;
-  bottom: 0;
   width: 90%;
 }
 form input[class=mensagensForm] {
   border: 0;
+  margin-right: 0.5%;
   padding: 10px;
   width: 90%;
-  margin-right: 0.5%;
 }
 form button[class=mensagensForm] {
-  width: 9%;
   background: rgb(130, 224, 255);
   border: none;
   padding: 10px;
+  width: 9%;
 }
 
 form[class=userForma] {
   background: #000;
+  bottom: 40px;
   padding: 3px;
   position: absolute;
-  bottom: 40px;
   width: 40%;
 }
 form input[class=userForm] {
   border: 0;
+  margin-right: 0.5%;
   padding: 10px;
   width: 65%;
-  margin-right: 0.5%;
 }
 form button[class=btnSnick] {
-  width: 30%;
   background: rgb(130, 224, 255);
   border: none;
-  padding: 10px;
   margin-left: 2%;
+  padding: 10px;
+  width: 30%;
 }
 
 #mensagens {
@@ -63,12 +63,12 @@ form button[class=btnSnick] {
 }
 .boxonline {
   background-color: #89cff0;
-  width: 200px;
+  border: 3px dotted black;
   min-height: 400px;
   position: absolute;
-  top: 30%;
   right: 0;
-  border: 3px dotted black;
+  top: 30%;
+  width: 200px;
 }
 .ulbox {
   list-style-type: none;
