@@ -2,90 +2,10 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font: 13px Helvetica, Arial;
-      }
-      form[class=mensagensForm] {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 90%;
-      }
-      form input[class=mensagensForm] {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      form button[class=mensagensForm] {
-        width: 9%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-      }
-
-      form[class=userForma] {
-        background: #000;
-        padding: 3px;
-        position: absolute;
-        bottom: 40px;
-        width: 40%;
-      }
-      form input[class=userForm] {
-        border: 0;
-        padding: 10px;
-        width: 65%;
-        margin-right: 0.5%;
-      }
-      form button[class=btnSnick] {
-        width: 30%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-        margin-left: 2%;
-      }
-
-      #mensagens {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      #mensagens li {
-        padding: 5px 10px;
-      }
-      #mensagens li:nth-child(odd) {
-        background: #eee;
-      }
-      #mensagens {
-        margin-bottom: 40px;
-      }
-      .boxonline {
-        background-color: antiquewhite;
-        width: 200px;
-        min-height: 400px;
-        position: absolute;
-        top: 30%;
-        right: 0;
-      }
-      .ulbox {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      .ulbox li {
-        padding: 5px 10px;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="./style.css">
   </head>
   <body>
-    <div class="boxonline"><center>Lista de pessoas online:</center><br>
+    <div class="boxonline"><center><h3>Pessoas online:</h3></center><br>
       <ul class="ulbox">
         <% if (usersOnline !== [] ) {%>
           <% usersOnline.forEach(user => { %>
@@ -150,12 +70,12 @@
         const boxOnlineUl = document.querySelector('.ulbox');
         boxOnlineUl.innerHTML = '';
         const li = document.createElement('li');
-        li.innerHTML = `<div data-testid="online-user">${nickname}</div>`;
+        li.innerHTML = `<div data-testid="online-user"><img src="./online.png">${nickname}<img src="./me.png"></div>`;
         boxOnlineUl.appendChild(li);
         lista.forEach((item) => {
           if (item !== nickname) {
             const li = document.createElement('li');
-            li.innerHTML = `<div data-testid="online-user">${item}</div>`;
+            li.innerHTML = `<div data-testid="online-user"><img src="./online.png">${item}</div>`;
             boxOnlineUl.appendChild(li);
           }
         });
