@@ -69,13 +69,21 @@
     </style>
   </head>
   <body>
-    <ul id="mensagens"></ul>
     <form action="" class="userForma">
       <input id="useForm" class="userForm" autocomplete="off" data-testid="nickname-box" /> <button data-testid="nickname-save" class="btnSnick">Salvar Nickname</button>
     </form>
     <form action="" class="mensagensForm">
       <input id="mensagemInput" autocomplete="off" data-testid="message-box" class="mensagensForm"/><button data-testid="send-button" class="mensagensForm">Send</button>
     </form>
+    <ul id="mensagens">
+      <% if (historico) {%>
+        <% historico.forEach(hist => { %>
+            <li>
+              <div data-testid="message"><%=hist %></div>
+            </li>
+          <%})%>
+      <% } %>
+    </ul>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();

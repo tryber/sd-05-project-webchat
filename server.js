@@ -40,8 +40,10 @@ app.set('views', './views');
 
 app.use(express.static('./'));
 
-app.get('/', (req, res) => {
-  res.status(200).render('index.ejs');
+app.get('/', async (req, res) => {
+  const bd = await chatHistoryModel.getAll();
+  const historico = bd.map(({ timestamp, nickname, chatMessage }) => `${timestamp} ${nickname}: ${chatMessage}`);
+  res.status(200).render('index.ejs', { historico });
 });
 
 io.on('connection', (socket) => {

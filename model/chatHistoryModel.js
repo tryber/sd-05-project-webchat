@@ -9,6 +9,10 @@ const create = async (nickname, chatMessage, timestamp) => {
   return insert.ops[0];
 };
 
+const getAll = async () => connection().then((db) => db
+  .collection(theCollection).find({}).toArray());
+
 module.exports = {
   create,
+  getAll,
 };
