@@ -3,43 +3,49 @@
   margin: 0;
   padding: 0;
 }
+
 body {
   font: 13px Helvetica, Arial;
 }
-form[ class = "mensagensForm" ] {
+
+form[ class = 'mensagensForm' ] {
   background: black;
   bottom: 0;
   padding: 3px;
   position: fixed;
   width: 90%;
 }
-form input[ class = "mensagensForm" ] {
+
+form input[ class = 'mensagensForm' ] {
   border: 0;
   margin-right: 0.5%;
   padding: 10px;
   width: 90%;
 }
-form button[ class = "mensagensForm" ] {
+
+form button[ class = 'mensagensForm' ] {
   background: rgb(130, 224, 255);
   border: none;
   padding: 10px;
   width: 9%;
 }
 
-form[ class = "userForma" ] {
+form[ class = 'userForma' ] {
   background: black;
   bottom: 40px;
   padding: 3px;
   position: absolute;
   width: 40%;
 }
-form input[ class = "userForm" ] {
+
+form input[ class = 'userForm' ] {
   border: 0;
   margin-right: 0.5%;
   padding: 10px;
   width: 65%;
 }
-form button[ class = "btnSnick" ] {
+
+form button[ class = 'btnSnick' ] {
   background: rgb(130, 224, 255);
   border: none;
   margin-left: 2%;
@@ -47,20 +53,34 @@ form button[ class = "btnSnick" ] {
   width: 30%;
 }
 
+.ulbox {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ulbox li {
+  padding: 5px 10px;
+}
+
 #mensagens {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
+
 #mensagens li {
   padding: 5px 10px;
 }
+
 #mensagens li:nth-child(odd) {
   background: #eee;
 }
+
 #mensagens {
   margin-bottom: 40px;
 }
+
 .boxonline {
   background-color: #89cff0;
   border: 3px dotted black;
@@ -69,12 +89,4 @@ form button[ class = "btnSnick" ] {
   right: 0;
   top: 30%;
   width: 200px;
-}
-.ulbox {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-.ulbox li {
-  padding: 5px 10px;
 }
