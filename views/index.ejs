@@ -107,6 +107,9 @@
         e.preventDefault();
         userNickname = nickNameInput.value;
         nickNameInput.value = '';
+
+        const li = document.getElementById(id);
+        li.innerHTML = userNickname;
         socket.emit('changeNick', userNickname, id);
       });
 
