@@ -23,7 +23,7 @@
         width: 100%;
       }
       form input {
-        border: 0;
+        border: 1;
         padding: 10px;
         width: 90%;
         margin-right: 0.5%;
@@ -51,6 +51,14 @@
   <body>
     <ul id="users"></ul>
     <ul id="messages"></ul>
+    <ul id="onlineUsers">
+      <% if(usersOnline !== []) { %>
+        <% usersOnline.forEach((user) => { %>
+          <li data-testid="online-user" id=<%= `${user.socketId}` %> ><%= `${user.nickname}` %></li>
+        <% }) %>
+      <% } %>
+    </ul>
+    <ul id="messages">
     <% if (messages) { %>
       <% messages.forEach((msg) => { %>
         <li data-testid="message">
@@ -58,9 +66,10 @@
         </li>
      <% }) %>
     <% } %>
+    </ul>
     <form id="form" action="">
-      <input data-testid="nickname-box" id="nickname" type="text" value="Guest<%= Math.round(Math.random() * 1000) %>" />
-      <button data-testid="nickname-save">Salvar</button>
+      <input data-testid="nickname-box" id="nickname" type="text" />
+      <button data-testid="nickname-save" id="save-nickname">Salvar</button>
       <input data-testid="message-box" id="input" autocomplete="off" />
       <button data-testid="send-button">Enviar</button>
     </form>
@@ -70,12 +79,39 @@
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const nickname = document.getElementById('nickname');
+    const users = document.getElementById('onlineUsers');
     const messages = document.getElementById('messages');
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       if (nickname.value && input.value) {
         client.emit('message', { nickname: nickname.value, chatMessage: input.value })
         input.value = '';
+      }
+    });
+    document.getElementById('save-nickname').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (nickname.value) {
+        client.emit('changeNickname', nickname.value )
+      }
+    });
+    client.on('changeNickname', (nick, id) => {
+      const changeUser = document.getElementById(id);
+      changeUser.innerHTML = nick;
+    });
+    
+    let userid = '';
+      client.on('saveId', (id) => {
+      userid = id;
+    });
+    client.on('listOfUsers', (nickname, socketId) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${socketId}`);
+      li.textContent = nickname;
+        if (socketId === userid) {
+          users.prepend(li);
+      } else {
+          users.append(li);
       }
     });
     client.on('message', (mensagem) => {
