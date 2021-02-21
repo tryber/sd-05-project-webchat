@@ -3,45 +3,45 @@ html, body {
 }
 
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 #chat {
-  height: 100%;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  display: flex;
   flex-direction: column;
+  height: 100%;
+  justify-content: center;
   padding: 2vw;
 }
 
 input {
-  width: 60vw;
   border: 1px solid #ddd;
+  font-size: 1.5vw;
   height: 5vw;
   padding: 0 2vw;
-  font-size: 1.5vw;
+  width: 60vw;
 }
 
 button {
-  width: 60vw;
-  height: 5vw;
-  font-size: 1.5vw;
   background: #069;
+  border: none;
+  color: #FFF;
+  font-size: 1.5vw;
+  font-weight: bold;
+  height: 5vw;
   text-align: center;
   line-height: 5vw;
-  font-weight: bold;
-  color: #FFF;
   margin-top: 1vw;
-  border: none;
+  width: 60vw;
 }
 
 .messages {
-  width: 60vw;
+  border: 1px solid #ddd;
   height: 40vw;
   margin: 2vw 0;
-  border: 1px solid #ddd;
   padding: 2vw;
+  width: 60vw;
 }
