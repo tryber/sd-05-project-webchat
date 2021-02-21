@@ -45,7 +45,7 @@ let onlineUsers = [];
 app.get('/', async (req, res) => {
   const messages = await getAllMessages();
 
-  res.render('index', { onlineUsers, messages });
+  res.status(200).render('index', { onlineUsers, messages });
 });
 
 io.on('connection', async (socket) => {
@@ -53,6 +53,9 @@ io.on('connection', async (socket) => {
   const guestNickname = `Guest_${parseInt(Math.random() * 10000, 10)}`;
 
   console.log(`Usuário com o ID ${socketId} conectado!`);
+  onlineUsers.unshift({ socketId, nickname: guestNickname });
+  // método unshift() faz um "push" num array, porém,
+  // adiciona o novo item como primeiro da lista (índice 0)
 
   socket.emit('connected', socketId, guestNickname);
   io.emit('userConnected', socketId, guestNickname);

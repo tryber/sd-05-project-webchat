@@ -15,8 +15,9 @@
 
 <body>
   <div class="online-users">
+    <h3>Usuários Online:</h3>
     <ul id="online-users-list">
-      <% if (onlineUsers !== []) { %>
+      <% if (onlineUsers !==[]) { %>
         <% onlineUsers.forEach((user)=> { %>
           <li data-testid="online-user" id=<%=`${user.socketId}` %> ><%= `${user.nickname}` %>
           </li>
@@ -26,7 +27,7 @@
   </div>
 
   <div class="messages">
-    <ul id="messages">
+    <ul id="messages-list">
       <% if (messages) { %>
         <% messages.forEach((message)=> { %>
           <li data-testid="message">
@@ -56,10 +57,10 @@
     let nickname = '';
     let socketId = '';
 
-    const chat = document.querySelector('.chat');
     const nickInput = document.querySelector('#nickname-input');
     const nickButton = document.querySelector('#save-nick-btn');
     const messages = document.querySelector('.messages');
+    const messagesList = document.querySelector('#messages-list');
     const messageInput = document.querySelector('#message-input');
     const sendBtn = document.querySelector('#send-btn');
 
@@ -82,7 +83,7 @@
       nickname = nick;
     })
 
-    client.on('usersList', (nickname, socketId) => {
+    client.on('userList', (nickname, socketId) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
       li.setAttribute('id', `${socketId}`);
@@ -94,11 +95,26 @@
       }
     })
 
+    client.on('updateNickname', (nickname, id) => {
+      const userNickname = document.getElementById(id);
+      userNickname.innerHTML = nickname;
+    });
+
     client.on('message', (receivedMessage) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
       li.textContent = receivedMessage;
       messages.appendChild(li);
+    });
+
+    client.on('messagesLog', (allMessages) => {
+      messages.innerHTML = '';
+      allMessages.forEach((message) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${message.date} - ${message.nickname}: ${message.chatMessage}`;
+        messages.append(li);
+      });
     });
 
     client.on('disconnected', (id) => {

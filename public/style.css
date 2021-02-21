@@ -2,18 +2,9 @@ html , body {
   height: 100%;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 input {
   border: 1px solid #ddd;
   font-size: 14pt;
-  height: 50px;
-  padding: 0 20px;
-  width: 600px;
 }
 
 button {
@@ -21,25 +12,26 @@ button {
   color: white;
   font-size: 14pt;
   font-weight: 900;
-  height: 50px;
-  line-height: 50px;
-  margin-top: 10px;
   text-align: center;
-  width: 600px;
 }
 
 .chat-form {
   align-items: center;
   display: flex;
   flex-direction: column;
-  height: 100%;
   justify-content: center;
 }
 
 .messages {
-  border: 1px solid #ddd;
+  border: 1px solid pink;
   height: 400px;
-  margin: 20px 0;
   padding: 20px;
   width: 600px;
 }
+
+.online-users {
+  border: 1px solid green;
+  font-size: 14pt;
+  font-weight: 900;
+  width: 400px;
+  }
