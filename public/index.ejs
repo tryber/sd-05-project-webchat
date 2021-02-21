@@ -1,0 +1,120 @@
+<!-- front-end ~ área do cliente -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projeto Webchat - Bloco 32: Socket.io </title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="online-users">
+    <ul id="online-users-list">
+      <% if (onlineUsers !== []) { %>
+        <% onlineUsers.forEach((user)=> { %>
+          <li data-testid="online-user" id=<%=`${user.socketId}` %> ><%= `${user.nickname}` %>
+          </li>
+          <% }) %>
+            <% } %>
+    </ul>
+  </div>
+
+  <div class="messages">
+    <ul id="messages">
+      <% if (messages) { %>
+        <% messages.forEach((message)=> { %>
+          <li data-testid="message">
+            <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+          </li>
+          <% }) %>
+            <% } %>
+    </ul>
+  </div>
+
+  <form class="chat-form">
+    <div>
+      <input type="text" data-testid="nickname-box" id="nickname-input" name="username"
+        placeholder="Digite seu nome de usuário">
+      <button type="button" data-testid="nickname-save" id="save-nick-btn">Salvar</button>
+    </div>
+
+    <div>
+      <input type="text" data-testid="message-box" id="message-input" name="message" placeholder="Digite sua mensagem">
+      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
+    </div>
+  </form>
+
+  <script type="text/javascript">
+    const client = io();
+
+    let nickname = '';
+    let socketId = '';
+
+    const chat = document.querySelector('.chat');
+    const nickInput = document.querySelector('#nickname-input');
+    const nickButton = document.querySelector('#save-nick-btn');
+    const messages = document.querySelector('.messages');
+    const messageInput = document.querySelector('#message-input');
+    const sendBtn = document.querySelector('#send-btn');
+
+    sendBtn.addEventListener('click', () => {
+      if (messageInput.value.length > 0) {
+        const chatMessage = messageInput.value;
+        client.emit('message', { nickname, chatMessage });
+        messageInput.value = '';
+      }
+    })
+
+    nickButton.addEventListener('click', () => {
+      nickname = nickInput.value;
+      client.emit('updateNickname', nickname, socketId)
+      nickInput.value = '';
+    })
+
+    client.on('connected', (id, nick) => {
+      socketId = id;
+      nickname = nick;
+    })
+
+    client.on('usersList', (nickname, socketId) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${socketId}`);
+      li.textContent = nickname;
+      if (socketId === currentId) {
+        onlineUsers.prepend(li);
+      } else {
+        onlineUsers.append(li);
+      }
+    })
+
+    client.on('message', (receivedMessage) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.textContent = receivedMessage;
+      messages.appendChild(li);
+    });
+
+    client.on('disconnected', (id) => {
+      const disconnectedUser = document.getElementById(id);
+      // console.log(disconnectedUser)
+      disconnectedUser.remove();
+    });
+  </script>
+</body>
+
+</html>
+
+<!-- referências:
+1. vídeo da Rocketseat
+https://youtu.be/-jXfKDYJJvo
+2. setAttribute() method
+https://www.w3schools.com/jsref/met_element_setattribute.asp
+3. 'prepend' e 'append': repositórios do Lipe e da Juliette
+-->
