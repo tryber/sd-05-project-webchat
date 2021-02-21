@@ -49,15 +49,15 @@ app.get('/', async (req, res) => {
 });
 
 io.on('connection', async (socket) => {
-  const socketId = socket.id;
+  const userId = socket.id;
   const guestNickname = `Guest_${parseInt(Math.random() * 10000, 10)}`;
 
-  console.log(`Usuário com o ID ${socketId} conectado!`);
-  onlineUsers.unshift({ socketId, nickname: guestNickname });
+  console.log(`Usuário com o ID ${userId} conectado!`);
+  onlineUsers.unshift({ socketId: userId, nickname: guestNickname });
   // método unshift() faz um "push" num array, porém,
   // adiciona o novo item como primeiro da lista (índice 0)
 
-  io.emit('connected', socketId, guestNickname);
+  io.emit('connected', userId, guestNickname);
 
   // evento que emite mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
@@ -71,10 +71,10 @@ io.on('connection', async (socket) => {
   });
 
   // evento que altera o nickname do usuário
-  socket.on('updateNickname', (nickname, id) => {
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
-    onlineUsers.push({ socketId: id, nickname });
-    io.emit('updateNickname', nickname, id);
+  socket.on('updateNickname', ({ nickname }) => {
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== userId);
+    onlineUsers.push({ socketId: userId, nickname });
+    io.emit('updateNickname', { nickname, socketId: userId });
   });
 
   // evento que exibe as mensagens antigas (log)
@@ -84,9 +84,9 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`Usuário com o ID ${socketId} desconectado!`);
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
-    io.emit('userDisconnected', socketId);
+    console.log(`Usuário com o ID ${userId} desconectado!`);
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== userId);
+    io.emit('userDisconnected', userId);
   });
 });
 

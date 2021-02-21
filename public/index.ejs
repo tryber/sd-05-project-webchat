@@ -63,6 +63,7 @@
     const messagesList = document.querySelector('#messages-list');
     const messageInput = document.querySelector('#message-input');
     const sendBtn = document.querySelector('#send-btn');
+    const onlineUsers = document.querySelector('.online-users')
 
     sendBtn.addEventListener('click', () => {
       if (messageInput.value.length > 0) {
@@ -74,7 +75,7 @@
 
     nickButton.addEventListener('click', () => {
       nickname = nickInput.value;
-      client.emit('updateNickname', nickname, socketId)
+      client.emit('updateNickname', nickname)
       nickInput.value = '';
     })
 
@@ -95,8 +96,14 @@
       }
     })
 
-    client.on('updateNickname', (nickname, id) => {
-      const userNickname = document.getElementById(id);
+    client.on('updateNickname', ({ nickname, socketId }) => {
+      const userNickname = document.getElementById(socketId);
+
+      (console.log(socketId, 'socket id'));
+      // retorna o id
+      (console.log(userNickname, 'userNickname'));
+      // retorna undefined
+
       userNickname.innerHTML = nickname;
     });
 
