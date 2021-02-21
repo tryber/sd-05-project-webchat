@@ -1,4 +1,4 @@
-html, body {
+html , body {
   height: 100%;
 }
 
@@ -32,9 +32,9 @@ button {
   font-size: 1.5vw;
   font-weight: bold;
   height: 5vw;
-  text-align: center;
   line-height: 5vw;
   margin-top: 1vw;
+  text-align: center;
   width: 60vw;
 }
 
