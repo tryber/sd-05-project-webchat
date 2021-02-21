@@ -9,7 +9,7 @@ const addMessage = async (data) => {
 
 const getAllMessages = async () => {
   const db = await connection();
-  const allMessages = await db.collection('products').find().toArray();
+  const allMessages = await db.collection('messages').find().toArray();
   return allMessages;
 };
 

@@ -31,7 +31,7 @@
       <% if (messages) { %>
         <% messages.forEach((message)=> { %>
           <li data-testid="message">
-            <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+            <%= `${message.dateTime} - ${message.nickname}: ${message.chatMessage}` %>
           </li>
           <% }) %>
             <% } %>
