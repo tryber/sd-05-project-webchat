@@ -54,7 +54,7 @@
   <script type="text/javascript">
     const client = io();
 
-    let socketId = '';
+    let clientId = '';
     let nickname = '';
 
     const nickInput = document.querySelector('#nickname-input');
@@ -64,6 +64,7 @@
     const messageInput = document.querySelector('#message-input');
     const sendBtn = document.querySelector('#send-btn');
     const onlineUsers = document.querySelector('.online-users')
+    const onlineUsersList = document.querySelector('#online-users-list')
 
     sendBtn.addEventListener('click', () => {
       if (messageInput.value.length > 0) {
@@ -79,31 +80,19 @@
       nickInput.value = '';
     })
 
-    client.on('connected', (id, nick) => {
-      socketId = id;
-      nickname = nick;
-    })
+    client.on('connected', ({ userId, guestNickname }) => {
+      clientId = userId;
+      nickname = guestNickname;
 
-    client.on('userList', (nickname, id) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
-      li.setAttribute('id', `${id}`);
-      li.textContent = nickname;
-      if (socketId === id) {
-        onlineUsers.prepend(li);
-      } else {
-        onlineUsers.append(li);
-      }
+      li.setAttribute('id', `${clientId}`);
+      li.innerHTML = nickname;
+      onlineUsersList.appendChild(li);
     })
 
     client.on('updateNickname', ({ nickname, socketId }) => {
       const userNickname = document.getElementById(socketId);
-
-      (console.log(socketId, 'socket id'));
-      // retorna o id
-      (console.log(userNickname, 'userNickname'));
-      // retorna undefined
-
       userNickname.innerHTML = nickname;
     });
 
@@ -124,9 +113,8 @@
       });
     });
 
-    client.on('disconnected', (id) => {
-      const disconnectedUser = document.getElementById(id);
-      // console.log(disconnectedUser)
+    client.on('userDisconnected', (userId) => {
+      const disconnectedUser = document.getElementById(userId);
       disconnectedUser.remove();
     });
   </script>

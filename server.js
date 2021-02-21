@@ -56,8 +56,7 @@ io.on('connection', async (socket) => {
   onlineUsers.unshift({ socketId: userId, nickname: guestNickname });
   // método unshift() faz um "push" num array, porém,
   // adiciona o novo item como primeiro da lista (índice 0)
-
-  io.emit('connected', userId, guestNickname);
+  io.emit('connected', { userId, guestNickname });
 
   // evento que emite mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
@@ -71,7 +70,7 @@ io.on('connection', async (socket) => {
   });
 
   // evento que altera o nickname do usuário
-  socket.on('updateNickname', ({ nickname }) => {
+  socket.on('updateNickname', (nickname) => {
     onlineUsers = onlineUsers.filter((user) => user.socketId !== userId);
     onlineUsers.push({ socketId: userId, nickname });
     io.emit('updateNickname', { nickname, socketId: userId });
