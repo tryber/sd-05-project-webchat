@@ -1,4 +1,4 @@
-html, body {
+html , body {
   height: 100%;
 }
 
@@ -6,14 +6,6 @@ html, body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-#chat {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
 }
 
 input {
@@ -34,6 +26,14 @@ button {
   margin-top: 10px;
   text-align: center;
   width: 600px;
+}
+
+.chat-form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
 }
 
 .messages {

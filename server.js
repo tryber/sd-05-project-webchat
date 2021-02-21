@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const moment = require('moment');
+const dateFormat = require('dateformat');
 const path = require('path');
 const socketio = require('socket.io');
 const http = require('http');
@@ -59,9 +59,8 @@ io.on('connection', async (socket) => {
 
   // evento que emite mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
-    // formatação de data e hora conforme o readme utilizando a biblioteca Moment.js
-    const now = new Date().getTime();
-    const dateTime = moment(now).format('DD-MM-YYYY h:mm:ss A');
+    // formatação de data e hora conforme o readme utilizando a biblioteca date-format
+    const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
     // função assíncrona que adiciona a mensagem
     await addMessage({ nickname, chatMessage, dateTime });
     // monta a mensagem para ser emitida e exibida
