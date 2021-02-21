@@ -3,43 +3,43 @@ html, body {
 }
 
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 #chat {
-  height: 100%;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  display: flex;
   flex-direction: column;
+  height: 100%;
+  justify-content: center;
 }
 
 input {
-  width: 600px;
   border: 1px solid #ddd;
+  font-size: 14pt;
   height: 50px;
   padding: 0 20px;
-  font-size: 14px;
+  width: 600px;
 }
 
 button {
-  width: 600px;
-  height: 50px;
-  font-size: 14px;
   background: #069;
-  text-align: center;
+  color: white;
+  font-size: 14pt;
+  font-weight: 900;
+  height: 50px;
   line-height: 50px;
-  font-weight: bold;
-  color: #FFF;
   margin-top: 10px;
+  text-align: center;
+  width: 600px;
 }
 
 .messages {
-  width: 600px;
+  border: 1px solid #ddd;
   height: 400px;
   margin: 20px 0;
-  border: 1px solid #ddd;
   padding: 20px;
+  width: 600px;
 }
