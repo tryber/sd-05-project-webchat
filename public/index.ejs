@@ -54,8 +54,8 @@
   <script type="text/javascript">
     const client = io();
 
-    let nickname = '';
     let socketId = '';
+    let nickname = '';
 
     const nickInput = document.querySelector('#nickname-input');
     const nickButton = document.querySelector('#save-nick-btn');
@@ -83,12 +83,12 @@
       nickname = nick;
     })
 
-    client.on('userList', (nickname, socketId) => {
+    client.on('userList', (nickname, id) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
-      li.setAttribute('id', `${socketId}`);
+      li.setAttribute('id', `${id}`);
       li.textContent = nickname;
-      if (socketId === currentId) {
+      if (socketId === id) {
         onlineUsers.prepend(li);
       } else {
         onlineUsers.append(li);

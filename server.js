@@ -57,8 +57,7 @@ io.on('connection', async (socket) => {
   // método unshift() faz um "push" num array, porém,
   // adiciona o novo item como primeiro da lista (índice 0)
 
-  socket.emit('connected', socketId, guestNickname);
-  io.emit('userConnected', socketId, guestNickname);
+  io.emit('connected', socketId, guestNickname);
 
   // evento que emite mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
