@@ -20,7 +20,7 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-const { createMessage } = require('./models/Message');
+const { createMessage, getAll } = require('./models/Message');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -29,8 +29,10 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (req, res) => {
-  res.render(path.join(__dirname, './views/index.ejs'));
+app.get('/', async (req, res) => {
+  const messages = await getAll();
+
+  res.render(path.join(__dirname, './views/index.ejs'), { messages });
 });
 
 io.on('connection', (socket) => {

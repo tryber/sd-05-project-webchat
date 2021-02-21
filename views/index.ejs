@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webchat</title>
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> -->
     <style>
       * {
         margin: 0;
@@ -51,13 +51,20 @@
   <body>
     <ul id="users"></ul>
     <ul id="messages"></ul>
+    <% if (messages) { %>
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message">
+          <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+        </li>
+     <% }) %>
+    <% } %>
     <form id="form" action="">
       <input data-testid="nickname-box" id="nickname" type="text" value="Guest<%= Math.round(Math.random() * 1000) %>" />
       <button data-testid="nickname-save">Salvar</button>
       <input data-testid="message-box" id="input" autocomplete="off" />
       <button data-testid="send-button">Enviar</button>
     </form>
-  </body>
+  </body>  
   <script>
     const client = io();
     const form = document.getElementById('form');
