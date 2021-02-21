@@ -53,9 +53,7 @@
   <script type="text/javascript">
     const client = io();
 
-    let clientId = '';
-    let nickname = '';
-
+    // constantes e variáveis
     const nickInput = document.querySelector('#nickname-input');
     const nickButton = document.querySelector('#save-nick-btn');
     const messages = document.querySelector('.messages');
@@ -65,6 +63,10 @@
     const onlineUsers = document.querySelector('.online-users')
     const onlineUsersList = document.querySelector('#online-users-list')
 
+    let clientId = '';
+    let nickname = '';
+
+    // events listeners
     sendBtn.addEventListener('click', () => {
       if (messageInput.value.length > 0) {
         const chatMessage = messageInput.value;
@@ -79,6 +81,7 @@
       nickInput.value = '';
     })
 
+    // eventos do socket conectando cliente e servidor
     client.on('connected', ({ userId, guestNickname }) => {
       clientId = userId;
       nickname = guestNickname;
@@ -126,5 +129,4 @@
 https://youtu.be/-jXfKDYJJvo
 2. setAttribute() method
 https://www.w3schools.com/jsref/met_element_setattribute.asp
-3. 'prepend' e 'append': repositórios do Lipe e da Juliette
 -->

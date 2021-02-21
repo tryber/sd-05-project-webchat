@@ -1,3 +1,4 @@
+// back-end ~ server side
 // dependências
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -58,11 +59,11 @@ io.on('connection', async (socket) => {
   // adiciona o novo item como primeiro da lista (índice 0)
   io.emit('connected', { userId, guestNickname });
 
-  // evento que emite mensagens
+  // evento que envia mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
     // formatação de data e hora conforme o readme utilizando a biblioteca date-format
     const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
-    // função assíncrona que adiciona a mensagem
+    // função assíncrona que adiciona a mensagem no mongoDB
     await addMessage({ nickname, chatMessage, dateTime });
     // monta a mensagem para ser emitida e exibida
     const message = `${dateTime} - ${nickname}: ${chatMessage}`;
@@ -93,6 +94,8 @@ io.on('connection', async (socket) => {
 server.listen(PORT, () => console.log(`Bate-papo rolando na porta ${PORT}`));
 
 /* referências:
-1. documentação Moment.js
-https://momentjs.com/docs/#/displaying/format/
+1. vídeo da Rocketseat
+https://youtu.be/-jXfKDYJJvo
+2. documentação dateFormat
+https://www.npmjs.com/package/dateformat
 */
