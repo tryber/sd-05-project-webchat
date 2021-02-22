@@ -101,6 +101,7 @@
       socket.on('nickChange', (nickname, userId) => {
         const p = document.getElementById(userId);
         p.innerHTML = nickname;
+        nick = nickname;
       });
 
       socket.on('disconected', (userId) => {
