@@ -17,7 +17,11 @@
         data-testid="nickname-box"
         placeholder="Digite seu usuário"
       />
-      <div class="messages"></div>
+      <div class="messages">
+        <%allMessages.forEach((message)=>{%>
+          <p data-testid="message"><%=message.dateTime%> - <%=message.nickname%>: <%=message.chatMessage%></p>
+        <%})%>
+      </div>
       <input
         type="text"
         data-testid="message-box"
