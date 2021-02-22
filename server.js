@@ -2,7 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');
 const dateFormat = require('dateformat');
-const faker = require('faker');
+// const faker = require('faker');
 
 // Escopo retirado do conteúdo 32.3
 const app = express();
@@ -38,7 +38,7 @@ app.get('/', async (req, res) => {
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
   const userId = socket.id;
-  const fakeName = faker.name.firstName();
+  const fakeName = 'fakerMeDibrou';
 
   socket.emit('conectado', userId, fakeName);
   usersOnline.push({ socketId: userId, nickname: fakeName });
