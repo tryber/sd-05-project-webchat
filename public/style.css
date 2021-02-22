@@ -1,6 +1,4 @@
-/* Chat em tempo real com NodeJS + Socket.io | Diego Fernandes | Rocketseat
-<https://www.youtube.com/watch?v=-jXfKDYJJvo> */
-html, body {
+html , body {
   height: 100%;
 }
 
@@ -47,3 +45,6 @@ button {
   padding: 2vw;
   width: 60vw;
 }
+
+/* Chat em tempo real com NodeJS + Socket.io | Diego Fernandes | Rocketseat
+<https://www.youtube.com/watch?v=-jXfKDYJJvo> */
