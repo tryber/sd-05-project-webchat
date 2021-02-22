@@ -63,8 +63,8 @@
     })
 
     nickBtn.addEventListener('click', function () {
-      nickname = author.value;
-      client.emit('author', nickname);
+      nick = author.value;
+      client.emit('author', nick);
       author.value = '';
     });
 
