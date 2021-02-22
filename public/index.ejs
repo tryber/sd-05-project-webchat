@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <form id="chat">
+    <form class="chat">
       <input
       type="text"
       name="username"
@@ -34,7 +34,7 @@
     const userNickname = document.querySelector('[data-testid="nickname-box"]');
     const messageBox = document.querySelector('[data-testid="message-box"]');
     const chat = document.querySelector('.messages');
-    $('#chat')sendChatButtom.addEventListener('click', function () {
+    sendChatButtom.addEventListener('click', function () {
       const nickname = userNickname.value;
       const chatMessage = messageBox.value;
       if (nickname.length && chatMessage.length) {
