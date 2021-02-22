@@ -30,10 +30,21 @@ app.set('views', './public');
 app.use(bodyParser.json());
 app.use(cors());
 
-// concectando socket
+// concectando socket data/mensagem
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
   io.emit('conectado', `${socket.id}`);
+
+  // historico de mensagens
+  const historyMessage = getMessages();
+  const conectados = [];
+  const messagesSave = [];
+  historyMessage.map((msg) => {
+    const { chatMessage, nickname, dateTime } = msg;
+    return messagesSave.push(`${dateTime} - ${nickname}: ${chatMessage}`);
+  });
+  io.emit('history', messagesSave);
+
   // mensagens com data e nickname
   socket.on('message', async ({ nickname, chatMessage }) => {
     const dateTime = moment(Date.now()).format('DD-MM-yyyy HH:mm:ss');
@@ -41,6 +52,23 @@ io.on('connection', (socket) => {
     // DD-MM-yyyy HH:mm:ss ${message.nickname} ${message.chatMessage}
     const message = `${dateTime} - ${nickname}: ${chatMessage}`;
     io.emit('message', message);
+  });
+
+  // mudar de nome
+  socket.on('changeName', async ({ nickname }) => {
+    io.emit('changeName', nickname);
+  });
+
+  // nome online
+  socket.on('changeName', async ({ nickname }) => {
+    conectados.push(nickname);
+    io.emit('online', conectados);
+
+    // disconectar
+    socket.on('disconnect', () => {
+      delete conectados[socket.id];
+      io.emit('online', conectados);
+    });
   });
 });
 

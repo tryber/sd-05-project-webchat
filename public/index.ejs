@@ -30,6 +30,7 @@
 
     <script type="text/javascript">
     const socket = io('http://localhost:3000');
+    const renderHistory = document.querySelector('[data-testid="message"]');
     const sendChatButtom = document.querySelector('[data-testid="send-button"]');
     const userNickname = document.querySelector('[data-testid="nickname-box"]');
     const messageBox = document.querySelector('[data-testid="message-box"]');
@@ -46,12 +47,28 @@
       }
       });
 
+      socket.on('history', renderHistory);
+      const renderHistory = (history) => {
+      $('#messages').append('<div data-testid="message">' + history + '</div>');
+    };
+
+      socket.on('online', renderConectados);
+      const renderConectados = (connected) => {
+      $('#onlineUser').append('<li data-testid="online-user">' + connected + '</li>');
+    };
+
       socket.on('message', (message) => {
         const p = document.createElement('p');
         p.innerHTML = message;
         p.setAttribute('data-testid', 'message');
         chat.appendChild(p);
       });
+      
+      // socket.on('history', (renderHist) => {
+      //   const renderHist = (history);
+      //   renderHist.append('<div>' + history + '</div>');
+      // });
+
     </script>
   </body>
 </html>
