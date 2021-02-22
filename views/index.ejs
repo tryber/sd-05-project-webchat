@@ -15,9 +15,7 @@
     <ul id="online-users">
       <% if (onlineUsers) { %>
         <% onlineUsers.forEach((user)=> { %>
-          <li data-testid="online-user" id=<%= user.id %>>
-            <%= user.nickname %>
-          </li>
+          <li data-testid="online-user" id=<%= user.id %>><%= user.nickname %></li>
         <% }) %>
       <% } %> 
     </ul>
