@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');
 const dateFormat = require('dateformat');
+const faker = require('faker');
 
 // Escopo retirado do conteúdo 32.3
 const app = express();
@@ -24,26 +25,41 @@ app.set('views', './views');
 app.use(bodyParser.json());
 app.use(cors());
 
+// Lista de usuários
+let usersOnline = [];
+
 // Endpoint para leitura das mensagens
 app.get('/', async (req, res) => {
   const allMessages = await getMessages();
-  res.status(200).render('index', { allMessages });
+  res.status(200).render('index', { allMessages, usersOnline });
 });
 
 // Endpoint para envio de mensagens
-
-// formato da data
-// DD-MM-yyyy HH:mm:ss ${message.nickname} ${message.chatMessage}
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
+  const userId = socket.id;
+  const fakeName = faker.name.firstName();
 
-  io.emit('conectado', `${socket.id}`);
+  socket.emit('conectado', userId, fakeName);
+  usersOnline.push({ socketId: userId, nickname: fakeName });
+  socket.broadcast.emit('userOn', userId, fakeName);
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
     await createMessage(nickname, chatMessage, dateTime);
     const message = `${dateTime} - ${nickname}: ${chatMessage}`;
     io.emit('message', message);
+  });
+
+  socket.on('nickChange', (nickname) => {
+    usersOnline = usersOnline.filter((user) => user.socketId !== userId);
+    usersOnline.push({ socketId: userId, nickname });
+    io.emit('nickChange', nickname, userId);
+  });
+
+  socket.on('disconnect', () => {
+    usersOnline = usersOnline.filter((user) => user.socketId !== userId);
+    io.emit('disconected', userId);
   });
 });
 

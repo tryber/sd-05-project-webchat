@@ -19,7 +19,14 @@
       />
       <div class="messages">
         <%allMessages.forEach((message)=>{%>
-          <p data-testid="message"><%=message.dateTime%> - <%=message.nickname%>: <%=message.chatMessage%></p>
+        <p data-testid="message">
+          <%=message.dateTime%> - <%=message.nickname%>: <%=message.chatMessage%>
+        </p>
+        <%})%>
+      </div>
+      <div class="usersOn">
+        <%usersOnline.forEach((user)=>{%>
+        <p data-testid="online-user" id="<%=user.socketId%>"><%=user.nickname%></p>
         <%})%>
       </div>
       <input
@@ -38,9 +45,21 @@
       const authorInput = document.querySelector('[data-testid="nickname-box"]');
       const messageInput = document.querySelector('[data-testid="message-box"]');
       const chat = document.querySelector('.messages');
+      const userList = document.querySelector('.usersOn');
+      const userButton = document.querySelector('[data-testid="nickname-save"]');
+      let nick;
+      let id;
+
+      userButton.addEventListener('click', function () {
+        const nickname = authorInput.value;
+
+        if (nickname.length) {
+          socket.emit('nickChange', nickname);
+        }
+      });
 
       chatButton.addEventListener('click', function () {
-        const nickname = authorInput.value;
+        const nickname = nick;
         const chatMessage = messageInput.value;
 
         if (nickname.length && chatMessage.length) {
@@ -58,6 +77,36 @@
         p.innerHTML = message;
         p.setAttribute('data-testid', 'message');
         chat.appendChild(p);
+      });
+
+      socket.on('conectado', (userId, fakeName) => {
+        nick = fakeName;
+        id = userId;
+        const divUsers = document.getElementsByClassName('usersOn');
+        const p = document.createElement('p');
+        p.innerHTML = fakeName;
+        p.setAttribute('data-testid', 'online-user');
+        p.setAttribute('id', userId);
+        userList.prepend(p);
+      });
+
+      socket.on('userOn', (userId, fakeName) => {
+        const p = document.createElement('p');
+        p.innerHTML = fakeName;
+        p.setAttribute('data-testid', 'online-user');
+        p.setAttribute('id', userId);
+        userList.appendChild(p);
+      });
+
+      socket.on('nickChange', (nickname, userId) => {
+        const p = document.getElementById(userId);
+        p.innerHTML = nickname;
+      });
+
+      socket.on('disconected', (userId) => {
+        const p = document.getElementById(userId);
+        console.log(p);
+        p.remove();
       });
     </script>
   </body>
