@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project 32 - Webchat || Bate papo UOL é você?</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form id="chat">
+      <input
+      type="text"
+      name="username"
+      data-testid="nickname-box"
+      placeholder="Digite seu usuário"
+    />
+      <div class="messages"></div>
+      <input
+      type="text"
+      data-testid="message-box"
+      name="message"
+      placeholder="Digite sua mensagem"
+    />
+    <button type="button" data-testid="send-button">Enviar</button>
+    <button type="button" data-testid="nickname-save">Salvar Nickname</button>
+    </form>
+
+    <script type="text/javascript">
+    const socket = io('http://localhost:3000');
+    const sendChatButtom = document.querySelector('[data-testid="send-button"]');
+    const userNickname = document.querySelector('[data-testid="nickname-box"]');
+    const messageBox = document.querySelector('[data-testid="message-box"]');
+    const chat = document.querySelector('.messages');
+    $('#chat')sendChatButtom.addEventListener('click', function () {
+      const nickname = userNickname.value;
+      const chatMessage = messageBox.value;
+      if (nickname.length && chatMessage.length) {
+        const messageObject = {
+          nickname,
+          chatMessage,
+        };
+        socket.emit('message', messageObject);
+      }
+      });
+
+      socket.on('message', (message) => {
+        const p = document.createElement('p');
+        p.innerHTML = message;
+        p.setAttribute('data-testid', 'message');
+        chat.appendChild(p);
+      });
+    </script>
+  </body>
+</html>
