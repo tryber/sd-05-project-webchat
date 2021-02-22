@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');
 const dateFormat = require('dateformat');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const faker = require('faker');
 
 // Escopo retirado do conteúdo 32.3
