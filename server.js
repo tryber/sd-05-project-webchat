@@ -23,37 +23,49 @@ const io = require('socket.io')(httpServer, {
 
 app.use(express.static(path.join(__dirname, 'views')));
 app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
-app.set('view engine', 'ejs');
-
-const messageController = require('./controllers/messageController');
+const messageModel = require('./models/MessageModel');
 const { createMessage } = require('./models/MessageModel');
 
-app.use('/', messageController);
+let onlineUsers = [];
+
+app.get('/', async (_req, res) => {
+  const message = await messageModel.getAll();
+  return res.render('index', { message, onlineUsers });
+});
 
 io.on('connection', async (socket) => {
   console.log(`${socket.id} connected`);
 
-  socket.emit('nickname', faker.name.firstName());
+  const fakeName = faker.name.firstName();
+  onlineUsers.push({ id: socket.id, nickname: fakeName });
+  io.emit('onlineUsers', { id: socket.id, onlineUsers });
+  socket.emit('nickname', { id: socket.id, nickname: fakeName });
 
-  socket.on('nickname', async (nickname) => {
-    socket.emit('nickname', nickname);
-  });
+  io.emit('onlineUsers', { id: socket.id, onlineUsers });
 
-  socket.on('nicknameOnline', async (nickname) => {
-    io.emit('nicknameOnline', nickname);
+  socket.on('changeNick', async (nickname) => {
+    socket.emit('nickname', { id: socket.id, nickname });
+    onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
+    onlineUsers.push({ id: socket.id, nickname });
+    io.emit('onlineUsers', { id: socket.id, onlineUsers });
   });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const timestamp = moment(new Date().getTime()).format('DD-MM-yyyy hh:mm:ss');
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+    console.log(message);
     await createMessage({ timestamp, nickname, chatMessage });
     socket.broadcast.emit('message', message);
   });
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnect`);
+    const updatedUsers = onlineUsers.filter((user) => user.id !== socket.id);
+    onlineUsers = updatedUsers;
+    io.emit('onlineUsers', { id: socket.id, onlineUsers });
   });
 });
 

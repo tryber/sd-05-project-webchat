@@ -3,6 +3,7 @@ const connection = require('./connection');
 const createMessage = async ({ timestamp, nickname, chatMessage }) => {
   try {
     const message = await connection().then((db) => db.collection('messages').insertOne({ timestamp, nickname, chatMessage }));
+    console.log(message);
     return message.ops[0];
   } catch (error) {
     console.error(error.message);
