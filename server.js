@@ -43,7 +43,7 @@ app.post('/message', (req, res) => {
 
   // Evento personalizado que dispara para todos os clients.
   // primeiro parametro, nome do evento, segundo, ação que o client deve fazer/dados enviados.
-  io.emit('message', { chatMessage, nickname });
+  // io.emit('message', { chatMessage, nickname });
 
   res.status(200).json({ message: `${nickname} enviou: ${chatMessage}` });
 });

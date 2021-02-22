@@ -15,19 +15,17 @@
     </div>
     <ul id="online-users-list">
       <% if (usersOnline.length > 0) { %>
-        <% usersOnline.map((u) => { %>
-          <!-- <li data-testid="online-user" id="<%=u.userId %>"><%=u.nickname%></li> -->
-          <li data-testid="online-user"><%= `${u.nickname}` %></li>
+        <% usersOnline.forEach((u) => { %>
+          <li data-testid="online-user" id="<%=u.userId%>"><%=u.nickname%></li>
         <% }) %>
       <% } %>
     </ul>
     <div>
       <ul id="mensagens">
         <% if (allMessages) { %>
-          <% console.log(allMessages) %>
-          <% allMessages.map((m) => { %>
+          <% allMessages.forEach((m) => { %>
             <li data-testid="message">
-              <%= `${m.dateFormat} - ${m.nickname}: ${m.chatMessage}`%>
+              <%= `${m.dateFormat} - ${m.nickname}: ${m.chatMessage}` %>
             </li>
           <% }) %>
         <% } %>
@@ -50,6 +48,8 @@
     let clientId = '';
     let nickname = `User ${Math.round(Math.random() * 1000)}`;
     let chatMessage = '';
+
+    socket.nickname = nickname;
 
     // Função que irá lidar com todas as alterações do user (login, mudança de nome e logout).
     function renderOnlineUsers(usersOnline) {
@@ -105,8 +105,9 @@
 
     socket.on('message', (data) => {
       const li = document.createElement('li');
-      li.setAttribute = ('data-testid', 'message');
-      li.textContent = data;
+      li.setAttribute('data-testid', 'message');
+      li.innerText = data;
+
       document.getElementById('mensagens').appendChild(li);
     })
 

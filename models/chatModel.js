@@ -5,8 +5,6 @@ const createMessage = async ({ dateFormat, nickname, chatMessage }) => {
     const newMessage = await connection().then((db) =>
       db.collection('messages').insertOne({ dateFormat, nickname, chatMessage }));
 
-    console.log(newMessage);
-
     return newMessage.ops[0];
   } catch (e) {
     console.log(e);
