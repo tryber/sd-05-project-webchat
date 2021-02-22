@@ -1,7 +1,7 @@
 {
   "name": "webchat",
   "version": "1.0.0",
-  "description": "",
+  "description": "Ao iniciar este projeto, você concorda com as diretrizes do Código de Ética e Conduta e do Manual da Pessoa Estudante da Trybe.",
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand  --detectOpenHandles --forceExit",
@@ -47,5 +47,16 @@
     "stylelint": "^13.8.0",
     "stylelint-config-standard": "^20.0.0",
     "stylelint-order": "^4.1.0"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tryber/sd-05-project-webchat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tryber/sd-05-project-webchat/issues"
+  },
+  "homepage": "https://github.com/tryber/sd-05-project-webchat#readme"
 }
