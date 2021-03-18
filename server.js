@@ -1,11 +1,14 @@
 const cors = require('cors');
+const path = require('path');
 const moment = require('moment');
+const express = require('express');
 const {
   uniqueNamesGenerator,
   colors,
   animals,
 } = require('unique-names-generator');
-const app = require('express')();
+
+const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
@@ -17,14 +20,16 @@ const io = require('socket.io')(http, {
 const { addMessage, allMessages } = require('./models/messages.model');
 
 const onlineUsers = [];
-
+const viewPath = path.join(__dirname, 'view');
 app.use(cors());
 
+app.use(express.static(viewPath));
+app.set('views', viewPath);
 app.set('view engine', 'ejs');
 
 app.get('/', async (_, res) => {
   const messages = await allMessages();
-  res.status(200).render(`${__dirname}/index`, { onlineUsers, messages });
+  res.status(200).render('index', { onlineUsers, messages });
 });
 
 io.on('connection', (socket) => {
