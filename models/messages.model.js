@@ -9,4 +9,11 @@ module.exports = {
       .insertOne(msgData);
     return insertedMsg.ops[0];
   },
+  allMessages: async () => {
+    const db = await connection();
+    const messages = await db
+      .collection(COLLECTIONS.MESSAGES)
+      .find().toArray();
+    return messages;
+  },
 };

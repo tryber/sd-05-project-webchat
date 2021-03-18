@@ -14,7 +14,7 @@ const io = require('socket.io')(http, {
   },
 });
 
-const { addMessage } = require('./models/messages.model');
+const { addMessage, allMessages } = require('./models/messages.model');
 
 const onlineUsers = [];
 
@@ -22,7 +22,10 @@ app.use(cors());
 
 app.set('view engine', 'ejs');
 
-app.get('/', (_, res) => res.status(200).render(`${__dirname}/index`, { onlineUsers }));
+app.get('/', async (_, res) => {
+  const messages = await allMessages();
+  res.status(200).render(`${__dirname}/index`, { onlineUsers, messages });
+});
 
 io.on('connection', (socket) => {
   const userId = socket.id;

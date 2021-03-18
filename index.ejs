@@ -7,7 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <ul id="messages">
+      <% messages.forEach(({date, nickname, chatMessage}) => { %>
+        <li data-testid="message"><%=date %> - <%=nickname %>: <%=chatMessage%></li>
+        <%}) %>
+    </ul>
     <form action="">
       <div class="nickName container">
         <input id="nickInput" autocomplete="on" data-testid="nickname-box" />
