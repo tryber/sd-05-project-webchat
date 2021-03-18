@@ -5,7 +5,7 @@
 }
 
 body {
-  font: 13px Helvetica Arial;
+  font: 13px;
 }
 
 form {
@@ -31,16 +31,16 @@ form button {
   width: 9%;
 }
 
-#mensagens {
+.messages {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-#mensagens li {
+.message-item {
   padding: 5px 10px;
 }
 
-#mensagens li:nth-child( odd ) {
+.message-item nth-child( odd ) {
   background: #eee;
 }

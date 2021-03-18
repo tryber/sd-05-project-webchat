@@ -6,9 +6,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <ul id="messages">
+    <ul class="messages" id="messages">
       <% messages.forEach(({date, nickname, chatMessage}) => { %>
-      <li data-testid="message">
+      <li data-testid="message" class="message-item">
         <%=date %> - <%=nickname %>: <%=chatMessage%>
       </li>
       <%}) %>
@@ -48,6 +48,7 @@
         const li = document.createElement('li');
         li.innerText = message;
         li.setAttribute('data-testid', 'message');
+        li.className = "message-item";
         messagesUl.appendChild(li);
       };
       const showUsers = (id, nick) => {
