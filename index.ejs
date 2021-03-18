@@ -9,8 +9,10 @@
   <body>
     <ul id="messages">
       <% messages.forEach(({date, nickname, chatMessage}) => { %>
-        <li data-testid="message"><%=date %> - <%=nickname %>: <%=chatMessage%></li>
-        <%}) %>
+      <li data-testid="message">
+        <%=date %> - <%=nickname %>: <%=chatMessage%>
+      </li>
+      <%}) %>
     </ul>
     <form action="">
       <div class="nickName container">
@@ -18,12 +20,16 @@
         <button id="change-nick" data-testid="nickname-save">Apelido</button>
       </div>
       <div class="input-message container">
-        <input data-testid="message-box" id="mensagemInput" autocomplete="off" />
+        <input
+          data-testid="message-box"
+          id="mensagemInput"
+          autocomplete="off"
+        />
         <button id="send-message" data-testid="send-button">Send</button>
       </div>
       <div class="logged-users container" id="logged-users">
         <% onlineUsers.forEach(({userId, nickname}) => { %>
-          <li data-testid="online-user" id="<%=userId%>"><%=nickname%></li>
+        <li data-testid="online-user" id="<%=userId%>"><%=nickname%></li>
         <%}) %>
       </div>
     </form>
@@ -81,6 +87,9 @@
       socket.on('nickChange', (nick, id) => {
         const ulNick = document.getElementById(id);
         ulNick.innerText = nick;
+      });
+      socket.on('userQuit', (id) => {
+        document.getElementById(id).remove();
       });
     </script>
   </body>

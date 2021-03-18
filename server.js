@@ -57,6 +57,13 @@ io.on('connection', (socket) => {
     onlineUsers[userPosition].nickname = nick;
     io.emit('nickChange', nick, id);
   });
+
+  socket.on('disconnect', () => {
+    console.log(`Usuário ${userId} vazou!`);
+    const userIdx = onlineUsers.findIndex((usr) => usr.userId === userId);
+    onlineUsers.splice(userIdx, 1);
+    io.emit('userQuit', userId);
+  });
 });
 
 http.listen(process.env.PORT || 3000);
