@@ -2,7 +2,7 @@ html , body {
   height: 100%;
 }
 
-* {
+/* * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -44,7 +44,7 @@ button {
   margin: 2vw 0;
   padding: 2vw;
   width: 60vw;
-}
+} */
 
 /* Chat em tempo real com NodeJS + Socket.io | Diego Fernandes | Rocketseat
 <https://www.youtube.com/watch?v=-jXfKDYJJvo> */

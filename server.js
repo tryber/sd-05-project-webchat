@@ -1,3 +1,5 @@
+// Desenvolvimento em conjuto do Rafão t05 =  PR #31
+
 const express = require('express');
 const bodyParser = require('body-parser');
 // Cross-Origin Resource Sharing
@@ -5,80 +7,88 @@ const cors = require('cors');
 const path = require('path');
 // moment = date library for parsing, validating, manipulating, and formatting dates.
 const moment = require('moment');
+// require models mensagens
+const { createMessage, createPrivateMessage, getMessages } = require('./models/messagesModel');
 
 const app = express();
 
 // require socket.io e protocolo http
-const socketIo = require('socket.io');
 const http = require('http');
+const socketIo = require('socket.io');
 
 // Wss para protocolo http
 const server = http.createServer(app);
 // socket.io para wss
 const io = socketIo(server);
 
-// require models mensagens
-const { createMessage, getMessages } = require('./models/messagesModel');
-
-// rota app.use do diretorio public
-app.use(express.static(path.join(__dirname, 'public')));
-// por default view engine é ejs
-app.set('view engine', 'ejs');
-// diretorio public com views
-app.set('views', './public');
-
+app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors());
 
-// concectando socket data/mensagem
-io.on('connection', (socket) => {
-  console.log(`Socket conectado: ${socket.id}`);
-  io.emit('conectado', `${socket.id}`);
+// rota app.use do diretorio public
+app.use('/', express.static(path.join(__dirname, 'public')));
+// // por default view engine é ejs
+// app.set('view engine', 'ejs');
+// // diretorio public com views
+// app.set('views', './public');
 
-  // historico de mensagens
-  const historyMessage = getMessages();
-  const conectados = [];
-  const messagesSave = [];
-  historyMessage.map((msg) => {
-    const { chatMessage, nickname, dateTime } = msg;
-    return messagesSave.push(`${dateTime} - ${nickname}: ${chatMessage}`);
-  });
-  io.emit('history', messagesSave);
+const onlineUsers = {};
 
-  // mensagens com data e nickname
-  socket.on('message', async ({ nickname, chatMessage }) => {
-    const dateTime = moment(Date.now()).format('DD-MM-yyyy HH:mm:ss');
-    await createMessage(nickname, chatMessage, dateTime);
-    // DD-MM-yyyy HH:mm:ss ${message.nickname} ${message.chatMessage}
-    const message = `${dateTime} - ${nickname}: ${chatMessage}`;
-    io.emit('message', message);
+// concectando socket
+io.on('connection', async (socket) => {
+  const messages = await getMessages();
+  io.to(socket.id).emit('displayHistory', messages, 'public');
+
+  socket.on('userConnection', (currentUser) => {
+    onlineUsers[socket.id] = currentUser;
+    io.emit('displayUsers', onlineUsers);
   });
 
-  // mudar de nome
-  socket.on('changeName', async ({ nickname }) => {
-    io.emit('changeName', nickname);
+  socket.on('updateNick', (nickname) => {
+    onlineUsers[socket.id] = nickname;
+    io.emit('displayUsers', onlineUsers);
   });
 
-  // nome online
-  socket.on('changeName', async ({ nickname }) => {
-    conectados.push(nickname);
-    io.emit('online', conectados);
+  socket.on('disconnect', () => {
+    delete onlineUsers[socket.id];
+    io.emit('displayUsers', onlineUsers);
+  });
 
-    // disconectar
-    socket.on('disconnect', () => {
-      delete conectados[socket.id];
-      io.emit('online', conectados);
-    });
+  socket.on('message', async ({ nickname, chatMessage, addressee }) => {
+    let msg;
+    if (!addressee) {
+      msg = await createMessage({
+        nickname,
+        message: chatMessage,
+        timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
+      });
+      io.emit('message', `${msg.timestamp} - ${nickname}: ${chatMessage}`, 'public');
+    } else {
+      msg = await createPrivateMessage({
+        nickname,
+        message: chatMessage,
+        timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
+        addressee,
+      });
+      // https://socket.io/docs/v3/rooms/
+      io.to(socket.id)
+        .to(addressee)
+        .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
+    }
   });
 });
 
+// --------------------------------------------------------------------------------------------- 
 // Endpoint GET para mensagens
-app.get('/', async (req, res) => {
-  const getAllMessages = await getMessages();
-  res.status(200).render('index', { getAllMessages });
-});
+// exemplo de ejs response.render('caminho', {objeto no ejs que quer chamar});
+// app.get('/', async (req, res) => {
+//   const getAllMessages = await getMessages();
+//   res.status(200).render('index', { getAllMessages });
+// });
+// ----------------------------------------------------------------------------------------------
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
+// const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`ICQ balançou a tela na porta ${PORT}, saudades!!!.`));
 
 // Referencias para o projeto
