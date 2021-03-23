@@ -1,60 +1,15 @@
-<!-- front-end ~ área do cliente -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projeto Webchat - Bloco 32: Socket.io </title>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <title>Document</title>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
 </head>
 
 <body>
-  <div class="online-users">
-    <h3>Usuários Online:</h3>
-    <ul class='ulUsuarioOnline'>
-      <% if (users !==[]) { %>
-        <% users.forEach((user)=> { %>
-          <li data-testid="online-user" id="<%=user.socketId%>">
-            <%=user.nickname%>
-          </li>
-          <% }) %>
-            <% } %>
-    </ul>
-  </div>
-
-  <div class="messages">
-    <ul id="messages-list">
-      <% if (messages) { %>
-        <% messages.forEach((message)=> { %>
-          <li data-testid="message">
-            <%= `${message.dateTime} - ${message.nickname}: ${message.chatMessage}` %>
-          </li>
-          <% }) %>
-            <% } %>
-    </ul>
-  </div>
-
-  <form class="chat-form">
-    <div>
-      <input type="text" data-testid="nickname-box" class="inputNickname" name="username"
-        placeholder="Digite seu nome de usuário">
-      <button type="button" data-testid="nickname-save" class="btnNickname">Salvar</button>
-    </div>
-
-    <div>
-      <input type="text" data-testid="message-box" class="inputMessage" name="message"
-        placeholder="Digite sua mensagem">
-      <button type="button" data-testid="send-button" class="btnMessage">Enviar</button>
-    </div>
-  </form>
-
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <script defer src="/main.js"></script>
 </body>
 
 </html>

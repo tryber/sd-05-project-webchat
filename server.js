@@ -1,62 +1,58 @@
-const path = require('path');
-const http = require('http');
 const express = require('express');
-const bodyParser = require('body-parser');
-const dateFormat = require('dateformat');
+const moment = require('moment');
+const path = require('path');
+
+const PORT = process.env.PORT || 3000;
 
 const app = express();
-const server = http.createServer(app);
-const io = require('socket.io')(server);
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-const { addMessage, getAllMessages } = require('./models/messagesModel');
-
-// Set Static Folder
 app.use(express.static(path.join(__dirname, 'views')));
-app.set('views', './views');
+
+app.set('views', path.join(__dirname, 'views'));
+
+app.engine('html', require('ejs').renderFile);
+
 app.set('view engine', 'ejs');
 
-let users = [];
+const http = require('http').createServer(app);
 
-app.get('/', async (req, res) => {
-  const messages = await getAllMessages();
-  res.status(200).render('index', { users, messages });
+const cors = require('cors');
+
+app.use(cors()); // Permite recursos restritos na página web serem pedidos a domínio externo
+
+const client = require('socket.io')(http, {
+  cors: {
+    origin: 'http://localhost:3000', // url aceita pelo cors
+    methods: ['GET', 'POST'], // Métodos aceitos pela url
+  },
 });
 
-io.on('connection', (socket) => {
-  const sessionUserId = socket.id;
-  const convidadoNick = `Convidado_${parseInt(Math.random() * 10000, 10)}`;
-  console.log(`Connected: ${sessionUserId}`);
+const create = require('./controllers/index');
+const { createMessage } = require('./models/Messages');
 
-  io.emit('connected', { sessionUserId, convidadoNick });
+app.use('/', create);
 
-  socket.on('chat message', (msg) => {
-    console.log(`message: ${msg}`);
-  });
+// Foi criado um envento chamado connecton e a cada socket que for criado
+// será renderizado para o client o id e a string connected
+client.on('connection', async (socket) => {
+  console.log(`${socket.id} connected`);
 
-  // socket.on -> 'message' aguardando acionamento do botao Mandar Mensagem enviado pelo main.js
-  socket.on('messageServer', async ({ nickname, chatMessage }) => {
-    const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
+  // cada msg do client será composta pelo momento q enviou a msg, o nickname e a msg
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const date = new Date().getTime();
+    const timeStamp = moment(date).format('DD-MM-yyyy hh:mm:ss');
+    const message = `${timeStamp} - ${nickname}: ${chatMessage}`;
+    await createMessage(timeStamp, nickname, chatMessage);
 
-    await addMessage({ nickname, chatMessage, dateTime });
-    const message = `${dateTime} - ${nickname}: ${chatMessage}`;
-    io.emit('messageMain', message);
-  });
-
-  socket.on('changeNickname', (nickname) => {
-    users = users.filter((user) => user.socketId !== sessionUserId);
-    users.push({ socketId: sessionUserId, nickname });
-    io.emit('changeNickname', { nickname, socketId: sessionUserId });
+    // toda vez que o evento message for emitido vai renderizar a msg no padrão da const message
+    socket.broadcast.emit('message', message);
   });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log(`${socket.id} disconnect`);
   });
 });
 
-const PORT = 3000 || process.env.PORT;
-server.listen(PORT, () => {
-  console.log(`Running on port ${PORT}`);
+http.listen(PORT, () => {
+  console.log(`Servidor ouvindo na porta ${PORT}`);
 });
