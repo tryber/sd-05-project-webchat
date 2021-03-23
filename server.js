@@ -1,6 +1,5 @@
 const moment = require('moment');
-const server = require('express');
-const app = server();
+const app = require('express');
 const http = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(http, {
