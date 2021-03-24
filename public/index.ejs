@@ -23,7 +23,7 @@
       <div id="onlineUsers">
       <%getAllMessages.forEach((user) => { %>
           <div class="private">
-            <li data-testid="online-user" id="<%=user.socketId %>"><%=user.nickname %></li>
+            <li data-testid="online-user" id="<%=user.socketId %>"></li>
             <button class="private" type="button" >private</button>
           </div>
           <% }) %>
