@@ -26,11 +26,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // rota app.use do diretorio public
-app.use('/', express.static(path.join(__dirname, 'public')));
+// app.use('/', express.static(path.join(__dirname, 'public')));
 // // por default view engine é ejs
-// app.set('view engine', 'ejs');
-// // diretorio public com views
-// app.set('views', './public');
+app.set('view engine', 'ejs');
+// diretorio public com views
+app.set('views', './public');
 
 const onlineUsers = {};
 
@@ -78,13 +78,14 @@ io.on('connection', async (socket) => {
   });
 });
 
-// --------------------------------------------------------------------------------------------- 
+// // --------------------------------------------------------------------------------------------- 
 // Endpoint GET para mensagens
 // exemplo de ejs response.render('caminho', {objeto no ejs que quer chamar});
-// app.get('/', async (req, res) => {
-//   const getAllMessages = await getMessages();
-//   res.status(200).render('index', { getAllMessages });
-// });
+app.get('/', async (req, res) => {
+  const getAllMessages = await getMessages();
+  console.log(getAllMessages);
+  return res.status(200).render('index', { getAllMessages });
+});
 // ----------------------------------------------------------------------------------------------
 
 const PORT = 3000;
