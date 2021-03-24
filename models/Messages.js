@@ -1,40 +1,27 @@
 const connection = require('../tests/helpers/db');
 
-const createMessage = async (messageObj) => {
+const createMessage = async ({ dateFormat, nickname, chatMessage }) => {
   try {
-    const database = await connection();
-    const message = await database.collection('messages').insertOne(messageObj);
-    return message.ops[0];
+    const newMessage = await connection().then((db) =>
+      db.collection('messages').insertOne({ dateFormat, nickname, chatMessage }));
+    // console.log(newMessage); saw that object is inside ops array
+    return newMessage.ops[0];
   } catch (err) {
-    console.error(err.message);
-    return null;
-  }
-};
-
-const createPrivateMessage = async (messageObj) => {
-  try {
-    const database = await connection();
-    const privateMessage = await database.collection('private').insertOne(messageObj);
-    return privateMessage.ops[0];
-  } catch (err) {
-    console.error(err.message);
-    return null;
+    console.log(err);
   }
 };
 
 const getMessages = async () => {
   try {
-    const database = await connection();
-    const messages = await database.collection('messages').find({}).toArray();
-    return messages;
+    const allMessages = await connection().then((db) =>
+      db.collection('messages').find().toArray());
+    return allMessages;
   } catch (err) {
-    console.error(err.message);
-    return null;
+    console.log(err);
   }
 };
 
 module.exports = {
   createMessage,
-  createPrivateMessage,
   getMessages,
 };

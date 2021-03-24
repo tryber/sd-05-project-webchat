@@ -1,132 +1,44 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebChat Project</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h2>Webchat</h2>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webchat</title>
-</head>
+    <ul class="messages" id="messages">
+      <% if (allMessages) { %>
+        <% allMessages.forEach((msg) => { %>
+          <li data-testid="message">
+            <%= `${msg.dateFormat} - ${msg.nickname}: ${msg.chatMessage}`%>
+          </li>
+       <% }) %>
+      <% } %>
+    </ul>
+    <section class="chat-inputs">
+      <div class="nickname-stuff">
+        <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
+        <button data-testid="nickname-save" type="button" id="nickname-save">Save nickname</button>
+      </div>
+      <div class="message-stuff">
+        <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
+        <button data-testid="send-button" type="button" id="send">Send message</button>
+      </div>
+    </section>
 
-<body>
-  <form id="nickname-form">
-    <input type="text" id="nickname" placeholder="Type your nickname" data-testid="nickname-box">
-    <button class="nickname-save" data-testid="nickname-save">Save</button>
-  </form>
-  <div id="chat-messages"></div>
-  <form id="chat-form">
-    <input type="text" id="message" placeholder="Enter message" required data-testid="message-box">
-    <button data-testid="send-button">Send</button>
-  </form>
-  <button id="public-button" data-testid="public" disabled>Public</button>
-  <ul id="users-list"></ul>
+    <ul class="users" id="users">
+      <% if (onlineUsers && onlineUsers.length > 0) { %>
+        <% onlineUsers.forEach((user) => { %>
+          <li data-testid="online-user" id="<%=user.id %>"><%=user.nickname%></li>
+       <% }) %>
+      <% } %>
+    </ul>
+  </body>
 
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <script>
-    const chatForm = document.getElementById('chat-form');
-    const chatMessages = document.getElementById('chat-messages');
-    const nicknameForm = document.getElementById('nickname-form');
-    const userList = document.getElementById('users-list');
-    const publicButton = document.getElementById('public-button');
-
-    const socket = io();
-    const localHistory = {
-      'public': [],
-      'private': [],
-    }
-    let nickname;
-    let receiver;
-    let chatType = 'public';
-
-    const addMessage = (message) => {
-      const messageElement = document.createElement('p');
-      messageElement.setAttribute('data-testid', 'message');
-      messageElement.innerText = message;
-      chatMessages.appendChild(messageElement);
-    };
-
-    const clearChat = () => {
-      while (chatMessages.firstChild) {
-        chatMessages.removeChild(chatMessages.lastChild)
-      }
-    }
-
-    chatForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const chatMessage = event.target.elements.message.value;
-      socket.emit('message', { chatMessage, nickname, receiver });
-      event.target.elements.message.value = '';
-      event.target.elements.message.focus();
-    });
-
-    nicknameForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      nickname = event.target.elements.nickname.value;
-      socket.emit('updateNick', nickname);
-    });
-
-    publicButton.addEventListener('click', (_event) => {
-      publicButton.disabled = true;
-      clearChat();
-      chatType = 'public'
-      receiver = '';
-      localHistory.public.map(m => addMessage(m));
-    })
-
-    socket.on('connect', () => {
-      if (!nickname) nickname = `Guest_${socket.id}`;
-      socket.emit('userConnection', nickname);
-    })
-
-    socket.on('displayHistory', (history, type) => {
-      let msg;
-      if (type === 'public') {
-        history.map(({ timestamp, nickname, message }) => {
-          msg = `${timestamp} - ${nickname}: ${message}`;
-          localHistory[type].push(msg);
-          if (type === chatType) addMessage(msg);
-        });
-      } else {
-        history.map(({ timestamp, nickname, message, receiver }) => {
-          msg = `${timestamp} (private) - ${nickname}: ${message}`;
-          localHistory[type].push(msg);
-          if (type === chatType) addMessage(msg);
-        });
-      }
-    });
-
-    socket.on('displayUsers', (users) => {
-      userList.innerHTML = '';
-      Object.entries(users).map(([key, value]) => {
-        const li = document.createElement('li');
-        const div = document.createElement('div');
-        div.innerText = `${value}`;
-        div.setAttribute('data-testid', 'online-user');
-        li.appendChild(div);
-        if (key !== socket.id) {
-          const privateButton = document.createElement('button');
-          privateButton.innerText = 'Private';
-          privateButton.id = key;
-          privateButton.setAttribute("data-testid", "private")
-          privateButton.addEventListener('click', (event) => {
-            clearChat();
-            publicButton.disabled = false;
-            chatType = 'private'
-            receiver = event.target.id;
-            localHistory.private.map(m => addMessage(m));
-          });
-          li.appendChild(privateButton);
-        }
-        userList.appendChild(li);
-      });
-    })
-
-    socket.on('message', (message, type) => {
-      localHistory[type].push(message);
-      console.log(localHistory);
-      if (type === chatType) addMessage(message);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
-  </script>
-</body>
-
+  <script defer src="/main.js"></script>
 </html>

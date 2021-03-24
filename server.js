@@ -1,63 +1,43 @@
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
 const path = require('path');
-const moment = require('moment');
 
-const { createMessage, createPrivateMessage, getMessages } = require('./models/Messages');
+const bodyParser = require('body-parser');
+const moment = require('moment');
+require('dotenv').config();
 
 const app = express();
+app.use(bodyParser.json());
 
-const server = http.createServer(app);
-const io = socketIo(server);
+const server = require('http').createServer(app);
+const cors = require('cors');
+const io = require('socket.io')(server);
 
-app.use(express.json());
+const { createMessage, getMessages } = require('./models/Messages');
+
 app.use(cors());
 
-app.use('/', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views')));
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
-const onlineUsers = {};
+app.get('/', async (_req, res) => {
+  const allMessages = await getMessages();
+  res.render('index', { allMessages });
+  res.render('index');
+});
 
 io.on('connection', async (socket) => {
-  const messages = await getMessages();
-  io.to(socket.id).emit('displayHistory', messages, 'public');
-
-  socket.on('userConnection', (currentUser) => {
-    onlineUsers[socket.id] = currentUser;
-    io.emit('displayUsers', onlineUsers);
-  });
-
-  socket.on('updateNick', (nickname) => {
-    onlineUsers[socket.id] = nickname;
-    io.emit('displayUsers', onlineUsers);
+  console.log(`User ${socket.id} connected`);
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const dateNow = new Date().getTime();
+    const dateFormat = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
+    const fullMessage = `${dateFormat} - ${nickname}: ${chatMessage}`;
+    await createMessage({ dateFormat, nickname, chatMessage });
+    io.emit('message', fullMessage); // to have messages displayed for all users
   });
 
   socket.on('disconnect', () => {
-    delete onlineUsers[socket.id];
-    io.emit('displayUsers', onlineUsers);
-  });
-
-  socket.on('message', async ({ nickname, chatMessage, receiver }) => {
-    let msg;
-    if (!receiver) {
-      msg = await createMessage({
-        nickname,
-        message: chatMessage,
-        timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
-      });
-      io.emit('message', `${msg.timestamp} - ${nickname}: ${chatMessage}`, 'public');
-    } else {
-      msg = await createPrivateMessage({
-        nickname,
-        message: chatMessage,
-        timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
-        receiver,
-      });
-      io.to(socket.id)
-        .to(receiver)
-        .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
-    }
+    console.log(`User ${socket.id} disconnected`);
   });
 });
 
