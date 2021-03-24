@@ -3,28 +3,28 @@ const moment = require('moment');
 
 const path = require('path');
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const serverApp = require('http').createServer(app);
+const io = require('socket.io')(serverApp);
 
-const { getMessages, addMessage } = require('./models/Messages');
+const { addMessage, getMessages } = require('./models/Messages');
 
-app.use(express.static(path.join(__dirname, 'views')));
-app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'public'));
 
-app.engine('html', require('ejs').renderFile);
-
-app.set('view engine', 'html');
+app.set('view engine', 'ejs');
 
 let onlineUsers = [];
 
-app.get('/', async (req, res) => {
+app.get('/', async (_, res) => {
   const messages = await getMessages();
-  res.status(200).render('index.ejs', { messages, onlineUsers });
+  res.status(200).render('index', { onlineUsers, messages });
 });
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
   const userId = socket.id;
   const clientNickname = `Guest_${parseInt(Math.random() * 10000, 10)}`;
 
@@ -43,10 +43,10 @@ io.on('connection', async (socket) => {
     io.emit('message', msg);
   });
 
-  socket.on('changeNickname', (nick, id) => {
+  socket.on('nickChange', (nick, id) => {
     onlineUsers = onlineUsers.filter((user) => user.userId !== userId);
     onlineUsers.push({ userId: id, nickname: nick });
-    io.emit('changeNickname', nick, id);
+    io.emit('nickChange', nick, id);
   });
 
   socket.on('getMsgHistory', async () => {
@@ -54,23 +54,20 @@ io.on('connection', async (socket) => {
     socket.emit('history', history);
   });
 
-  socket.on('getchatPrivadoHistorico', async (id, target) => {
+  socket.on('getPvtHistory', async (id, target) => {
     const history = await getMessages();
-    const chatPrivadoHistorico = history.reduce((array, msg) => {
+    const pvtHistory = history.reduce((array, msg) => {
       if (msg.to && (msg.to === target || msg.from === target)) array.push(msg);
       return array;
     }, []);
-    socket.emit('chatPrivadoHistorico', chatPrivadoHistorico);
+    socket.emit('pvtHistory', pvtHistory);
   });
 
   socket.on('disconnect', () => {
     console.log(`Usuário desconectado! ID: ${userId}`);
     onlineUsers = onlineUsers.filter((user) => user.userId !== userId);
-    io.emit('userDisconectado', userId);
+    io.emit('userDisconnected', userId);
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server listening to port ${PORT}`);
-});
+serverApp.listen(PORT, () => console.log(`Baguncinha rolando na porta ${PORT}`));
