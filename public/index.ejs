@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebChat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <form id="inputName">
+    <input type="text" id="nickname" placeholder="Enter your Nickname" data-testid="nickname-box">
+    <button class="nickname-save" data-testid="nickname-save">Salvar Nome</button>
+  </form>
+  <div id="messages">
+    <!-- <% getAllMessages.forEach((el) => { %>
+      <li><%= el.timestamp el.nickname el.message %></li>
+      <% }) %> -->
+  </div>
+  <form id="inputMessageInBox">
+    <input type="text" id="message" placeholder="Enter your message" required data-testid="message-box">
+    <button data-testid="send-button">Enviar mensagem</button>
+  </form>
+  <button id="publicButton" data-testid="public" disabled>Public Room</button>
+  <ul id="onlineUsers"></ul>
+
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="./script.js"></script>
+</body>
+
+</html>
