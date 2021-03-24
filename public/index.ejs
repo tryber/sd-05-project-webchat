@@ -15,9 +15,9 @@
     <button class="nickname-save" data-testid="nickname-save">Salvar Nome</button>
   </form>
   <div id="messages">
-    <!-- <% getAllMessages.forEach((el) => { %>
-      <li><%= el.timestamp el.nickname el.message %></li>
-      <% }) %> -->
+    <% getAllMessages.forEach(({timestamp, nickname, message}) => { %>
+      <li><%= timestamp %> <%= nickname %> <%= message %> | </li>
+      <% }) %>
   </div>
   <form id="inputMessageInBox">
     <input type="text" id="message" placeholder="Enter your message" required data-testid="message-box">

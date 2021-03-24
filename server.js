@@ -77,6 +77,13 @@ io.on('connection', async (socket) => {
         .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
     }
   });
+  
+});
+
+app.get('/', async (_req, res) => {
+  const getAllMessages = await getMessages();
+  console.log(getAllMessages);
+  return res.render('index', { getAllMessages });
 });
 
 server.listen(3000, () => console.log('Listening on port 3000...'));
