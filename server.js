@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // rota app.use do diretorio public
-// app.use('/', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views')));
 // // por default view engine é ejs
 app.set('view engine', 'ejs');
 // diretorio public com views
