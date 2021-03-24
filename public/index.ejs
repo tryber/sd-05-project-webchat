@@ -14,19 +14,34 @@
     <input type="text" id="nickname" placeholder="Enter your Nickname" data-testid="nickname-box">
     <button class="nickname-save" data-testid="nickname-save">Salvar Nome</button>
   </form>
-  <div id="messages">
-    <% getAllMessages.forEach((arrayChat) => { %>
+  <!-- <div id="messages"> -->
+    <!-- <% getAllMessages.forEach((arrayChat) => { %>
       <li><%= arrayChat %></li>
       <% }) %>
-      <!-- <% console.log(getAllMessages) %> -->
-    
+      <% console.log(getAllMessages) %> -->
+  <div>
+      <div id="onlineUsers">
+      <%getAllMessages.forEach((user) => { %>
+          <div class="private">
+            <li data-testid="online-user" id="<%=user.socketId %>"><%=user.nickname %></li>
+            <button class="private" type="button" >private</button>
+          </div>
+          <% }) %>
+      </div>
+  </div>
+  <div>
+    <div id="messages" class="messages">
+      <% getAllMessages.forEach((onlineUsers) => { %> <% if (!onlineUsers.to) { %>
+      <li data-testid="message"><%= onlineUsers.timestamp %> - <%= onlineUsers.nickname %>: <%= onlineUsers.chatMessage%></li>
+      <% } %> <% }) %>
+    </div>
   </div>
   <form id="inputMessageInBox">
     <input type="text" id="message" placeholder="Enter your message" required data-testid="message-box">
     <button data-testid="send-button">Enviar mensagem</button>
   </form>
   <button id="publicButton" data-testid="public" disabled>Public Room</button>
-  <ul id="onlineUsers"></ul>
+  <!-- <ul id="onlineUsers"></ul> -->
 
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
@@ -84,22 +99,22 @@
       socket.emit('userConnection', nickname);
     })
 
-    // socket.on('displayHistory', (history, type) => {
-    //   let msg;
-    //   if (type === 'public') {
-    //     history.map(({ timestamp, nickname, message }) => {
-    //       msg = `${timestamp} - ${nickname}: ${message}`;
-    //       localHistory[type].push(msg);
-    //       if (type === chatType) addMessage(msg);
-    //     });
-    //   } else {
-    //     history.map(({ timestamp, nickname, message, addressee }) => {
-    //       msg = `${timestamp} (private) - ${nickname}: ${message}`;
-    //       localHistory[type].push(msg);
-    //       if (type === chatType) addMessage(msg);
-    //     });
-    //   }
-    // });
+    socket.on('displayHistory', (history, type) => {
+      let msg;
+      if (type === 'public') {
+        history.map(({ timestamp, nickname, message }) => {
+          msg = `${timestamp} - ${nickname}: ${message}`;
+          localHistory[type].push(msg);
+          if (type === chatType) addMessage(msg);
+        });
+      } else {
+        history.map(({ timestamp, nickname, message, addressee }) => {
+          msg = `${timestamp} (private) - ${nickname}: ${message}`;
+          localHistory[type].push(msg);
+          if (type === chatType) addMessage(msg);
+        });
+      }
+    });
 
     socket.on('displayUsers', (users) => {
       onlineUsersList.innerHTML = '';
@@ -107,12 +122,13 @@
         const li = document.createElement('li');
         const div = document.createElement('div');
         div.innerText = `${value}`;
+        div.setAttribute('data-testid', 'online-user');
         li.appendChild(div);
         if (key !== socket.id) {
           const privateButton = document.createElement('button');
           privateButton.innerText = 'Private';
           privateButton.id = key;
-          privateButton.setAttribute("data-testid", "private")
+          privateButton.setAttribute("class", "private")
           privateButton.addEventListener('click', (event) => {
             cleanHistoryChat();
             publicButton.disabled = false;

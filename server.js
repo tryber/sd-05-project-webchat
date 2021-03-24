@@ -36,21 +36,22 @@ const onlineUsers = {};
 
 // concectando socket
 io.on('connection', async (socket) => {
+  const socketId = socket.id;
   const messages = await getMessages();
   io.to(socket.id).emit('displayHistory', messages, 'public');
 
   socket.on('userConnection', (currentUser) => {
-    onlineUsers[socket.id] = currentUser;
+    onlineUsers[socketId] = currentUser;
     io.emit('displayUsers', onlineUsers);
   });
 
   socket.on('updateNick', (nickname) => {
-    onlineUsers[socket.id] = nickname;
+    onlineUsers[socketId] = nickname;
     io.emit('displayUsers', onlineUsers);
   });
 
   socket.on('disconnect', () => {
-    delete onlineUsers[socket.id];
+    delete onlineUsers[socketId];
     io.emit('displayUsers', onlineUsers);
   });
 
@@ -71,7 +72,7 @@ io.on('connection', async (socket) => {
         addressee,
       });
       // https://socket.io/docs/v3/rooms/
-      io.to(socket.id)
+      io.to(socketId)
         .to(addressee)
         .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
     }
@@ -84,7 +85,7 @@ io.on('connection', async (socket) => {
 app.get('/', async (req, res) => {
   const getAllMessages = await getMessages();
   console.log(getAllMessages);
-  return res.status(200).render('index', { getAllMessages });
+  return res.status(200).render('index', { getAllMessages, onlineUsers });
 });
 // ----------------------------------------------------------------------------------------------
 
