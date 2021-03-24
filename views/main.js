@@ -1,34 +1,34 @@
 window.onload = () => {
-  const client = window.io();
+  const socket = window.io();
   let userId;
   let nickname;
-  let from;
-  let to;
+  let de;
+  let para;
 
-  const allpvtBtns = document.querySelectorAll('#private-btn');
-  const sendButton = document.getElementById('send-button');
+  const btnPrivadoDireto = document.querySelectorAll('#private-btn');
+  const btnEnviar = document.getElementById('send-button');
   const messageBox = document.getElementById('message-box');
   const nicknameBox = document.getElementById('nickname-box');
-  const nicknameSave = document.getElementById('nickname-save');
+  const btnSaveNickname = document.getElementById('nickname-save');
   const onlineUsers = document.getElementById('online-users');
-  const publicButton = document.getElementById('public');
-  const privateButton = document.getElementById('private');
+  const btnPublico = document.getElementById('public');
+  const btnPrivado = document.getElementById('private');
   const chat = document.getElementById('messages');
 
-  allpvtBtns.forEach((btn) => {
+  btnPrivadoDireto.forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      to = e.target.previousSibling.previousSibling.id;
-      client.emit('getchatPrivadoHistorico', userId, to);
+      para = e.target.previousSibling.previousSibling.id;
+      socket.emit('getchatPrivadoHistorico', userId, para);
     });
   });
 
-  client.on('connected', (id, nick) => {
+  socket.on('connected', (id, nick) => {
     userId = id;
     nickname = nick;
-    from = id;
+    de = id;
   });
 
-  client.on('userConnected', (id, nick) => {
+  socket.on('userConnected', (id, nick) => {
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'online-user');
     li.setAttribute('id', `${id}`);
@@ -41,12 +41,12 @@ window.onload = () => {
     } else {
       const btn = document.createElement('button');
       btn.addEventListener('click', (e) => {
-        to = id;
-        client.emit('getchatPrivadoHistorico', userId, to);
+        para = id;
+        console.log(e.event.value);
+        socket.emit('getchatPrivadoHistorico', userId, para);
       });
       btn.innerHTML = 'pvt';
       btn.setAttribute('class', 'pvt-chat-btn');
-      // btn.setAttribute('data-testid', 'private');
       btn.setAttribute('type', 'button');
       btn.setAttribute('id', 'private-btn');
       div.append(btn);
@@ -54,27 +54,27 @@ window.onload = () => {
     }
   });
 
-  client.on('changeNickname', (nick, id) => {
+  socket.on('changeNickname', (nick, id) => {
     const changeNicknameUser = document.getElementById(id);
     changeNicknameUser.innerHTML = nick;
   });
 
-  client.on('message', (msg) => {
+  socket.on('message', (msg) => {
     const li = document.createElement('li');
     li.setAttribute('data-testid', 'message');
     li.innerHTML = msg;
     chat.append(li);
   });
 
-  client.on('userDisconectado', (id) => {
+  socket.on('userDisconectado', (id) => {
     const disconnectedUser = document.getElementById(id).parentNode;
     disconnectedUser.remove();
   });
 
-  client.on('history', (history) => {
+  socket.on('history', (history) => {
     chat.innerHTML = '';
     history.forEach((msg) => {
-      if (!msg.to) {
+      if (!msg.para) {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
         li.innerHTML = `${msg.date} - ${msg.nickname}: ${msg.chatMessage}`;
@@ -83,7 +83,7 @@ window.onload = () => {
     });
   });
 
-  client.on('chatPrivadoHistorico', (history) => {
+  socket.on('chatPrivadoHistorico', (history) => {
     chat.innerHTML = '';
     history.forEach((msg) => {
       const li = document.createElement('li');
@@ -93,24 +93,24 @@ window.onload = () => {
     });
   });
 
-  sendButton.addEventListener('click', () => {
+  btnEnviar.addEventListener('click', () => {
     const chatMessage = messageBox.value;
     messageBox.value = '';
-    client.emit('message', { nickname, chatMessage, to, from });
+    socket.emit('message', { nickname, chatMessage, para, de });
   });
 
-  nicknameSave.addEventListener('click', () => {
+  btnSaveNickname.addEventListener('click', () => {
     nickname = nicknameBox.value;
-    client.emit('changeNickname', nickname, userId);
+    socket.emit('changeNickname', nickname, userId);
   });
 
-  publicButton.addEventListener('click', () => {
-    client.emit('getMsgHistory');
-    to = null;
+  btnPublico.addEventListener('click', () => {
+    socket.emit('getMsgHistory');
+    para = null;
   });
 
-  privateButton.addEventListener('click', () => {
-    to = document.querySelectorAll('[data-testid="online-user"]')[1].id;
-    client.emit('getchatPrivadoHistorico', userId, to);
+  btnPrivado.addEventListener('click', () => {
+    para = document.querySelectorAll('[data-testid="online-user"]')[1].id;
+    socket.emit('getchatPrivadoHistorico', userId, para);
   });
 };
