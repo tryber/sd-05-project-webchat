@@ -1,58 +1,62 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>WebScockets</title>
-        <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA==" crossorigin="anonymous"></script>
-        <link href="./styles.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div id="Web-socket">
-            <h2>Web Chat</h2>
-            <div id="chat-window">
-                <div id="chatBox"></div>
-                <div id="userTyping"></div>
-            </div>
-            <input id="user" type="text" placeholder="User Name" />
-            <input id="user-message" type="text" placeholder="Message" />
-            <button id="send">Send</button>
-        </div>
-        // Make connection
-        var socket = io('http://localhost:3000');
-        
-        // Query DOM
-        const userMessage = document.getElementById('user-message');
-        const user = document.getElementById('user');
-        const btn = document.getElementById('send');
-        const chatBox = document.getElementById('chatBox');
-        const userTyping = document.getElementById('userTyping');
-        
-        // Emit events
-        btn.addEventListener('click', function(){
-          console.log('linha 13', userMessage.value);
-          socket.emit('message', {
-              chatMessage: userMessage.value,
-              nickname: user.value
-          });
-          userMessage.value = "";
-        });
-        
-        // message.addEventListener('keypress', function(){
-        //     socket.emit('typing', handle.value);
-        // })
-        
-        // Listen for events
-        socket.on('chat', function(data){
-            feedback.innerHTML = '';
-            output.innerHTML += '<p><strong>' + data.handle + ': </strong>' + data.message + '</p>';
-        });
-        
-        socket.on('typing', function(data){
-            feedback.innerHTML = '<p><em>' + data + ' is typing a message...</em></p>';
-        });
-        
+  <head>
+    <meta charset="utf-8" />
+    <title>WebScockets</title>
+    <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+      integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+      crossorigin="anonymous"
+    ></script>
+    <link href="./styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="Web-socket">
+      <h2>Web Chat</h2>
+      <div id="chat-window">
+        <div id="chatBox"></div>
+        <div id="userTyping"></div>
+      </div>
+      <input id="user" type="text" placeholder="User Name" />
+      <input id="user-message" type="text" placeholder="Message" />
+      <button id="send">Send</button>
+    </div>
+    <script>
+      var socket = io("http://127.0.0.1:3000");
 
-        <!-- <script src="./scripts.js"></script> -->
-    </body>
+      // Query DOM
+      const userMessage = document.getElementById("user-message");
+      const user = document.getElementById("user");
+      const btn = document.getElementById("send");
+      const chatBox = document.getElementById("chatBox");
+      const userTyping = document.getElementById("userTyping");
+
+      // Emit events
+      btn.addEventListener("click", function () {
+        console.log("linha 13", userMessage.value);
+        socket.emit("message", {
+          chatMessage: userMessage.value,
+          nickname: user.value,
+        });
+        userMessage.value = "";
+      });
+
+      // message.addEventListener('keypress', function(){
+      //     socket.emit('typing', handle.value);
+      // })
+
+      // Listen for events
+      socket.on("chat", function (data) {
+        feedback.innerHTML = "";
+        output.innerHTML +=
+          "<p><strong>" + data.handle + ": </strong>" + data.message + "</p>";
+      });
+
+      socket.on("typing", function (data) {
+        feedback.innerHTML =
+          "<p><em>" + data + " is typing a message...</em></p>";
+      });
+    </script>
+  </body>
 </html>
