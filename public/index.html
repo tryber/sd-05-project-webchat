@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web chat</title>
+  </head>
+  <body>
+    <form id="nicknameForm">
+      <input type="text" id="nickname" placeholder="nickname" data-testid="nickname-box" />
+      <button id="nickname-save" data-testid="nickname-save">Save</button>
+    </form>
+    <div id="chatMessages"></div>
+    <form id="chat-form">
+      <input
+        type="text"
+        id="message"
+        placeholder="send message"
+        required
+        data-testid="message-box"
+      />
+      <button id="send-btn" data-testid="send-button">Send</button>
+    </form>
+    <button id="public-button" data-testid="public" disabled>Public</button>
+    <ul id="users-list"></ul>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+      const nicknameForm = document.getElementById('nicknameForm');
+      const nicknameSaveBtn = document.getElementById('nickname-save');
+      const chatMessages = document.getElementById('chatMessages');
+      const chatForm = document.getElementById('chat-form');
+      const usersList = document.getElementById('users-list');
+      const publicButton = document.getElementById('public-button');
+
+      const socket = io();
+
+      let nickname;
+      const localMessageHistory = {
+        'public': [],
+        'private': [],
+      };
+      let receiver = '';
+      let chatType = 'public';
+
+      const clearChat = () => {
+        while (chatMessages.firstChild) {
+          chatMessages.removeChild(chatMessages.lastChild);
+        }
+      };
+
+      const addMessage = (message) => {
+        const messageP = document.createElement('p');
+        messageP.setAttribute('data-testid', 'message');
+        messageP.innerText = message;
+        chatMessages.appendChild(messageP);
+      };
+
+      publicButton.addEventListener('click', () => {
+        publicButton.disabled = true;
+        clearChat();
+        chatType = 'public';
+        receiver = '';
+        localMessageHistory.public.forEach((message) => addMessage(message));
+      });
+
+      nicknameForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        nickname = event.target.elements.nickname.value;
+        socket.emit('changeNickname', nickname);
+      });
+
+      chatForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const chatMessage = event.target.elements.message.value;
+        socket.emit('message', { chatMessage, nickname, receiver });
+        event.target.elements.message.value = '';
+        event.target.elements.message.focus();
+      });
+
+      socket.on('connect', () => {
+        if (!nickname) nickname = `Guest_${socket.id}`;
+        socket.emit('userConection', nickname);
+      });
+
+      socket.on('message', (message, type) => {
+        localMessageHistory[type].push(message);
+        if (type === chatType) addMessage(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+
+      socket.on('showOnlineUsers', (users) => {
+        usersList.innerHTML = '';
+        const usersKeys = Object.keys(users);
+        usersKeys.forEach((userKey) => {
+          const li = document.createElement('li');
+          const div = document.createElement('div');
+          div.innerText = `${users[userKey]}`;
+          div.setAttribute('data-testid', 'online-user');
+          li.appendChild(div);
+          if (socket.id !== userKey) {
+            const sendPrivateMessageBtn = document.createElement('button');
+            sendPrivateMessageBtn.innerText = 'send private message';
+            sendPrivateMessageBtn.id = userKey;
+            sendPrivateMessageBtn.setAttribute('data-testid', 'private');
+            sendPrivateMessageBtn.addEventListener('click', (event) => {
+              clearChat();
+              publicButton.disabled = false;
+              chatType = 'private';
+              receiver = event.target.id;
+              localMessageHistory.private.map((message) => addMessage(message));
+            });
+            li.appendChild(sendPrivateMessageBtn);
+          }
+          usersList.appendChild(li);
+        });
+      });
+
+      socket.on('showMessageHistory', (messages, type) => {
+        messages.forEach(({ nickname, message, timestamp }) => {
+          let msg = `${timestamp} - ${nickname}: ${message}`;
+          if (chatType === 'private') msg = `${timestamp} (private) - ${nickname}: ${message}`;
+          localMessageHistory[type].push(msg);
+          if (chatType === type) addMessage(msg);
+        });
+      });
+    </script>
+  </body>
+</html>
