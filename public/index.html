@@ -1,25 +1,32 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>WebScockets</title>
-        <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA==" crossorigin="anonymous"></script>
-        <link href="./styles.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div id="Web-socket">
-            <h2>Web Chat</h2>
-            <div id="chat-window">
-                <div id="chatBox"></div>
-                <div id="userTyping"></div>
-            </div>
-            <input id="user" type="text" placeholder="User Name" />
-            <input id="user-message" type="text" placeholder="Message" />
-            <button id="send">Send</button>
-        </div>
+<html lang="pt-br">
 
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Webchat</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
+</head>
+
+<body>
+  <div>
+    <ul id="onlineUsers"></ul>
+    <button id="publicButton" data-testid="public" disabled >Public Room</button>
+    <form id="chat-box">
+      <div id="messages"></div>
+     
+    </form>
+    <form id="inputName">
+      <input type="text" id="nickname" placeholder="Enter your user name" data-testid="nickname-box">
+      <button class="nickname-save" data-testid="nickname-save">Salvar Nome</button>
+      <input type="text" id="message" placeholder="Enter your message" required data-testid="message-box">
+      <button data-testid="send-button">Enviar mensagem</button>
+    </form>
+  
+  <script src="./script.js"></script>
     </body>
-    <script src="./scripts.js"></script>
+  </div>
 </html>
