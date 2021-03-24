@@ -80,7 +80,7 @@ io.on('connection', async (socket) => {
   });
 });
 
-// // --------------------------------------------------------------------------------------------- 
+// // ---------------------------------------------------------------------------------------------
 // Endpoint GET para mensagens
 // exemplo de ejs response.render('caminho', {objeto no ejs que quer chamar});
 app.get('/', async (req, res) => {
