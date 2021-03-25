@@ -28,8 +28,8 @@ app.set('views', viewPath);
 app.set('view engine', 'ejs');
 
 app.get('/', async (_, res) => {
-  const messages = await allMessages({ pvtMsg: null });
-  res.status(200).render('index', { onlineUsers, messages });
+  const messages = await allMessages();
+  return res.status(200).render('index', { onlineUsers, messages });
 });
 
 io.on('connection', (socket) => {
@@ -48,25 +48,16 @@ io.on('connection', (socket) => {
   );
 
   socket.on('message', async (message) => {
-    // const { targetId, usrId, nickname } = message;
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
-    const {
-      nickname,
-      usrId = null,
-      targetId = null,
-      pvtMsg = false,
-    } = message;
-    // date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
-    console.log(message);
     await addMessage({ ...message, date });
-    if (pvtMsg) {
-      console.log(`Usuário ${nickname} pvteou ${targetId}`);
-
-      io.to(targetId)
-        .to(usrId)
-        .emit('message', ...message, date);
+    console.log({ ...message, date });
+    if (message.pvtMsg) {
+      console.log(`Usuário ${message.nickname} pvteou ${message.targetId}`);
+      io.to(message.targetId)
+        .to(message.usrId)
+        .emit('message', `${date} - ${message.nickname}(private): ${message.chatMessage}`);
     } else {
-      io.emit('message', ...message, date);
+      io.emit('message', `${date} - ${message.nickname}: ${message.chatMessage}`);
     }
   });
 

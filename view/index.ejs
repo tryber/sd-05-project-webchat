@@ -7,12 +7,11 @@
   </head>
   <body>
     <ul class="messages" id="messages">
-      <% messages.forEach(({date, nickname, chatMessage, targetId}) => { %>
-        <% if (!targetId){ %>
+      <% messages.forEach(({date, nickname, chatMessage}) => { %>
       <li data-testid="message" class="message-item">
         <%=date %> - <%=nickname %>: <%=chatMessage%>
       </li>
-      <%}}) %>
+      <%}) %>
     </ul>
     <div class="chat-room" id="chat-room" action="">
       <div class="nickName container">
@@ -83,19 +82,11 @@
         });
       });
 
-      const createMessage = (message, pvt = false) => {
+      const createMessage = (message) => {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message');
         li.className = 'message-item';
-        let msg;
-        if (pvt) {
-          msg = `${message.date} - ${message.nickname}(private): ${message.chatMessage}`;
-        li.innerText = msg;
-        messagesUl.appendChild(li);
-        } else if (!message.targetId) {
-          msg = `${message.date} - ${message.nickname}: ${message.chatMessage}`;
-        }
-        li.innerText = msg;
+        li.innerText = message;
         messagesUl.appendChild(li);
       };
 
@@ -129,13 +120,14 @@
       };
       sendMessage.addEventListener('click', (e) => {
         e.preventDefault();
-        const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
         const chatMessage = document.querySelector('#mensagemInput').value;
+        const message = {chatMessage, nickname, targetId: targetUsr, userId};
         if (targetUsr) {
           message.pvtMsg = true
         }
         if (chatMessage != '') {
           socket.emit('message', message );
+          console.log(message)
         }
         inputMessage.value = '';
       });
@@ -164,12 +156,12 @@
 
       socket.on('userConnected', (id, nick) => showUsers(id, nick));
       socket.on('message', (message) => {
-        if (message.targetId && (userId === message.targetId || userId === message.usrId) ) {
-          console.log(`usuario ${message.usrId} me pvteou`)
-          createMessage(msg, pvt=true);
-        } else if (!message.targetId) {
-          createMessage(message);
-        }
+        // if (message.targetId && (userId === message.targetId || userId === message.usrId) ) {
+        //   console.log(`usuario ${message.usrId} me pvteou`)
+        //   createMessage(msg, pvt=true);
+        // } else if (!message.targetId) {
+        // }
+        createMessage(message);
       });
       socket.on('nickChange', (nick, userId) => {
         const ulNick = document.getElementById(`user-${userId}`);
