@@ -50,7 +50,6 @@ io.on('connection', (socket) => {
   socket.on('message', async (message) => {
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
     await addMessage({ ...message, date });
-    console.log({ ...message, date });
     if (message.pvtMsg) {
       console.log(`Usuário ${message.nickname} pvteou ${message.targetId}`);
       io.to(message.targetId)
