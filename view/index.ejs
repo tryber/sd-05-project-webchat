@@ -143,7 +143,6 @@
         let selectUser = document.querySelectorAll('[data-testid="online-user"]')[1].id;
         selectUser = selectUser.slice(5) //removento o do id user-
         targetUsr = selectUser;
-        console.log("usuario: ", selectUser, targetUsr)
         socket.emit('getPrivate', userId, selectUser);
       });
 
@@ -159,7 +158,6 @@
 
       socket.on('userConnected', (id, nick) => showUsers(id, nick));
       socket.on('message', (message) => {
-        console.log("mensagem recebida")
         createMessage(message);
       });
       socket.on('nickChange', (nick, userId) => {

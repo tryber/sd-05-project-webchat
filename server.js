@@ -48,12 +48,8 @@ io.on('connection', (socket) => {
   );
 
   socket.on('message', async (message) => {
-    console.log(message.userId, message.targetId, message.pvtMsg);
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
     await addMessage({ ...message, date });
-    const allSockets = await io.allSockets();
-    console.log('>>>: ', allSockets);
-    console.log(message);
     if (message.pvtMsg) {
       console.log(`Usuário ${message.userId} pvteou ${message.targetId}`);
       io.to(message.targetId)
@@ -89,34 +85,38 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getPrivate', async (usrId, targetId) => {
-    let msgs = await allMessages();
-    if (usrId && targetId) {
-      msgs = await allMessages({
-        $or: [
-          { userId: usrId, targetId },
-          { userId: targetId, targetId: usrId },
-        ],
-      });
-      socket.emit('privateHistory', msgs);
-    }
-    if (usrId && !targetId) {
-      msgs = await allMessages({
-        $and: [
-          { pvtMsg: true },
-          {
-            $or: [
-              {
-                targetId: `${userId}`,
-              },
-              {
-                userId: `${userId}`,
-              },
-            ],
-          },
-        ],
-      });
-    }
-    socket.emit('privateHistory', msgs);
+    const msgs = await allMessages();
+    // if (usrId && targetId) {
+    //   msgs = await allMessages({
+    //     $or: [
+    //       { userId: usrId, targetId },
+    //       { userId: targetId, targetId: usrId },
+    //     ],
+    //   });
+    //   socket.emit('privateHistory', msgs);
+    // }
+    // if (usrId && !targetId) {
+    //   msgs = await allMessages({
+    //     $and: [
+    //       { pvtMsg: true },
+    //       {
+    //         $or: [
+    //           {
+    //             targetId: `${userId}`,
+    //           },
+    //           {
+    //             userId: `${userId}`,
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   });
+    // }
+    const historico = msgs.reduce((array, msg) => {
+      if (msg.targetId && (msg.targetId === targetId || msg.userId === targetId)) array.push(msg);
+      return array;
+    }, []);
+    socket.emit('privateHistory', historico);
   });
 });
 
