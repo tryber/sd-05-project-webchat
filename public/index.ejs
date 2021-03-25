@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebScockets</title>
+    <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js">
+    </script>
+    <link href="./styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="Web-socket">
+      <h2>Web Chat</h2>
+      <div id="chat-window">
+        <div id="chatBox" data-testid="message-box" >
+          <ul>
+            <% historyMessages.forEach((msg) => { %>
+            <li><%= msg.realTime %><%= msg.nickname %><%= msg.chatMessage %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <div id="userTyping"></div>
+      </div>
+      <div>
+        <form>
+          <input id="user" type="text" placeholder="User Name" data-testid="nickname-box" />
+          <input id="user-message" type="text" placeholder="Message" />
+        </form>
+        <button id="save-nick" data-testid="nickname-save" >Salvar Nickname</button>
+        <button id="send" data-testid="send-button" >Send</button>
+      </div>
+    <script>
+      const socket = io();
+
+      // Query DOM
+      const userMessage = document.getElementById("user-message");
+      const user = document.getElementById("user");
+      const btn = document.getElementById("send");
+      const chatBox = document.getElementById("chatBox");
+      const userTyping = document.getElementById("userTyping");
+
+      let initName;
+
+
+      // Emit events
+      btn.addEventListener("click", function () {
+        console.log("linha 35", userMessage.value);
+        socket.emit("message", {
+          chatMessage: userMessage.value,
+          nickname: initName,
+        });
+        userMessage.value = "";
+      });
+
+      // message.addEventListener('keypress', function(){
+      //     socket.emit('typing', handle.value);
+      // })
+
+      socket.on('joinRoom', (randomName) => {
+        initName = randomName;
+        const tagH6 = document.createElement('h6');
+        tagH6.innerText = `Bem vindo ${initName}`;
+        chatBox.appendChild(tagH6);
+      });
+
+      // Listen for events
+      socket.on('message', function (data) {
+        // feedback.innerHTML = "";
+        chatBox.innerHTML +=
+          `<p data-testid="message" ><strong>${data}</p>`;
+      });
+
+      socket.on('history', (data) => {
+        console.log('client L55', data);
+        // data.forEach(element => element);
+      });
+
+      socket.on("typing", function (data) {
+        feedback.innerHTML =
+          "<p><em>" + data + " is typing a message...</em></p>";
+      });
+    </script>
+  </body>
+</html>
