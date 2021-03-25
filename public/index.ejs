@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <form id="nickname-box">
+  <form id="inputName">
     <input data-testid="nickname-box" type="text" id="nickname-box" placeholder="Enter your Nickname">
     <button data-testid="nickname-save" id="nickname-save">Salvar Nome</button>
   </form>
@@ -20,24 +20,24 @@
       <% }) %>
       <% console.log(getAllMessages) %> -->
   <div>
-      <div id="online-user">
-      <%getAllMessages.forEach((user) => { %>
+      <div id="onlineUsers">
+      <%getAllMessages.forEach((user) => {%>
           <div class="private">
-            <li data-testid="online-user" id="<%=user.socketId %>"></li>
-            <button data-testid="private" id="private" type="button" >private</button>
+            <li data-testid="online-user" id="<%=user.socketId%>"><%=user.nickname%></li>
+            <button data-testid="private" id="private" type="button">private</button>
           </div>
-          <% }) %>
+          <%})%>
       </div>
   </div>
   <div>
     <div id="messages" class="messages">
-      <% getAllMessages.forEach((onlineUsers) => { %> <% if (!onlineUsers.to) { %>
-      <li data-testid="message"><%= onlineUsers.timestamp %> - <%= onlineUsers.nickname %>: <%= onlineUsers.chatMessage%></li>
-      <% } %> <% }) %>
+      <%getAllMessages.forEach((onlineUsers) => {%> <% if (!onlineUsers.to) {%>
+      <li data-testid="message"><%=onlineUsers.timestamp%> - <%= onlineUsers.nickname%>: <%=onlineUsers.chatMessage%></li>
+      <%}%> <%})%>
     </div>
   </div>
-  <form id="message-box">
-    <input data-testid="message-box" type="text" id="message-box" placeholder="Enter your message">
+  <form id="inputMessageInBox">
+    <input data-testid="message-box" type="text" id="message-box" placeholder="Enter your message" required>
     <button data-testid="send-button" id="send-button" type="button">Enviar mensagem</button>
   </form>
   <button data-testid="public" id="publicButton" type="button" disabled>Public Room</button>
@@ -45,10 +45,10 @@
 
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
-    const inputMessage = document.getElementById('message-box');
+    const inputMessage = document.getElementById('inputMessageInBox');
     const chatMessages = document.getElementById('messages');
-    const inputNickname = document.getElementById('nickname-box');
-    const onlineUsersList = document.getElementById('online-user');
+    const inputNickname = document.getElementById('inputName');
+    const onlineUsersList = document.getElementById('onlineUsers');
     const publicButton = document.getElementById('publicButton');
 
     const socket = io();

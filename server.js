@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 // Cross-Origin Resource Sharing
 const cors = require('cors');
-const path = require('path');
+// const path = require('path');
 // moment = date library for parsing, validating, manipulating, and formatting dates.
 const moment = require('moment');
 
@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // rota app.use do diretorio public
-app.use(express.static(path.join(__dirname, 'views')));
+// app.use(express.static(path.join(__dirname, 'views')));
 // // por default view engine é ejs
 app.set('view engine', 'ejs');
 // diretorio public com views
