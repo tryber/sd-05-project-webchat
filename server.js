@@ -28,7 +28,7 @@ app.set('views', viewPath);
 app.set('view engine', 'ejs');
 
 app.get('/', async (_, res) => {
-  const messages = await allMessages();
+  const messages = await allMessages({ pvtMsg: null });
   res.status(200).render('index', { onlineUsers, messages });
 });
 
@@ -40,27 +40,46 @@ io.on('connection', (socket) => {
     separator: '',
   });
 
+  onlineUsers.unshift({ userId, nickname: tempNick });
+  socket.emit('connected', { userId, nickname: tempNick });
+  io.emit('userConnected', userId, tempNick);
   console.log(
     `Usuário ID ${userId} com o nick provisório ${tempNick} entrou no chat!`,
   );
-  onlineUsers.unshift({ userId, nickname: tempNick });
-  socket.emit('connected', userId, tempNick);
-  io.emit('userConnected', userId, tempNick);
 
-  socket.on('message', async ({ nickname, chatMessage }) => {
+  socket.on('message', async (message) => {
+    // const { targetId, usrId, nickname } = message;
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
-    addMessage({ nickname, chatMessage, date });
-    const msg = `${date} - ${nickname}: ${chatMessage}`;
-    io.emit('message', msg);
+    const {
+      nickname,
+      usrId = null,
+      targetId = null,
+      pvtMsg = false,
+    } = message;
+    // date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
+    console.log(message);
+    await addMessage({ ...message, date });
+    if (pvtMsg) {
+      console.log(`Usuário ${nickname} pvteou ${targetId}`);
+
+      io.to(targetId)
+        .to(usrId)
+        .emit('message', ...message, date);
+    } else {
+      io.emit('message', ...message, date);
+    }
   });
 
-  socket.on('nickChange', (nick, id) => {
-    const userPosition = onlineUsers.findIndex((usr) => usr.userId === id);
+  socket.on('nickChange', (usuario) => {
+    const nick = usuario.nickname;
+    const userPosition = onlineUsers.findIndex(
+      (usr) => usr.userId === usuario.userId,
+    );
     console.log(
       `Usuário ${onlineUsers[userPosition].userId} mudou o nickname de ${onlineUsers[userPosition].nickname} para ${nick}.`,
     );
     onlineUsers[userPosition].nickname = nick;
-    io.emit('nickChange', nick, id);
+    io.emit('nickChange', nick, usuario.userId);
   });
 
   socket.on('disconnect', () => {
@@ -69,6 +88,46 @@ io.on('connection', (socket) => {
     onlineUsers.splice(userIdx, 1);
     io.emit('userQuit', userId);
   });
+
+  socket.on('getPublic', async () => {
+    const msgs = await allMessages({ pvtMsg: null });
+    socket.emit('publicHistory', msgs);
+  });
+
+  socket.on('getPrivate', async (usrId, targetId) => {
+    let msgs = await allMessages();
+    if (userId && targetId) {
+      msgs = await allMessages({
+        $or: [
+          { targetId, usrId },
+          { usrId: targetId, targetId: userId },
+        ],
+      });
+      socket.emit('privateHistory', msgs);
+    }
+    if (userId && !targetId) {
+      msgs = await allMessages({
+        $and: [
+          { pvtMsg: true },
+          {
+            $or: [
+              {
+                targetId: usrId,
+              },
+              {
+                usrId,
+              },
+            ],
+          },
+        ],
+      });
+    }
+    socket.emit('privateHistory', msgs);
+  });
 });
 
-http.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+
+http.listen(PORT, () => {
+  console.log(`Ouvindo na porta ${PORT} bb.`);
+});

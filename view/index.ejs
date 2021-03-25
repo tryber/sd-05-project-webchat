@@ -7,13 +7,14 @@
   </head>
   <body>
     <ul class="messages" id="messages">
-      <% messages.forEach(({date, nickname, chatMessage}) => { %>
+      <% messages.forEach(({date, nickname, chatMessage, targetId}) => { %>
+        <% if (!targetId){ %>
       <li data-testid="message" class="message-item">
         <%=date %> - <%=nickname %>: <%=chatMessage%>
       </li>
-      <%}) %>
+      <%}}) %>
     </ul>
-    <form action="">
+    <div class="chat-room" id="chat-room" action="">
       <div class="nickName container">
         <input id="nickInput" autocomplete="on" data-testid="nickname-box" />
         <button id="change-nick" data-testid="nickname-save">Apelido</button>
@@ -28,68 +29,166 @@
       </div>
       <div class="logged-users container" id="logged-users">
         <% onlineUsers.forEach(({userId, nickname}) => { %>
-        <li data-testid="online-user" id="<%=userId%>"><%=nickname%></li>
+        <div class="pvt-user">
+          <li data-testid="online-user" id="user-<%=userId%>"><%=nickname%></li>
+          <button
+            class="pvt-button <%=userId %>"
+            type="button"
+            id="<%=userId %>"
+          >
+            Sigilo
+          </button>
+        </div>
         <%}) %>
       </div>
-    </form>
+      <div class="chat-type">
+        <button
+          class="chat-type-btn"
+          data-testid="private"
+          id="private-btn"
+          type="button"
+        >
+          Privado
+        </button>
+        <button
+          class="chat-type-btn"
+          data-testid="public"
+          id="pub-btn"
+          type="button"
+        >
+          Pub
+        </button>
+      </div>
+    </div>
     <script>
       const socket = io();
-      const form = document.querySelector('form');
       const inputMessage = document.querySelector('#mensagemInput');
+      const privateBtns = document.querySelectorAll('.pvt-button');
       const loggedUsers = document.querySelector('#logged-users');
       const sendMessage = document.querySelector('#send-message');
+      const privateChat = document.querySelector('#private-btn');
       const changeNick = document.querySelector('#change-nick');
       const messagesUl = document.querySelector('#messages');
       const nickInput = document.querySelector('#nickInput');
+      const publicChat = document.querySelector('#pub-btn');
+      const form = document.querySelector('#chat-room');
       let nickname;
       let userId;
+      let targetUsr = null;
 
-      const createMessage = (message) => {
+      privateBtns.forEach((button) => {
+        button.addEventListener('click', (e) => {
+          targetUsr = e.target.id;
+          socket.emit('getPrivate', userId, targetUsr);
+        });
+      });
+
+      const createMessage = (message, pvt = false) => {
         const li = document.createElement('li');
-        li.innerText = message;
         li.setAttribute('data-testid', 'message');
-        li.className = "message-item";
+        li.className = 'message-item';
+        let msg;
+        if (pvt) {
+          msg = `${message.date} - ${message.nickname}(private): ${message.chatMessage}`;
+        li.innerText = msg;
+        messagesUl.appendChild(li);
+        } else if (!message.targetId) {
+          msg = `${message.date} - ${message.nickname}: ${message.chatMessage}`;
+        }
+        li.innerText = msg;
         messagesUl.appendChild(li);
       };
+
       const showUsers = (id, nick) => {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'online-user');
-        li.setAttribute('id', id);
+        li.setAttribute('id', `user-${id}`);
         li.innerText = nick;
-        loggedUsers.appendChild(li);
+
+        const privButton = document.createElement('button');
+        privButton.setAttribute('type', 'button');
+        privButton.setAttribute('id', id);
+        privButton.setAttribute = `pvt-button ${id}`;
+        privButton.innerText = 'Sigilo';
+
+        const privUser = document.createElement('div');
+        privUser.setAttribute('class', 'pvt-user');
+
+        privButton.addEventListener('click', (e) => {
+          targetUsr = e.target.id;
+          socket.emit('getPrivate', userId, targetUsr);
+        });
+
+        privUser.append(li);
+        privUser.append(privButton);
+        if (id === userId) {
+          loggedUsers.prepend(li);
+        } else {
+          loggedUsers.append(privUser);
+        }
       };
       sendMessage.addEventListener('click', (e) => {
         e.preventDefault();
+        const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
         const chatMessage = document.querySelector('#mensagemInput').value;
-        if (chatMessage != '') {
-          socket.emit('message', { nickname, chatMessage });
-          inputMessage.value = '';
+        if (targetUsr) {
+          message.pvtMsg = true
         }
+        if (chatMessage != '') {
+          socket.emit('message', message );
+        }
+        inputMessage.value = '';
       });
       changeNick.addEventListener('click', (e) => {
         e.preventDefault();
         nickname = nickInput.value;
         if (nickname != '') {
-          socket.emit('nickChange', nickname, userId);
+          socket.emit('nickChange', { nickname, userId });
           nickInput.placeholder = nickname;
           nickInput.value = '';
         }
       });
-      socket.on('connected', (id, nick) => {
-        userId = id;
-        nickname = nick;
-        nickInput.placeholder = nick;
+      privateChat.addEventListener('click', () => {
+        socket.emit('getPrivate', userId);
       });
+
+      publicChat.addEventListener('click', () => {
+        targetId = null;
+        socket.emit('getPublic');
+      });
+      socket.on('connected', (usuario) => {
+        userId = usuario.userId;
+        nickname = usuario.nickname;
+        nickInput.placeholder = nickname;
+      });
+
       socket.on('userConnected', (id, nick) => showUsers(id, nick));
-      socket.on('message', (msg) => {
-        createMessage(msg);
+      socket.on('message', (message) => {
+        if (message.targetId && (userId === message.targetId || userId === message.usrId) ) {
+          console.log(`usuario ${message.usrId} me pvteou`)
+          createMessage(msg, pvt=true);
+        } else if (!message.targetId) {
+          createMessage(message);
+        }
       });
-      socket.on('nickChange', (nick, id) => {
-        const ulNick = document.getElementById(id);
+      socket.on('nickChange', (nick, userId) => {
+        const ulNick = document.getElementById(`user-${userId}`);
         ulNick.innerText = nick;
       });
       socket.on('userQuit', (id) => {
         document.getElementById(id).remove();
+      });
+      socket.on('privateHistory', (messages) => {
+        messagesUl.innerHTML = '';
+        if (messages.length){
+          messages.forEach((message) => createMessage(message, pvt=true));
+        }
+      });
+      socket.on('publicHistory', (messages) => {
+        messagesUl.innerHTML = '';
+        messages.forEach((message) => {
+          createMessage(message);
+        });
       });
     </script>
   </body>
