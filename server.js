@@ -20,12 +20,25 @@ app.get("/", async (_req, res) => {
   res.render("index", { historyMessages });
 });
 
+// LISTA DE TODOS OS USUARIOS ONLINE
+// ARRAY??
+
+// COMO ARMAZENAR NESTA LISTA UM NOVO USUARIO?
+
+// COMO ENVIAR ESTA LISTA PARA O FRONT END MOSTRAR NA TELA?
+
+
+const usersOnLine = [];
 
 io.on("connection", (socket) => {
   console.log("made socket connection", socket.id);
+  const userId = socket.id;
   const randomName = faker.name.findName();
-  socket.emit('joinRoom', randomName);
+  const user = { userId, randomName };
+  usersOnLine.push(user);
+  socket.emit("joinRoom", randomName);
   socket.emit("history");
+  socket.emit("usersOnline", usersOnLine);
 
   // Handle chat event
   socket.on("message", async (data) => {
@@ -37,6 +50,10 @@ io.on("connection", (socket) => {
     await saveMessages({ realTime, nickname, chatMessage });
     io.emit("message", msgFormated);
   });
+
+  // socket.on('saveNickName', ({ nickname: user }) => {
+  //   const 
+  // })
 
   // Handle typing event
   socket.on("typing", function (data) {
