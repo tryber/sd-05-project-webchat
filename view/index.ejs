@@ -86,8 +86,7 @@
         const msgLi = document.createElement('li');
         msgLi.setAttribute('data-testid', 'message');
         msgLi.className = 'message-item';
-        msgLi.innerText = recMsg;
-        console.log(recMsg)
+        msgLi.innerHTML = recMsg;
         messagesUl.appendChild(msgLi);
       };
 
@@ -141,7 +140,11 @@
         }
       });
       privateChat.addEventListener('click', () => {
-        socket.emit('getPrivate', userId);
+        let selectUser = document.querySelectorAll('[data-testid="online-user"]')[1].id;
+        selectUser = selectUser.slice(5) //removento o do id user-
+        targetUsr = selectUser;
+        console.log("usuario: ", selectUser, targetUsr)
+        socket.emit('getPrivate', userId, selectUser);
       });
 
       publicChat.addEventListener('click', () => {
@@ -156,6 +159,7 @@
 
       socket.on('userConnected', (id, nick) => showUsers(id, nick));
       socket.on('message', (message) => {
+        console.log("mensagem recebida")
         createMessage(message);
       });
       socket.on('nickChange', (nick, userId) => {
@@ -167,8 +171,6 @@
       });
       socket.on('privateHistory', (items) => {
         messagesUl.innerHTML = '';
-        console.log('pvt')
-        console.log(items)
         if (items.length){
           items.forEach((item) => {
             createMessage(`${item.date} - ${item.nickname}(private): ${item.chatMessage}`)

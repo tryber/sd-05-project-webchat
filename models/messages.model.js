@@ -11,7 +11,6 @@ module.exports = {
   },
   allMessages: async (search = {}) => {
     const db = await connection();
-    console.log(search);
     const messages = await db
       .collection(COLLECTIONS.MESSAGES)
       .find(search).toArray();

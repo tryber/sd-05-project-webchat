@@ -51,8 +51,11 @@ io.on('connection', (socket) => {
     console.log(message.userId, message.targetId, message.pvtMsg);
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
     await addMessage({ ...message, date });
+    const allSockets = await io.allSockets();
+    console.log('>>>: ', allSockets);
+    console.log(message);
     if (message.pvtMsg) {
-      console.log(`Usuário ${message.nickname} pvteou ${message.targetId}`);
+      console.log(`Usuário ${message.userId} pvteou ${message.targetId}`);
       io.to(message.targetId)
         .to(message.userId)
         .emit('message', `${date} - ${message.nickname}(private): ${message.chatMessage}`);
@@ -81,14 +84,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getPublic', async () => {
-    console.log('publico\n');
     const msgs = await allMessages({ pvtMsg: null });
     socket.emit('publicHistory', msgs);
   });
 
   socket.on('getPrivate', async (usrId, targetId) => {
-    console.log('privado\n');
-    console.log(userId, targetId);
     let msgs = await allMessages();
     if (usrId && targetId) {
       msgs = await allMessages({
