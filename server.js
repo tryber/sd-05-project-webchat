@@ -28,7 +28,7 @@ app.set('views', viewPath);
 app.set('view engine', 'ejs');
 
 app.get('/', async (_, res) => {
-  const messages = await allMessages();
+  const messages = await allMessages({ pvtMsg: { $ne: true } });
   return res.status(200).render('index', { onlineUsers, messages });
 });
 
@@ -48,12 +48,13 @@ io.on('connection', (socket) => {
   );
 
   socket.on('message', async (message) => {
+    console.log(message.userId, message.targetId, message.pvtMsg);
     const date = moment(new Date().getTime()).format('DD-MM-YYYY hh:mm:ss A');
     await addMessage({ ...message, date });
     if (message.pvtMsg) {
       console.log(`Usuário ${message.nickname} pvteou ${message.targetId}`);
       io.to(message.targetId)
-        .to(message.usrId)
+        .to(message.userId)
         .emit('message', `${date} - ${message.nickname}(private): ${message.chatMessage}`);
     } else {
       io.emit('message', `${date} - ${message.nickname}: ${message.chatMessage}`);
@@ -80,32 +81,35 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getPublic', async () => {
+    console.log('publico\n');
     const msgs = await allMessages({ pvtMsg: null });
     socket.emit('publicHistory', msgs);
   });
 
   socket.on('getPrivate', async (usrId, targetId) => {
+    console.log('privado\n');
+    console.log(userId, targetId);
     let msgs = await allMessages();
-    if (userId && targetId) {
+    if (usrId && targetId) {
       msgs = await allMessages({
         $or: [
-          { targetId, usrId },
-          { usrId: targetId, targetId: userId },
+          { userId: usrId, targetId },
+          { userId: targetId, targetId: usrId },
         ],
       });
       socket.emit('privateHistory', msgs);
     }
-    if (userId && !targetId) {
+    if (usrId && !targetId) {
       msgs = await allMessages({
         $and: [
           { pvtMsg: true },
           {
             $or: [
               {
-                targetId: usrId,
+                targetId: `${userId}`,
               },
               {
-                usrId,
+                userId: `${userId}`,
               },
             ],
           },

@@ -82,12 +82,13 @@
         });
       });
 
-      const createMessage = (message) => {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'message');
-        li.className = 'message-item';
-        li.innerText = message;
-        messagesUl.appendChild(li);
+      const createMessage = (recMsg) => {
+        const msgLi = document.createElement('li');
+        msgLi.setAttribute('data-testid', 'message');
+        msgLi.className = 'message-item';
+        msgLi.innerText = recMsg;
+        console.log(recMsg)
+        messagesUl.appendChild(msgLi);
       };
 
       const showUsers = (id, nick) => {
@@ -144,7 +145,7 @@
       });
 
       publicChat.addEventListener('click', () => {
-        targetId = null;
+        targetUsr = null;
         socket.emit('getPublic');
       });
       socket.on('connected', (usuario) => {
@@ -155,11 +156,6 @@
 
       socket.on('userConnected', (id, nick) => showUsers(id, nick));
       socket.on('message', (message) => {
-        // if (message.targetId && (userId === message.targetId || userId === message.usrId) ) {
-        //   console.log(`usuario ${message.usrId} me pvteou`)
-        //   createMessage(msg, pvt=true);
-        // } else if (!message.targetId) {
-        // }
         createMessage(message);
       });
       socket.on('nickChange', (nick, userId) => {
@@ -169,16 +165,20 @@
       socket.on('userQuit', (id) => {
         document.getElementById(id).remove();
       });
-      socket.on('privateHistory', (messages) => {
+      socket.on('privateHistory', (items) => {
         messagesUl.innerHTML = '';
-        if (messages.length){
-          messages.forEach((message) => createMessage(message, pvt=true));
+        console.log('pvt')
+        console.log(items)
+        if (items.length){
+          items.forEach((item) => {
+            createMessage(`${item.date} - ${item.nickname}(private): ${item.chatMessage}`)
+          });
         }
       });
-      socket.on('publicHistory', (messages) => {
+      socket.on('publicHistory', (items) => {
         messagesUl.innerHTML = '';
-        messages.forEach((message) => {
-          createMessage(message);
+        items.forEach((item) => {
+          createMessage(`${item.date} - ${item.nickname}: ${item.chatMessage}`);
         });
       });
     </script>
