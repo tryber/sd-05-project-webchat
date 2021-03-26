@@ -5,11 +5,10 @@ let schema = null;
 
 async function connection() {
   if (schema) return Promise.resolve(schema);
-  return MongoClient
-    .connect(process.env.DB_URL || 'mongodb://localhost:27017/webchat', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+  return MongoClient.connect(process.env.DB_URL || 'mongodb://localhost:27017/webchat', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
     .then((conn) => conn.db(process.env.DB_NAME))
     .then((dbSchema) => {
       schema = dbSchema;
