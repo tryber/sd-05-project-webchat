@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>PR ta on</h1>
+    <h2 id="resposta"></h2>
+    <input id="input" />
+    <button id="button">Enter</button>
+  </body>
+  <script>
+    const socket = io('http://localhost:3000');
+    const saveInput = document.getElementById('input');
+    const saveButton = document.getElementById('button');
+    saveButton.addEventListener('click', () => {
+      saveInput.value;
+      console.log(saveInput.value);
+      socket.emit('salvar mensagens', { message: saveInput.value });
+    });
+    socket.on('respondendo', ({ message }) => {
+      document.getElementById('resposta').innerHTML = message;
+    });
+  </script>
+</html>
