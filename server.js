@@ -15,9 +15,9 @@ app.set('views', 'public');
 app.use(express.json());
 
 // aqui aplico no ejs mandando os usuários e o chat
-app.get('/', async (_req, res) => {
-  const allMessages = await getMessages();
-  res.status(200).render('index', allMessages);
+app.get('/', (_req, res) => {
+  // const allMessages = await getMessages();
+  res.status(200).render('index', { message: 'Foi?' });
 });
 
 const usersOnLine = [];
@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
 
   const userId = socket.id;
   const nickName = faker.name.findName();
-  const user = { userId, nickFaker: nickName };
+  const user = { userId, nickName };
   usersOnLine.push(user);
 
   socket.emit('conected', userId, nickName); // send to current user
@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('typing', data);
   });
 
-  socket.on('disconect', () => console.log('User left the room...'));
+  socket.emit('disconect', () => console.log('User left the room...'));
 });
 
 server.listen(3000, () => console.log('Listening on port 3000'));
