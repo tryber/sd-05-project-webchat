@@ -1,64 +1,66 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
-const path = require("path");
-const cors = require("cors");
-const moment = require("moment");
-const { saveMessages, getMessages } = require("./model/webChatModel");
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const path = require('path');
+const cors = require('cors');
+const moment = require('moment');
 const faker = require('faker');
+const { saveMessages, getMessages } = require('./model/webChatModel');
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, "public")));
-app.set("view engine", "ejs");
-app.set("views", "public");
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', 'public');
 app.use(express.json());
 
-app.get("/", async (_req, res) => {
-  const historyMessages = await getMessages();
-  console.log("server L18", historyMessages);
-  res.render("index", { historyMessages });
+// aqui aplico no ejs mandando os usuários e o chat
+app.get('/', async (_req, res) => {
+  const allMessages = await getMessages();
+  res.status(200).render('index', allMessages);
 });
-
-// LISTA DE TODOS OS USUARIOS ONLINE
-// ARRAY??
-
-// COMO ARMAZENAR NESTA LISTA UM NOVO USUARIO?
-
-// COMO ENVIAR ESTA LISTA PARA O FRONT END MOSTRAR NA TELA?
-
 
 const usersOnLine = [];
 
-io.on("connection", (socket) => {
-  console.log("made socket connection", socket.id);
+io.on('connection', (socket) => {
+  console.log('Made socket connection', socket.id);
+
   const userId = socket.id;
-  const randomName = faker.name.findName();
-  const user = { userId, randomName };
+  const nickName = faker.name.findName();
+  const user = { userId, nickFaker: nickName };
   usersOnLine.push(user);
-  socket.emit("joinRoom", randomName);
-  socket.emit("history");
-  socket.emit("usersOnline", usersOnLine);
+
+  socket.emit('conected', userId, nickName); // send to current user
+
+  io.emit('userConnected', userId, nickName); // send to all users that are connected
+
+  socket.on('saveNickName', (nick, id) => {
+    usersOnLine = usersOnLine.filter((user) => user.userId === userId);
+    usersOnLine.push({ userId: id, nickName: nick });
+    console.log(usersOnLine);
+  });
+
+  socket.emit('usersOnline', usersOnLine);
+
+  socket.emit('joinRoom', nickName);
 
   // Handle chat event
-  socket.on("message", async (data) => {
+  socket.on('saveMessage', async (data) => {
     console.log(data);
     const { chatMessage, nickname } = data;
-    const realTime = moment(new Date()).format("DD MM YYYY hh:mm:ss");
+    const realTime = moment(new Date()).format('DD MM YYYY hh:mm:ss');
     const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
-    console.log("server L28", msgFormated);
+    console.log('server L28', msgFormated);
     await saveMessages({ realTime, nickname, chatMessage });
-    io.emit("message", msgFormated);
+    io.emit('message', msgFormated); // vou enviar para renderizar na página
   });
-
-  // socket.on('saveNickName', ({ nickname: user }) => {
-  //   const 
-  // })
 
   // Handle typing event
-  socket.on("typing", function (data) {
-    socket.broadcast.emit("typing", data);
+  socket.on('typing', function (data) {
+    socket.broadcast.emit('typing', data);
   });
+
+  socket.on('disconect', () => console.log('User left the room...'));
 });
 
-server.listen(3000, () => console.log("Listening on port 3000"));
+server.listen(3000, () => console.log('Listening on port 3000'));
