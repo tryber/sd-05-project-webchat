@@ -4,14 +4,14 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 // moment = date library for parsing, validating, manipulating, and formatting dates.
-const moment = require('moment');
+// const moment = require('moment');
 
 const app = express();
 
 // require socket.io e protocolo http
 const socketIo = require('socket.io');
 const http = require('http');
-const { update } = require('lodash');
+// const { update } = require('lodash');
 
 // Wss para protocolo http
 const server = http.createServer(app);
@@ -118,7 +118,7 @@ app.get('/', async (_req, res) => {
   // console.log(getAllMessages);
   // return res.status(200).render('index', { getAllMessages, onlineUsers });
   res.status(200).render('index', { getAllMessages, onlineUsers, numeros });
-  numeros++;
+  numeros += 1;
 });
 
 const PORT = 3000;
