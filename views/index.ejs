@@ -2,44 +2,75 @@
 <html>
   <head>
     <title>WebChat</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
-    <h1>WEB Chat bombando</h1>
-    <form action="">
-      <input id="inputText" type="text" data-testid="message-box" />
-      <button id="buttonText" type="button" data-testid="send-button">Enviar</button>
+    <header class="header">WEB Chat bombando</header>
+    <form class="inputs">
+      <div action="" class="input-text">
+        <input id="inputText" type="text" data-testid="message-box" />
+        <button id="buttonText" type="button" data-testid="send-button">Enviar</button>
+      </div>
+      <div class="user-area">
+        <div action="">
+          <input id="inputNickname" type="text" data-testid="nickname-box" />
+          <button id="buttonNickName" type="button" data-testid="nickname-save">
+            NickName
+          </button>
+        </div>
+          <ul id="listUsers">
+            <% if(allUsers) { %>
+              <% allUsers.forEach(({nickname})=> { %>
+                <li data-testid="online-user"><%= nickname %></li>
+              <%})%>
+            <% } %>
+          </ul>
+      </div>
     </form>
-    <form action="">
-      <input id="inputNickname" type="text" data-testid="nickname-box" />
-      <button id="buttonNickName" type="button" data-testid="nickname-save">
-        Mudar NickName
-      </button>
-    </form>
-    <ul id="chat">
-      <% if(allMessages) { %> <% allMessages.forEach(({message:oldMessage})=> { %>
-      <li data-testid="message"><%= oldMessage %></li>
-      <%})%> <% } %>
-    </ul>
-    <ul id="listUsers">
-      <% if(allUsers) { %> <% allUsers.forEach(({nickname})=> { %>
-      <li data-testid="online-user"><%= nickname %></li>
-      <%})%> <% } %>
-    </ul>
+    <div>
+
+      <ul id="chat">
+        <% if(allMessages) { %>
+          <% allMessages.forEach(({message:oldMessage})=> { %>
+            <% const breakingMsg = new RegExp('(.*)-(.*):(.*)'); %> 
+            <% const parts = oldMessage.match(breakingMsg); %>
+            <li data-testid="message">
+              <span class="chatTime"><%=parts[1]%> -</span>
+              <span class="chatUser"><%=parts[2]%></span>:
+              <span class="chatMessage"><%=parts[3]%></span>
+            </li>
+            <%})%>
+          <% } %>
+        </ul>
+      </div>
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
   <script>
+    // const singleData = (min = 0, max = 100) => min + max * Math.random();
+    // const colorGenerator = () => [singleData(), singleData(), singleData()];
+    // const personalColor = colorGenerator();
+
     const socket = io('http://localhost:3000');
-    const randomNuber = Math.round(Math.random() * 10000);
+    const randomNuber = '<%= rand %>';
     let nickname = `Quest ${randomNuber}`;
     socket.emit('newUser', { nickname });
 
     const appendItem = (destiny, item, dataTestId) => {
-      console.log('destiny, item, dataTestId', destiny, item, dataTestId);
+      console.log(item)
       const chat = document.getElementById(destiny);
+      let teste;
       // usei jquerry pq estava dificil colocar o data-testid =D
       // https://api.jquery.com/jquery/message
-      const teste = $(`<li data-testid="${dataTestId}">${item}</li>`);
+      if (destiny === 'chat') {
+        const breakingMsg = new RegExp('(.*)-(.*):(.*)');
+        const parts = item.match(breakingMsg);
+        teste = $(
+          `<li data-testid="${dataTestId}" ><span class="chatTime">${parts[1]} -</span> <span class="chatUser">${parts[2]}</span>: <span class="chatMessage">${parts[3]}</span></li>`,
+        );
+      } else {
+        teste = $(`<li data-testid="${dataTestId}">${item}</li>`);
+      }
       chat.appendChild(teste[0]);
     };
 
@@ -61,10 +92,20 @@
 
     const buttonText = document.getElementById('buttonText');
 
-    buttonText.addEventListener('click', () => {
-      const chatMessage = document.getElementById('inputText').value;
-      if (!chatMessage) return false;
-      socket.emit('message', { chatMessage, nickname });
+    function textClickAction(e) {
+      // e.preventDefault();
+      const chatMessage = document.getElementById('inputText');
+      if (!chatMessage.value) return false;
+      socket.emit('message', { chatMessage: chatMessage.value, nickname });
+      chatMessage.value = '';
+      chatMessage.focus();
+    }
+
+    buttonText.addEventListener('click', textClickAction);
+    document.getElementById('inputText').addEventListener('keyup', (event) => {
+      if (event.keyCode == 13) {
+        textClickAction();
+      }
     });
 
     socket.on('UpdateUsers', ({ users }) => {

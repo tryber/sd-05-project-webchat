@@ -4,7 +4,9 @@ require('dotenv').config();
 
 const dateFormat = require('dateformat');
 
-const app = require('express')();
+const express = require('express');
+
+const app = express();
 
 const http = require('http');
 
@@ -21,21 +23,38 @@ const io = socketIo(socketIoServer, {
 
 const cors = require('cors');
 const connection = require('./model/connection');
+// const { json } = require('body-parser');
 
 app.use(cors());
 
 let users = [];
 
 app.use(cors());
+// app.use(express.static(__dirname + '/public'));
 
 // DD-MM-yyyy HH:mm:ss ${message.nickname} ${message.chatMessage} FORMATO
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+function* idGeneratior() {
+  let id = 0;
+  while (true) {
+    yield (id += 1);
+  }
+}
+const GiveId = idGeneratior();
+
+app.get('/deleteAll', async (_req, res) => {
+  await connection().then((db) => db.collection('messages').deleteMany({}));
+  res.status(200).json({ status: 'Done' });
+});
+
 app.get('/', async (_req, res) => {
   const allMessages = await connection().then((db) =>
     db.collection('messages').find().toArray());
-  res.status(200).render('index', { allMessages, allUsers: users });
+  res
+    .status(200)
+    .render('index', { allMessages, allUsers: users, rand: GiveId.next().value });
 });
 
 io.on('connection', async (socket) => {
@@ -59,7 +78,7 @@ io.on('connection', async (socket) => {
   socket.on('disconnect', () => {
     users = users.filter((e) => e.id !== socket.id);
     io.emit('UpdateUsers', { users });
-    console.log(socket.id, 'foi desconectado');
+    console.log(socket.id, 'foi desconectado ', new Date());
   });
 });
 
