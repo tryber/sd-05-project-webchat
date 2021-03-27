@@ -11,12 +11,31 @@
 
 <body>
   <form>
-    <!-- <%allcoisa.forEach((onlineUsers) => {%>
+    <!-- <%getAllMessages.forEach((onlineUsers) => {%>
 
-    <%=onlineUsers.nome%> - <%=onlineUsers.idade%>
-    <!-- <li data-testid="message"><%=onlineUsers.timestamp%> - <%= onlineUsers.nickname%>: <%=onlineUsers.chatMessage%></li> -->
-    <%})%> -->
+    <%=onlineUsers.nome%> - <%=onlineUsers.sala%>
+    <li data-testid="message"><%=onlineUsers.timestamp%> - <%= onlineUsers.nickname%>: <%=onlineUsers.chatMessage%></li>
+    <!<%})%> -->
   </form>
+  <div>
+    <input data-testid="nickname-box" id="nickname-box" />
+    <button data-testid="nickname-save" id="nickname-save">Salvar Nome</button>
+    <ul>
+      <li id='change-name'>
+        Guest<%=numeros%>
+      </li>
+      <%Object.values(onlineUsers).forEach((user) =>{%>
+      <li id=<%=user.socketId%>><%=user.nickname%></li>
+      <%})%>
+    </ul>
+  </div>
+  <div>
+    <input data-testid="message-box" id="message-box" />
+    <button data-testid="message-send-button" id="message-send-button">ENVIAR MENSAGEM</button>
+  </div>
+  <ul id='chat-box'>
+
+  </ul>
   <h1>funcionando</h1>
   <script type="text/javascript">
   </script>
@@ -24,7 +43,38 @@
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <Script>
   const socket = io('http://localhost:3000');
+  const messageBox = document.getElementById('message-box');
+  const messageSendButton = document.getElementById('message-send-button');
+  const chatBox = document.getElementById('chat-box');
+  const changeName = document.getElementById('change-name');
+  const saveName = document.getElementById('nickname-save');
+  const saveNameBox = document.getElementById('nickname-box');
+  const myData = {
+    nickname: 'Guest' + '<%=numeros%>', socketId: socket.id
+  };
+  saveName.addEventListener('click', () => {
+    changeName.innerHTML = saveNameBox.value
+    myData.nickname = saveNameBox.value
+    myData.socketId = socket.id
+    socket.emit('displayName', { myData })
+  });
 
+  messageSendButton.addEventListener('click', () => {
+    messageBox.value
+    socket.emit('message', { chat: messageBox.value })
+  });
+  socket.on('updateMessage', ({ chat }) => {
+    const message = document.createElement('li')
+    message.innerHTML = chat;
+    message.setAttribute('data-testid', 'message');
+    chatBox.appendChild(message)
+    console.log(chat);
+  });
+  socket.on('updateUsers', ({ onlineUsers }) => {
+    Object.values(onlineUsers).forEach(user => {
+      document.getElementById(user.socketId).innerHTML = user.nickname
+    });
+  })
 </Script>
 
 </html>
