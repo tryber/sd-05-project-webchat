@@ -2,11 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+			integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
+			crossorigin="anonymous"
+		/>
     <title>WebScockets</title>
-    <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js">
-    </script>
     <link href="./styles.css" rel="stylesheet" />
   </head>
   <body>
@@ -24,18 +26,18 @@
       <div>
         <form>
           <input id="user" type="text" placeholder="User Name" data-testid="nickname-box" />
-          <input id="user-message" type="text" placeholder="Message" />
+          <input id="user-message-field" type="text" placeholder="Message" />
         </form>
         <button type="button" id="save-nick" data-testid="nickname-save" >Salvar Nickname</button>
         <button id="send" data-testid="send-button" >Send</button>
       </div>
-
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script>
 
       const socket = io();
 
       // Query DOM
-      const userMessage = document.getElementById('user-message').value;
+      const userMsgField = document.getElementById('user-message-field');
       const userName = document.getElementById('user').value;
       const btn = document.getElementById('send');
       const btnToSaveNickName = document.getElementById('save-nick');
@@ -51,58 +53,52 @@
         (id, nick) => {
           userId = id;
           nickName = nick;
+          console.log(`User ${nickName} connected`)
         },
-        console.log('Usuário sem nome conectado')
       );
+
+      socket.on('userConnected', (id, nick) => {
+        const span = document.createElement('span');
+        span.innerHTML = `<span>${nick}</span>`;
+        chatBox.appendChild(span);
+      });
 
       btnToSaveNickName.addEventListener('click', function () {
         nickName = userName;
-        console.log('Bem vindo', nickName);
+        console.log('Nickname logged is', nickName);
         socket.emit('saveNickName', nickName, userId);
       });
 
       socket.on('usersOnline', (arrayOfUsers) => {
-        array.forEach((arrayOfUsers) => {
-          usersList.innerHTML += `<li data-testid="online-user" >${arrayOfUsers.nickName}</li>`;
+        arrayOfUsers.forEach((user) => {
+          usersList.innerHTML += `<li data-testid="online-user" >${user.nickName}</li>`;
         });
       });
 
       btn.addEventListener('click', function () {
-        console.log('linha 35', userMessage);
-        socket.emit('saveMessage', {
+        socket.emit('message', {
           nickName: userName,
-          chatMessage: userMessage,
+          chatMessage: userMsgField.value,
         });
-        userMessage = '';
+        userMsgField.value = '';
       });
 
-      userMessage.addEventListener('keypress', function () {
-        socket.emit('typing', userTyping.value);
-      });
+      // userMsgField.addEventListener('keypress', function () {
+      //   socket.emit('typing', userTyping.value);
+      // });
 
-      socket.on('userConnected', (id, nick) => {
-        const span = document.createElement('span');
-        span.innerHTML += `<span>${message.time}</span>`;
-        document.chatBox.appendChild(span);
-      });
+      // socket.on('privateChat', (nick) => {
+      //   nickName = nick;
+      //   const tagH6 = document.createElement('h6');
+      //   tagH6.innerText = `Bem vindo ${nickName}`;
+      //   chatBox.appendChild(tagH6);
+      // });
 
-      socket.on('joinRoom', (nick) => {
-        nickName = nick;
-        const tagH6 = document.createElement('h6');
-        tagH6.innerText = `Bem vindo ${nickName}`;
-        chatBox.appendChild(tagH6);
-      });
+      // socket.on('typing', function (data) {
+      //   feedback.innerHTML = '<p><em>' + data + ' is typing a message...</em></p>';
+      // });
 
-      socket.on('history', (data) => {
-        console.log('client L55', data);
-        // data.forEach(element => element);
-      });
-
-      socket.on('typing', function (data) {
-        feedback.innerHTML = '<p><em>' + data + ' is typing a message...</em></p>';
-      });
-
-      socket.on('disconect');
+      // socket.on('disconect');
 
     </script>
   </body>
