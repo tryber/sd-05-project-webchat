@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>PR Gatinho Manhoso</h1>
+    <div>
+      <input data-testid="nickname-box" id="nickname-box" />
+      <button data-testid="nickname-save" id="nickname-save">Salvar</button>
+      <ul>
+      <li id='userMe'>
+        Visitante<%= numeros %>
+      </li>
+      </ul>
+    </div>
+    <div>
+      <input data-testid="message-box" id="message-box" />
+      <button data-testid="send-button" id="message-send-button">Enviar</button>
+    </div>
+    <ul id="chat-box"></ul>
+  </body>
+  <script>
+    const socket = io('http://localhost:3000/');
+    const messageBox = document.getElementById('message-box');
+    const messageSendButton = document.getElementById('message-send-button');
+    const userMe = document.getElementById('userMe');
+    const userButtonSave = document.getElementById('nickname-save');
+    const userInputSave = document.getElementById('nickname-box');
+    userButtonSave.addEventListener('click', () => {
+      userMe.innerHTML=userInputSave.value
+    })
+    const chatBox = document.getElementById('chat-box');
+    messageSendButton.addEventListener('click', () => {
+      socket.emit('message', { chat: messageBox.value });
+    });
+    socket.on('updateMessage', ({ chat }) => {
+      const message = document.createElement('li');
+      message.innerHTML = chat;
+      message.setAttribute('data-testid', 'message');
+      chatBox.appendChild(message);
+    });
+  </script>
+</html>
