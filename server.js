@@ -19,6 +19,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     // url aceita pelo
+    // https://socket.io/docs/v3/handling-cors/
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     // Métodos aceitos pela url
@@ -43,8 +44,18 @@ const onlineUsers = {};
 io.on('connection', (socket) => {
   const socketId = socket.id;
   console.log(`Socket conectado: ${socketId}`);
-  io.emit('conectado', `${socketId}`);
+  // io.emit('conectado', `${socketId}`);
+
+  socket.on('newUserConectando', ({myData}) => {
+    myData.socketId = socket.id
+    onlineUsers[myData.socketId] = myData
+    io.emit('updateUsers', { onlineUsers });
+    console.log(myData, `AQUI ESTÁ O MYDATA`)
+  });
+
   socket.on('disconnect', () => {
+    delete onlineUsers[socketId]
+    io.emit('updateUsers', { onlineUsers });
     console.log(`${socketId} está desconectado`);
   });
 
