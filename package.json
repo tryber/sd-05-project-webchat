@@ -2,7 +2,7 @@
   "name": "webchat",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "jest --runInBand  --detectOpenHandles --forceExit",
     "test-coverage": "jest --coverage",
@@ -20,8 +20,10 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
+    "http-server": "^0.12.3",
     "mongodb": "^3.6.2",
-    "socket.io": "3.0.4",
+    "nodemon": "^2.0.7",
+    "socket.io": "^3.0.4",
     "socket.io-client": "3.0.5"
   },
   "devDependencies": {
