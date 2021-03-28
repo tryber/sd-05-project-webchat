@@ -9,6 +9,17 @@
 <body>
 
   <h1>Olá</h1>
+  <div>
+
+    <h2>Usuário:</h2>
+    <ul id="userList">
+      <li><%=contador%></li>
+      <% users.forEach((user) => { %>
+        <li><%=user.nickname%></li>
+      <% }) %>
+    </ul>
+
+  </div>
 
   <button id="clique">Clique</button>
 
@@ -21,27 +32,20 @@
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
 <script>
-  const nickname = 'usuário ' + Math.round(Math.random()*1000);
-
   const socket = io('http://localhost:3000');
-
-  const botao = document.getElementById('clique');
-
-  botao.addEventListener('click', () => {
-    const chatMessage = document.getElementById('texto').value
-    socket.emit('message', { chatMessage, nickname })
-  }); // emit = emite uma msg
-
-  socket.on('new message', (newMessage) => {
-    const message = document.createElement('li');
-    message.innerHTML = newMessage;
-    document.getElementById('chatList').appendChild(message);
-
-    console.log(newMessage)
+  let nickname = '<%=contador%>';
+  const userList = document.getElementById('userList');
+  socket.emit('connected', { nickname });
+  socket.on('updateUsers', ({ users }) => {
+    userList.innerHTML = '';
+    const atualUser = users.filter((user) => user.nickname === nickname);
+    const otherUsers = users.filter((user) => user.nickname !== nickname);
+    [...atualUser, ...otherUsers].forEach(user => {
+      const listItem = document.createElement('li');
+      listItem.innerHTML = user.nickname;
+      userList.appendChild(listItem);
+    });
   });
-
-  socket.on('RESPOSTA', (resp) => console.log(resp));
-
 </script>
 
 </html>
