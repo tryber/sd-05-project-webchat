@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO - trybe</title>
+    <!-- <scrip src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js">
+    </scrip> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" src="./api-webchat/public/style.css" />
+  </head>
+  <body>
+    <section>
+      <form action="">
+        <input id="username" data-testid="nickname-box" placeholder="Digite seu usuario" />
+        <button id="saveUser" type="button" data-testid="nickname-save">Salva usuário</button>
+        <div id="chat">
+          <h1><%= mensagens %></h1>
+          <ul>
+            <% req.forEach(function(msg){ %>
+              <li>
+                <%=msg%>
+              </li>
+              <% }) %>
+          </ul>
+          </div>
+        <input id="userMessage" data-testid="message-box" placeholder="Digite sus messagem" />
+        <button type="submit" data-testid="send-button">Enviar mensagem</button>
+      </form>
+    </section>
+    <aside>
+      <ul id="users">
+        <li><%= guest %></li>
+      </ul>
+    </aside>
+  </body>
+  <script>
+    const socket = io();
+    socket.emit('startConnection', { nickname: '<%=guest%>'});
+    const form = document.querySelector('form');
+    const saveUser = document.querySelector('#saveUser');
+    const user = document.querySelector('#username');
+    const message = document.querySelector('#userMessage');
+    const guest = document.querySelector('#users').children[0];
+    
+    saveUser.addEventListener('submit', (e) => {
+      e.preventDefault();
+    });
+    
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('socket nickname: ', socket.nickname)
+      if (!socket.nickname) user.value = guest.innerText;
+      if (user.value && message.value) {
+        const sendingObject = {
+          nickname: user.value,
+          chatMessage: message.value,
+        };
+        socket.emit('message', sendingObject);
+      }
+      message.value = '';
+      return false;
+    });
+    
+    saveUser.addEventListener('click', (e) => {
+      socket.nickname = user.value;
+      console.log('nome: ', socket.nickname);
+      socket.emit('save-nickName', { nickname: user.value, id: socket.id })
+    });
+    
+    function messageRender(parametro) {
+      const conversa = document.querySelector('#chat');
+      const div = document.createElement('div');
+      
+      div.className = 'messages';
+      div.setAttribute('data-testid', 'message');
+      div.textContent = parametro;
+      conversa.append(div);
+    }
+    
+    function nickNameRender(param) {
+      const users = document.querySelector('#users');
+      users.innerHTML= '';
+      const usuarioLogado = param.filter(id => id.id === socket.id);
+      
+      const usuarios = param.filter(id => id.id !== socket.id);
+      
+      [...usuarioLogado, ...usuarios].forEach((user) => {
+        const li = document.createElement('li');
+        li.className = 'user';
+        li.setAttribute('data-testid', 'online-user');
+        
+        li.setAttribute('id', user.id)
+        li.innerText = user.nickname;
+        console.log('innwe: ',li);
+        
+        users.appendChild(li);
+        console.log(users[0]);
+      });
+      
+    }
+    
+    
+    // socket.on('nickName', (users) => {
+      socket.on('update', (users) => {
+        console.log('guest:', guest);
+        
+        users.forEach(i => console.log('update: ',i.nickname));
+        nickNameRender(users);
+      });
+      
+      socket.on('saudacao', (e) => {
+      document.querySelector('#username').value = e;
+      console.log(e);
+  
+    });
+
+    socket.on('message', (msg) => {
+      // if (msg.id !== socket.id) messageRender(msg);
+      // if (!msg.includes(user.value))
+      messageRender(msg);
+    });
+  </script>
+</html>
+
+
+<!-- 
+ [HONESTIDADE ACADEMICA] - pedaço de codigo para manipular errros de rotas retirado do site: 
+ https://www.luiztools.com.br/post/tutorial-crud-em-node-js-com-driver-nativo-do-mongodb/
+ author: Luiztools -->
