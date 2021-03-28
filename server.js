@@ -1,44 +1,93 @@
+// pair programming PR, Lari, Sid, Samuel
 const express = require('express');
-const cors = require('cors');
 const bodyParser = require('body-parser');
-// const moment = require('moment');
-// const { createMessages, allMessages } = require('./model/messages');
+const cors = require('cors');
+const path = require('path');
+const moment = require('moment');
 
 const app = express();
 
-const socketServer = require('http').createServer(app);
-const io = require('socket.io')(socketServer);
+const socketIo = require('socket.io');
+const http = require('http');
+const { createMessage, getMessages } = require('./model/messages');
 
-const port = process.env.PORT || 3000;
-// const users = [];
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
+
+app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  }),
+);
+
+// rota app.use do diretorio public
+app.use(express.static(path.join(__dirname, 'view')));
+// por default view engine é ejs
+app.set('view engine', 'ejs');
+// diretorio public com views
+app.set('views', path.join(__dirname, 'view'));
+
+const onlineUsers = {};
 
 io.on('connection', (socket) => {
-  console.log('usuario ta on');
-  socket.on('salvar mensagens', ({ message }) => {
-    console.log(message);
-    io.emit('respondendo', { message });
+  const socketId = socket.id;
+  console.log(`Socket conectado: ${socketId}`);
+
+  socket.on('newUserConectando', ({ myData }) => {
+    myData.socketId = socket.id;
+    onlineUsers[myData.socketId] = myData;
+    io.emit('updateUsers', { onlineUsers });
+    console.log(myData, 'AQUI ESTÁ O MYDATA');
   });
-  /* socket.on('chat', async (message) => {
-        const date = new Date().getTime();
-        const transformDate = moment(date).format('DD-MM-yyyy h:mm:ss A');
-        createMessages(message);
-        socket.emit('chat', { ...message, transformDate });
-    });*/
+
   socket.on('disconnect', () => {
-    console.log('usuario off', socket.id);
+    delete onlineUsers[socketId];
+    io.emit('updateUsers', { onlineUsers });
+    console.log(`${socketId} está desconectado`);
   });
+
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const data = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    const newMessage = `${data} - ${nickname}: ${chatMessage}`;
+    createMessage(newMessage);
+    io.emit('message', newMessage);
+  });
+
+  socket.on('displayName', ({ myData }) => {
+    onlineUsers[myData.socketId] = myData;
+    io.emit('updateUsers', { onlineUsers });
+  });
+
+  //     // CRIAR MENSAGEM PRIVATA
+  //     msg = await createPrivateMessage({
+  //       nickname,
+  //       message: chatMessage,
+  //       timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
+  //       addressee,
+  //     });
+
+  // SALA PRIVATE
+
+  // https://socket.io/docs/v3/rooms/
+  // io.to(socketId)
+  //   .to(addressee)
+  //   .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
+  // }
+  // });
 });
-
-app.set('view engine', 'ejs');
-app.set('views', './view');
-app.use(bodyParser.json());
-app.use(cors());
-
+let numeros = 0;
 app.get('/', async (_req, res) => {
-  // const screenMessage = await allMessages();
-  res.status(200).render('chat');
+  const getAllMessages = await getMessages();
+  res.status(200).render('chat', { getAllMessages, onlineUsers, numeros });
+  numeros += 1;
 });
 
-socketServer.listen(port, () => {
-  console.log('Oou vc tem uma nova conversa');
-});
+const PORT = 3000;
+server.listen(PORT, () => console.log('Oou vc tem uma nova conversa'));
