@@ -1,10 +1,12 @@
+// [Honestidade Acadêmica]
+// pair programming e ajuda Paulo Zambelli, eu(Samuel), Larissa e Sid
 const express = require('express');
 const bodyParser = require('body-parser');
 // Cross-Origin Resource Sharing
 const cors = require('cors');
 const path = require('path');
 // moment = date library for parsing, validating, manipulating, and formatting dates.
-// const moment = require('moment');
+const moment = require('moment');
 
 const app = express();
 
@@ -21,16 +23,21 @@ const io = socketIo(server, {
     // url aceita pelo
     // https://socket.io/docs/v3/handling-cors/
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
     // Métodos aceitos pela url
+    methods: ['GET', 'POST'],
   },
 });
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  }),
+);
 
 // require models mensagens
-// const { createMessage, getMessages } = require('./models/messagesModel');
+const { createMessage, getMessages } = require('./models/messagesModel');
 
 // rota app.use do diretorio public
 app.use(express.static(path.join(__dirname, 'public')));
@@ -46,21 +53,25 @@ io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socketId}`);
   // io.emit('conectado', `${socketId}`);
 
-  socket.on('newUserConectando', ({myData}) => {
-    myData.socketId = socket.id
-    onlineUsers[myData.socketId] = myData
+  socket.on('newUserConectando', ({ myData }) => {
+    let dataUsers = myData.socketId;
+    dataUsers = socket.id;
+    onlineUsers[dataUsers.socketId] = dataUsers;
     io.emit('updateUsers', { onlineUsers });
-    console.log(myData, `AQUI ESTÁ O MYDATA`)
+    console.log(myData, 'AQUI ESTÁ O MYDATA');
   });
 
   socket.on('disconnect', () => {
-    delete onlineUsers[socketId]
+    delete onlineUsers[socketId];
     io.emit('updateUsers', { onlineUsers });
     console.log(`${socketId} está desconectado`);
   });
 
-  socket.on('message', ({ chat }) => {
-    io.emit('updateMessage', { chat });
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const data = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    const newMessage = `${data} - ${nickname}: ${chatMessage}`;
+    createMessage(newMessage);
+    io.emit('message', newMessage);
   });
 
   socket.on('displayName', ({ myData }) => {
@@ -121,16 +132,24 @@ io.on('connection', (socket) => {
   // }
   // });
 });
+
+// app.get('/', (_req, res) => {
+// const getAllMessages = [{ nome: 'BATE PAPO UOL', sala: 'sala: + 18' }];
+// return res.status(200).render('index', { getAllMessages, onlineUsers });
+
 let numeros = 0;
 app.get('/', async (_req, res) => {
-  // app.get('/', (_req, res) => {
-  const getAllMessages = [{ nome: 'BATE PAPO UOL', sala: 'sala: + 18' }];
-  // const getAllMessages = await getMessages();
+  const getAllMessages = await getMessages();
   // console.log(getAllMessages);
-  // return res.status(200).render('index', { getAllMessages, onlineUsers });
   res.status(200).render('index', { getAllMessages, onlineUsers, numeros });
   numeros += 1;
 });
 
 const PORT = 3000;
 server.listen(PORT, () => console.log(`ICQ balançou a tela na porta ${PORT}, saudades!!!.`));
+
+// Referencias para o projeto
+// Grande ajudar do aluno Paulo Zambelli em resolução do erro do projeto para evaluator.
+// revisão Vinicius Vasconcelos <https://github.com/tryber/sd-04-live-lectures/pull/67/files>
+// Chat em tempo real com NodeJS + Socket.io | Diego Fernandes | Rocketseat <https://www.youtube.com/watch?v=-jXfKDYJJvo>
+// Realtime Chat With Users & Rooms - Socket.io, Node & Express <https://www.youtube.com/watch?v=jD7FnbI76Hg>

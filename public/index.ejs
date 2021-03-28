@@ -1,3 +1,5 @@
+<!-- // [Honestidade Acadêmica] -->
+<!-- pair programming e ajuda Paulo Zambelli, eu(Samuel), Larissa e Sid -->
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,7 +8,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project 32 - Webchat || Bate papo UOL é você?</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- <link rel="stylesheet" href="style.css" /> -->
 </head>
 
 <body>
@@ -31,16 +33,31 @@
   </div>
   <div>
     <input data-testid="message-box" id="message-box" />
-    <button data-testid="message-send-button" id="message-send-button">ENVIAR MENSAGEM</button>
+    <button data-testid="send-button" id="message-send-button">ENVIAR MENSAGEM</button>
   </div>
   <!-- <div>
     <button data-testid="private" id="private" type="button">Private</button>
     <button data-testid="public" id="public" type="button">Public</button>
   </div> -->
   <ul id='chat-box'>
-
+    <% getAllMessages.forEach(({ chatMessage }) => {  %>
+    <li data-testid="message">
+      <%= chatMessage %>
+    </li>
+    <% })%>
   </ul>
-  <h1>funcionando</h1>
+  <!-- <div>
+    <button data-testid="private" id="private" type="button">Private</button>
+    <button data-testid="public" id="public" type="button">Public</button>
+  </div> -->
+  <ul id='chat-box'>
+    <% getAllMessages.forEach(({ chatMessage }) => {  %>
+    <li data-testid="message">
+      <%= chatMessage %>
+    </li>
+    <% })%>
+  </ul>
+  <!-- <h1>funcionando</h1> -->
   <script type="text/javascript">
   </script>
 </body>
@@ -60,31 +77,35 @@
   // target.previousSibling. possivel possibilidade button private
   // is that previousSibling returns the previous sibling node as an element node, a text node or a comment node
   // ------------------------------------------------------------
+  let nickname = 'Guest' + '<%=numeros%>';
 
   const myData = {
     nickname: 'Guest' + '<%=numeros%>', socketId: socket.id
   };
+
   // novo usuarios que loga aparece para os demais
   socket.emit('newUserConectando', { myData });
-
   saveName.addEventListener('click', () => {
     changeName.innerHTML = saveNameBox.value
     myData.nickname = saveNameBox.value
+    nickname = myData.nickname
     myData.socketId = socket.id
     socket.emit('displayName', { myData })
   });
 
   messageSendButton.addEventListener('click', () => {
     messageBox.value
-    socket.emit('message', { chat: messageBox.value })
+    socket.emit('message', { chatMessage: messageBox.value, nickname })
   });
-  socket.on('updateMessage', ({ chat }) => {
+
+  socket.on('message', (chatMessage) => {
     const message = document.createElement('li')
-    message.innerHTML = chat;
+    message.innerHTML = chatMessage;
     message.setAttribute('data-testid', 'message');
     chatBox.appendChild(message)
-    console.log(chat);
+    console.log(chatMessage);
   });
+
   socket.on('updateUsers', ({ onlineUsers }) => {
     newListWithUser.innerHTML = '';
     const myUser = document.createElement('li');
