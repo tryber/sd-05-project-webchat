@@ -16,7 +16,12 @@
       <h2>Web Chat</h2>
       <div>
         <h3>Online users</h3>
-        <div id="users-online"></div>
+        <ul id="users-online">
+          <li> <%= nickName %> </li>
+          <% usersOnLine.forEach((user) => { %>
+            <li> <%=user.nickName %> </li>
+          <% }) %>
+        </ul>
       </div>
       <div id="chat-window">
         <div id="chatBox" data-testid="message-box" >
@@ -38,24 +43,17 @@
 
       // Query DOM
       const userMsgField = document.getElementById('user-message-field');
-      const userName = document.getElementById('user').value;
+      const userName = document.getElementById('user');
       const btn = document.getElementById('send');
       const btnToSaveNickName = document.getElementById('save-nick');
       const chatBox = document.getElementById('chatBox');
       const userTyping = document.getElementById('userTyping');
       const usersList = document.getElementById('users-online');
 
-      let userId;
-      let nickName;
+      let userIdSocket;
+      let nickNameSocket = '<%= nickName %>' ;
 
-      socket.on(
-        'connected',
-        (id, nick) => {
-          userId = id;
-          nickName = nick;
-          console.log(`User ${nickName} connected`)
-        },
-      );
+      socket.emit('connected', nickNameSocket);
 
       socket.on('userConnected', (id, nick) => {
         const span = document.createElement('span');
@@ -64,24 +62,24 @@
       });
 
       btnToSaveNickName.addEventListener('click', function () {
-        nickName = userName;
-        console.log('Nickname logged is', nickName);
-        socket.emit('saveNickName', nickName, userId);
+        nickNameSocket = userName.value;
+        console.log('Nickname logged is', nickNameSocket);
+        socket.emit('saveNickName', nickNameSocket);
       });
 
-      socket.on('usersOnline', (arrayOfUsers) => {
-        arrayOfUsers.forEach((user) => {
-          usersList.innerHTML += `<li data-testid="online-user" >${user.nickName}</li>`;
-        });
-      });
+      // socket.on('usersOnline', (arrayOfUsers) => {
+      //   arrayOfUsers.forEach((user) => {
+      //     usersList.innerHTML += `<li data-testid="online-user" >${user.nickName}</li>`;
+      //   });
+      // });
 
-      btn.addEventListener('click', function () {
-        socket.emit('message', {
-          nickName: userName,
-          chatMessage: userMsgField.value,
-        });
-        userMsgField.value = '';
-      });
+      // btn.addEventListener('click', function () {
+      //   socket.emit('message', {
+      //     nickName: userName,
+      //     chatMessage: userMsgField.value,
+      //   });
+      //   userMsgField.value = '';
+      // });
 
       // userMsgField.addEventListener('keypress', function () {
       //   socket.emit('typing', userTyping.value);
@@ -98,8 +96,6 @@
       //   feedback.innerHTML = '<p><em>' + data + ' is typing a message...</em></p>';
       // });
 
-      // socket.on('disconect');
-
     </script>
   </body>
-</html> -->
+</html>
