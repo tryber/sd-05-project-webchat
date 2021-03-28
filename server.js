@@ -41,10 +41,10 @@ io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socketId}`);
 
   socket.on('newUserConectando', ({ myData }) => {
-    myData.socketId = socket.id;
-    onlineUsers[myData.socketId] = myData;
+    let dataMy = myData.socketId;
+    dataMy = socket.id;
+    onlineUsers[dataMy.socketId] = dataMy;
     io.emit('updateUsers', { onlineUsers });
-    console.log(myData, 'AQUI ESTÁ O MYDATA');
   });
 
   socket.on('disconnect', () => {
