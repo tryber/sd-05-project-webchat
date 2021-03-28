@@ -41,19 +41,27 @@ io.on('connection', (socket) => {
     console.log(users);
     io.emit('updateUsers', { users });
   });
+
+  socket.on('nickChange', ({ nickname }) => {
+    const userIndex = users.findIndex((user) => user.id === socket.id);
+    users[userIndex].nickname = nickname;
+    io.emit('updateUsers', { users }); // envia para tds usuarios
+  });
+
   socket.on('disconnect', () => {
     console.log('Alguém desconectou');
     users = users.filter((user) => user.id !== socket.id);
     io.emit('updateUsers', { users });
   });
-  // socket.on('message', ({ chatMessage, nickname }) => {
-  //  const agora = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
-  //  io.emit('new message', (`${agora} ${nickname} ${chatMessage}`));
-  // socket.broadcast.emit('RESPOSTA', 'BLOQUEADO'+num)
-  // socket.emit responde apenas para ele mesmo
-  // io.emit responde para todos os sockets
-  // socket.broadcast.emit responde para todos os sockets menos ele mesmo
-//  });
+
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const agora = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
+    io.emit('new message', (`${agora} ${nickname} ${chatMessage}`));
+    // socket.broadcast.emit('RESPOSTA', 'BLOQUEADO'+num)
+    // socket.emit responde apenas para ele mesmo
+    // io.emit responde para todos os sockets
+    // socket.broadcast.emit responde para todos os sockets menos ele mesmo
+  });
 });
 
 server.listen(3000, () => console.log('msn na porta 3000'));

@@ -13,19 +13,21 @@
 
     <h2>Usuário:</h2>
     <ul id="userList">
-      <li><%=contador%></li>
+      <li data-testid="online-user"><%=contador%></li>
       <% users.forEach((user) => { %>
-        <li><%=user.nickname%></li>
+        <li data-testid="online-user"><%=user.nickname%></li>
       <% }) %>
     </ul>
 
   </div>
 
-  <button id="clique">Clique</button>
+  <button data-testid="nickname-save" id="nickname-save">Trocar nickname</button>
 
-  <input type="text" id="texto">
+  <input type="text" data-testid="nickname-box" id="nickname-box">
 
   <ul id="chatList"></ul>
+  <button id="send-button" data-testid="send-button">Enviar mensagem</button>
+  <input type="text" id="mesage-box" data-testid="message-box">
 
 </body>
 
@@ -35,6 +37,14 @@
   const socket = io('http://localhost:3000');
   let nickname = '<%=contador%>';
   const userList = document.getElementById('userList');
+  const nickButton = document.getElementById('nickname-save');
+  const nickInput = document.getElementById('nickname-box');
+  const chat = document.getElementById('chatList');
+  nickButton.addEventListener('click', () => {
+    nickname = nickInput.value;
+    socket.emit('nickChange', { nickname });
+  });
+
   socket.emit('connected', { nickname });
   socket.on('updateUsers', ({ users }) => {
     userList.innerHTML = '';
@@ -43,6 +53,7 @@
     [...atualUser, ...otherUsers].forEach(user => {
       const listItem = document.createElement('li');
       listItem.innerHTML = user.nickname;
+      listItem.setAttribute('data-testid', 'online-user');
       userList.appendChild(listItem);
     });
   });
