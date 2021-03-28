@@ -50,6 +50,7 @@ io.on('connection', (socket) => {
   socket.on('startConnection', (data) => {
     onlineUser.push({ id: socket.id, nickname: data.nickname });
     io.emit('update', onlineUser);
+    response.shift();
   });
   // socket.emit('saudacao', faker.name.firstName());
 

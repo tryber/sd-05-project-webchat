@@ -19,9 +19,7 @@
           <h1><%= mensagens %></h1>
           <ul>
             <% req.forEach(function(msg){ %>
-              <li>
-                <%=msg%>
-              </li>
+              <li class='messages' data-testid='message'><%=msg%></li>
               <% }) %>
           </ul>
           </div>
