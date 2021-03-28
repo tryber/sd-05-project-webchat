@@ -1,20 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    </head>
-<body>
+  </head>
+  <body>
     <h1>Pai tá on, sim!</h1>
-    <%if(contador%2){%>
-        <h2>visitantes:<%=contador%></h2>
-        <%}%>
-</body>
-<script src='http://localhost:3000/socket.io/socket.io.js'></script>
-<script>
+    <div>
+      <input id="nickname-box" data-testid="nickname-box" type="text" />
+      <button id="nickname-save" data-testid="nickname-save">Salvar</button>
+      <h2>usuários:</h2>
+      <ul id="listUsers">
+        <li data-testid="online-user"><%=contador%></li>
+        <%usuarios.forEach((usuario) => {%>
+        <li data-testid="online-user"><%=usuario.nickname%></li>
+        <%})%>
+      </ul>
+    </div>
+  </body>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
     const socket = io('http://localhost:3000');
-    socket.emit('teste', 'Eu sou um novo cliente');
-</script>
+    let nickname = '<%=contador%>';
+    const userList = document.getElementById('listUsers');
+    const buttonNickname = document.getElementById('nickname-save');
+    const inputText = document.getElementById('nickname-box');
+    buttonNickname.addEventListener('click', () => {
+      nickname = inputText.value;
+      socket.emit('changeNick', { nickname });
+    });
+    socket.emit('connected', { nickname });
+    socket.on('refreshUsers', ({ usuarios }) => {
+      userList.innerHTML = '';
+      const dono = usuarios.filter((user) => user.nickname === nickname);
+      const outrosUsuarios = usuarios.filter(
+        (user) => user.nickname !== nickname
+      );
+      [...dono, ...outrosUsuarios].forEach((usuario) => {
+        const itemLi = document.createElement('li');
+        itemLi.innerHTML = usuario.nickname;
+        userList.appendChild(itemLi);
+      });
+    });
+  </script>
 </html>
