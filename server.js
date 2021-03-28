@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
     dataUsers = socket.id;
     onlineUsers[dataUsers.socketId] = dataUsers;
     io.emit('updateUsers', { onlineUsers });
-    console.log(myData, 'AQUI ESTÁ O MYDATA');
+    // console.log(myData, 'AQUI ESTÁ O MYDATA');
   });
 
   socket.on('disconnect', () => {
@@ -140,7 +140,6 @@ io.on('connection', (socket) => {
 let numeros = 0;
 app.get('/', async (_req, res) => {
   const getAllMessages = await getMessages();
-  // console.log(getAllMessages);
   res.status(200).render('index', { getAllMessages, onlineUsers, numeros });
   numeros += 1;
 });
