@@ -10,7 +10,9 @@ const socketIo = require('socket.io');
 
 const cors = require('cors');
 
-// const dateFormat = require('dateformat');
+const dateFormat = require('dateformat');
+
+const messageModel = require('./model/message');
 
 app.use(cors());
 
@@ -30,7 +32,8 @@ let contador = 0;
 let users = [];
 
 app.get('/', async (_req, res) => { // ejs
-  res.status(200).render('index', { contador: `Convidado ${contador}`, users });
+  const allMessages = await messageModel.getAll();
+  res.status(200).render('index', { contador: `Convidado ${contador}`, users, allMessages });
   contador += 1;
 });
 
@@ -54,9 +57,11 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', { users });
   });
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     const agora = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
-    io.emit('new message', (`${agora} ${nickname} ${chatMessage}`));
+    const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
+    await messageModel.createMessage(newMessage);
+    io.emit('message', newMessage);
     // socket.broadcast.emit('RESPOSTA', 'BLOQUEADO'+num)
     // socket.emit responde apenas para ele mesmo
     // io.emit responde para todos os sockets

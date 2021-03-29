@@ -25,9 +25,13 @@
 
   <input type="text" data-testid="nickname-box" id="nickname-box">
 
-  <ul id="chatList"></ul>
+  <ul id="chatList" data-testid="message">
+    <% allMessages.forEach(({ message }) => { %>
+      <li data-testid="message"><%=message%></li>
+    <% }) %>
+  </ul>
   <button id="send-button" data-testid="send-button">Enviar mensagem</button>
-  <input type="text" id="mesage-box" data-testid="message-box">
+  <input type="text" id="message-box" data-testid="message-box">
 
 </body>
 
@@ -43,6 +47,19 @@
   nickButton.addEventListener('click', () => {
     nickname = nickInput.value;
     socket.emit('nickChange', { nickname });
+  });
+
+  const messageButton = document.getElementById('send-button');
+  const messageBox = document.getElementById('message-box');
+  const messageList = document.getElementById('chatList');
+  messageButton.addEventListener('click', () => {
+    socket.emit('message', ({ chatMessage: messageBox.value, nickname }))
+  });
+  socket.on('message', (sms) => {
+    const chatItem = document.createElement('li');
+      chatItem.innerHTML = sms;
+      chatItem.setAttribute('data-testid', 'message');
+      chat.appendChild(chatItem);
   });
 
   socket.emit('connected', { nickname });
