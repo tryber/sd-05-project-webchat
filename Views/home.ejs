@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webchat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <header>
+      <h2>Webchat</h2>
+    </header>
+    <main>
+      <section>
+        <div id="chatView">
+          <article id="chatMessages">
+            <uli id="chatList">
+              <% console.log(messages) %> 
+              <% if (messages.length > 0) {%>
+                <% messages.forEach((message) => { %> 
+                  <li data-testid="message"><%= message.createdAt %> - <%= message.from %> : <%= message.message %> </li>
+                  <% }) %> 
+              <% } %>
+            </ul>
+          </article>
+          <article>
+            <div>
+              <input type="text" data-testid="nickname-box" placeholder="Change your name" />
+              <button type="button" data-testid="nickname-save">Change it!</button>
+            </div>
+            <p>Usuários Online</p>
+            <ul id="onlineUsersList" data-testid="nickname-box"></ul>
+          </article>
+        </div>
+      </section>
+      <footer>
+        <input type="text" id="input" data-testid="message-box" placeholder="Digite sua mensagem aqui" />
+        <button id="sendButton" data-testid="send-button" type="button">Enviar</button>
+      </footer>
+    </main>
+  </body>
+  <script>
+    const client = io();
+    let id;
+    let nickname;
+    let to;
+
+    const onlineUsersList = document.getElementById('onlineUsersList');
+    const sendBtn = document.getElementById('sendButton');
+    const chat = document.getElementById('chatList');
+    const inputMessage = document.getElementById('input');
+    const onlineUsersButtons = document.getElementsByClassName('onlineUser');
+
+    sendBtn.addEventListener('click', () => {
+      const chatMessage = inputMessage.value;
+      console.log(chatMessage);
+      client.emit('message', { id, nickname, to, chatMessage });
+    });
+
+    let onlineUsers = 0;
+    client.on('connected', (userData) => {
+      console.log(userData);
+      id = userData.id;
+      nickname = userData.name;
+    });
+
+    client.on('message', (messageData) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerHTML= messageData
+      console.log(messageData);
+      chat.appendChild(li);
+    });
+    client.on('newUserConnected', ({ name }) => {
+      console.log(`Seja bem vindo ao Chat ${name}`);
+    });
+    client.on('updateOnlineUsers', (users) => {
+      onlineUsersList.innerText = '';
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.setAttribute('id', `${user[0]}`);
+        li.setAttribute('class', 'onlineUser');
+        li.addEventListener('click', () => {
+          if (user[0] === to) {
+            to = null;
+          } else {
+            to = user[0];
+          }
+          console.log(to);
+        });
+        if (user[0] === nickname) {
+          li.innerHTML = `${user[0]} (You)`;
+          onlineUsersList.prepend(li);
+        } else {
+          li.innerHTML = user[0];
+          onlineUsersList.appendChild(li);
+        }
+        console.log(onlineUsersButtons);
+      });
+      console.log(onlineUsers);
+    });
+  </script>
+</html>
