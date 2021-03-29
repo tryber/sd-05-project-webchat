@@ -97,6 +97,7 @@ app.get('/', (req, res) => {
     mensagens: 'Histórico de mensagens',
     req: [...response],
     guest: `guest ${faker.name.firstName()}`,
+    onlineUser,
   });
 });
 

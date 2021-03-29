@@ -29,7 +29,11 @@
     </section>
     <aside>
       <ul id="users">
-        <li><%= guest %></li>
+        <li data-testid="online-user"><%= guest %></li>
+        <% onlineUser.forEach(function(user){ %>
+          <li class='user' data-testid='online-user'><%=user.nickname%></li>
+        <% }) %>
+      </ul>
       </ul>
     </aside>
   </body>
@@ -41,6 +45,17 @@
     const user = document.querySelector('#username');
     const message = document.querySelector('#userMessage');
     const guest = document.querySelector('#users').children[0];
+
+    const createButton = (id, to) => {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-testid', 'private');
+      btn.setAttribute('from', id);
+      btn.setAttribute('to', to.id);
+      btn.className = 'pvt-but';
+      btn.innerText = 'Privado';
+      btn.addEventListener('click', (e) => {alert(`Abrindo chat privado${to.nickname}`)});
+      return btn;
+    };
     
     saveUser.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -79,22 +94,22 @@
     
     function nickNameRender(param) {
       const users = document.querySelector('#users');
-      users.innerHTML= '';
       const usuarioLogado = param.filter(id => id.id === socket.id);
-      
       const usuarios = param.filter(id => id.id !== socket.id);
-      
+      users.innerHTML= '';
       [...usuarioLogado, ...usuarios].forEach((user) => {
         const li = document.createElement('li');
+        const div = document.createElement('div');
         li.className = 'user';
-        li.setAttribute('data-testid', 'online-user');
-        
-        li.setAttribute('id', user.id)
-        li.innerText = user.nickname;
-        console.log('innwe: ',li);
+        div.setAttribute('data-testid','online-user'); //data-testid="online-user"
+        div.innerText = user.nickname;
+        li.setAttribute('id', user.id);
+        li.appendChild(div);
+        if (socket.id !== user.id) {
+          li.appendChild(createButton(socket.id, user));
+        }       
         
         users.appendChild(li);
-        console.log(users[0]);
       });
       
     }
