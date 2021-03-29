@@ -66,9 +66,7 @@
 
       btnToSaveNickname.addEventListener('click', function () {
         nickname = nickField.value;
-        socket.emit('saveNickname', {
-          nickname,
-        });
+        socket.emit('saveNickname', nickname);
       });
 
       btnToSendMessage.addEventListener('click', () => {

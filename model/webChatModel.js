@@ -1,12 +1,8 @@
 const connection = require('./connection');
 
 async function saveMessages(message) {
-  const { realTime, nickname, chatMessage } = message;
   const db = await connection();
-  const messageSaved = await db
-    .collection('messages')
-    .insertOne({ realTime, chatMessage, nickname });
-  console.log('linha 7', messageSaved.ops[0]);
+  const messageSaved = await db.collection('messages').insertOne(message);
   return messageSaved.ops[0];
 }
 

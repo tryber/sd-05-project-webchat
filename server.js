@@ -47,7 +47,8 @@ io.on('connection', (socket) => {
   socket.on('saveNickname', (nick) => {
     const id = socket.id;
     usersOnLine = usersOnLine.filter((user) => user.userId !== id);
-    usersOnLine.push({ userId: id, nickName: nick });
+    usersOnLine.push({ userId: id, nickname: nick });
+    io.emit('userConnected', usersOnLine);
     console.log('Line 51 - usersOnLine:', usersOnLine);
   });
 
@@ -58,7 +59,8 @@ io.on('connection', (socket) => {
     const realTime = moment(new Date()).format('DD MM YYYY hh:mm:ss');
     const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
     console.log('server L64', msgFormated);
-    await saveMessages(msgFormated);
+    io.emit('message', msgFormated);
+    // await saveMessages(msgFormated);
   });
 
   socket.on('disconnect', () => {
