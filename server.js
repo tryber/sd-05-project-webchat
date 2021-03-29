@@ -53,14 +53,17 @@ io.on('connection', (socket) => {
   });
 
   // Handle chat event
-  socket.on('message', async (data) => {
-    console.log(data);
-    const { chatMessage, nickname } = data;
+  socket.on('message', async (nickname, chatMessage) => {
+    console.log('LINHA 57 ', chatMessage, nickname);
     const realTime = moment(new Date()).format('DD MM YYYY hh:mm:ss');
     const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
     console.log('server L64', msgFormated);
     io.emit('message', msgFormated);
-    // await saveMessages(msgFormated);
+    await saveMessages(msgFormated);
+  });
+
+  socket.on('private-message', (anotherSocketId, msg) => {
+    socket.to(anotherSocketId).emit('private message', socket.id, msg);
   });
 
   socket.on('disconnect', () => {

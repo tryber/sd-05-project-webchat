@@ -25,7 +25,7 @@
         </ul>
       </div>
       <div id="chat-window">
-        <div id="chatBox" data-testid="message-box"></div>
+        <div id="chatBox" data-testid="message-box"><%= allMessages %></div>
         <div id="userTyping"></div>
       </div>
       <div id="chat-mode">
@@ -52,6 +52,7 @@
       const socket = io();
       let userId = socket.id;
       let nickname = '<%= nickname %>';
+      let chatMessage;
 
       // Query DOM
       const ulUsers = document.getElementById('users-online');
@@ -63,18 +64,6 @@
       const btnToSendMessage = document.getElementById('send');
 
       socket.emit('connected', nickname);
-
-      btnToSaveNickname.addEventListener('click', function () {
-        nickname = nickField.value;
-        socket.emit('saveNickname', nickname);
-      });
-
-      btnToSendMessage.addEventListener('click', () => {
-        socket.emit('message', {
-          chatMessage: messageField.value,
-          nickname: nickField.value,
-        });
-      });
 
       socket.on('userConnected', (arrayOfUsers) => {
         ulUsers.innerHTML = '';
@@ -90,6 +79,23 @@
           li.innerHTML = user.nickname;
           ulUsers.appendChild(li);
         });
+      });
+
+      btnToSaveNickname.addEventListener('click', function () {
+        nickname = nickField.value;
+        socket.emit('saveNickname', nickname);
+      });
+
+      btnToSendMessage.addEventListener('click', function () {
+        (chatMessage = messageField.value),
+          nickname,
+          socket.emit('message', nickname, chatMessage);
+      });
+
+      socket.on('message', (message) => {
+        const msg = document.createElement('p');
+        msg.innerHTML = message;
+        chatBox.appendChild(msg);
       });
 
       // socket.on('usersOnline', (arrayOfUsers) => {
