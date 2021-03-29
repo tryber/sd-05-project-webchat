@@ -20,9 +20,13 @@
       </ul>
     </div>
     <div>
-        <input data-testid='message-box' id='input-chat' type="text">
-        <button id='button-chat' data-testid="send-buton">Enviar</button>
-        <ul id='chat'></ul>
+      <input data-testid="message-box" id="message-box" type="text" />
+      <button id="button-chat" data-testid="send-buton">Enviar</button>
+      <ul id="chat">
+        <%allMessages.forEach((message) => {%>
+            <li data-testid="message"><%=message.message%></li>
+            <%})%>
+      </ul>
     </div>
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
@@ -33,6 +37,11 @@
     const buttonNickname = document.getElementById('nickname-save');
     const inputText = document.getElementById('nickname-box');
     const chat = document.getElementById('chat');
+    const inputMessage = document.getElementById('message-box');
+    const buttonChat = document.getElementById('button-chat');
+    buttonChat.addEventListener('click', () => {
+      socket.emit('message', { nickname, chatMessage: inputMessage.value });
+    });
     buttonNickname.addEventListener('click', () => {
       nickname = inputText.value;
       socket.emit('changeNick', { nickname });
@@ -50,6 +59,12 @@
         itemLi.setAttribute('data-testid', 'online-user');
         userList.appendChild(itemLi);
       });
+    });
+    socket.on('message', (torpedo) => {
+      const itemLi = document.createElement('li');
+      itemLi.innerHTML = torpedo;
+      itemLi.setAttribute('data-testid', 'message');
+      chat.appendChild(itemLi);
     });
   </script>
 </html>

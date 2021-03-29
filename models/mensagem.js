@@ -1,11 +1,13 @@
 const dbConnection = require('./connection');
 
-const getAll = async () =>
-  dbConnection('products').then((db) => db.find().toArray());
+const getAll = async () => {
+  const dbs = await dbConnection();
+  return dbs.collection('messages').find().toArray();
+};
 
-const createMessage = async (name, quantity) =>
-  dbConnection('message')
-    .then((db) => db.insertOne({ name, quantity }))
-    .then((result) => ({ _id: result.insertedId, name, quantity }));
+const createMessage = async (message) => {
+  const dbs = await dbConnection();
+  return dbs.collection('messages').insertOne({ message });
+};
 
 module.exports = { getAll, createMessage };

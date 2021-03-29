@@ -10,7 +10,7 @@ async function connection() {
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    }
+    },
   )
     .then((conn) => conn.db(process.env.DB_NAME))
     .then((dbSchema) => {

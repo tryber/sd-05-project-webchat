@@ -2,6 +2,8 @@ const express = require('express');
 
 require('dotenv').config();
 
+const dateformat = require('dateformat');
+
 const PORT = 3000;
 
 const app = express();
@@ -11,6 +13,8 @@ const http = require('http');
 const server = http.createServer(app);
 
 const io = require('socket.io')(server);
+
+const model = require('./models/mensagem');
 
 let usuarios = [];
 
@@ -31,6 +35,12 @@ io.on('connection', (socket) => {
     io.emit('refreshUsers', { usuarios });
     console.log('Alguém caiu');
   });
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const agora = dateformat(new Date(), 'dd-mm-yyyy hh:MM:ss');
+    const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
+    await model.createMessage(newMessage);
+    io.emit('message', newMessage);
+  });
 });
 
 app.set('view engine', 'ejs');
@@ -39,10 +49,15 @@ app.set('views', './views');
 
 let contador = 0;
 
-app.get('/', (_req, res) => {
+app.get('/', async (req, res) => {
+  const allMessages = await model.getAll();
   res
     .status(200)
-    .render('index', { contador: `convidado ${contador}`, usuarios });
+    .render('index', {
+      contador: `convidado ${contador}`,
+      usuarios,
+      allMessages,
+    });
   contador += 1;
 });
 
