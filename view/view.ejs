@@ -13,13 +13,9 @@
       <input data-testid="nickname-box" id="nickname-box" />
       <button data-testid="nickname-save" id="nickname-save">Salvar</button>
       <ul id="list-users">
-        <li id="online-user" data-testid="online-user">
-          Visitante <%=numeros%>
-        </li>
+        <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
         <%Object.values(onlineUsers).forEach((user) =>{%>
-        <li id="<%=user.socketId%>"
-          data-testid="online-user"><%=user.nickname%>
-        </li>
+        <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
         <%})%>
       </ul>
     </div>
@@ -28,7 +24,7 @@
       <button data-testid="send-button" id="message-send-button">Enviar</button>
     </div>
     <ul id="chat-box">
-      <% messages.forEach(({date, nickname, chatMessage}) => { %>
+      <%messages.forEach(({date, nickname, chatMessage}) => {%>
       <li data-testid="message">
         <%=date%> - <%=nickname%>: <%=chatMessage%>
       </li>
@@ -45,7 +41,7 @@
     const chatBox = document.getElementById('chat-box');
     const onlineUsers = document.getElementById('online-user');
     const listUsers = document.getElementById('list-users');
-    let nickname = 'Visitante' + '<%=numeros%>';
+    let nickname = 'Visitante'+'<%=numeros%>';
     const myData = {
       nickname,
       socketId: socket.socketId,
