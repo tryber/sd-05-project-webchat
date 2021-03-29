@@ -12,17 +12,28 @@
     <div>
       <input data-testid="nickname-box" id="nickname-box" />
       <button data-testid="nickname-save" id="nickname-save">Salvar</button>
-      <ul>
-      <li id='userMe'>
-        Visitante<%= numeros %>
-      </li>
+      <ul id="list-users">
+        <li id="online-user" data-testid="online-user">
+          Visitante <%=numeros%>
+        </li>
+        <%Object.values(onlineUsers).forEach((user) =>{%>
+        <li id="<%=user.socketId%>"
+          data-testid="online-user"><%=user.nickname%>
+        </li>
+        <%})%>
       </ul>
     </div>
     <div>
       <input data-testid="message-box" id="message-box" />
       <button data-testid="send-button" id="message-send-button">Enviar</button>
     </div>
-    <ul id="chat-box"></ul>
+    <ul id="chat-box">
+      <% messages.forEach(({date, nickname, chatMessage}) => { %>
+      <li data-testid="message">
+        <%=date%> - <%=nickname%>: <%=chatMessage%>
+      </li>
+      <%})%>
+    </ul>
   </body>
   <script>
     const socket = io('http://localhost:3000/');
@@ -31,18 +42,49 @@
     const userMe = document.getElementById('userMe');
     const userButtonSave = document.getElementById('nickname-save');
     const userInputSave = document.getElementById('nickname-box');
-    userButtonSave.addEventListener('click', () => {
-      userMe.innerHTML=userInputSave.value
-    })
     const chatBox = document.getElementById('chat-box');
-    messageSendButton.addEventListener('click', () => {
-      socket.emit('message', { chat: messageBox.value });
+    const onlineUsers = document.getElementById('online-user');
+    const listUsers = document.getElementById('list-users');
+    let nickname = 'Visitante' + '<%=numeros%>';
+    const myData = {
+      nickname,
+      socketId: socket.socketId,
+    };
+    userButtonSave.addEventListener('click', () => {
+      userMe.innerHTML = userInputSave.value;
     });
-    socket.on('updateMessage', ({ chat }) => {
+    messageSendButton.addEventListener('click', () => {
+      socket.emit('message', { chatMessage: messageBox.value, nickname });
+    });
+    socket.on('message', (stringNewMessage) => {
       const message = document.createElement('li');
-      message.innerHTML = chat;
+      message.innerHTML = stringNewMessage;
       message.setAttribute('data-testid', 'message');
       chatBox.appendChild(message);
+      console.log('testando');
+    });
+    socket.emit('user', { myData });
+    userButtonSave.addEventListener('click', () => {
+      onlineUsers.innerHTML = userInputSave.value;
+      myData.nickname = userInputSave.value;
+      nickname = myData.nickname;
+      myData.socketId = socket.id;
+      socket.emit('changeName', { myData });
+    });
+    socket.on('updateUser', ({ onlineUsers }) => {
+      listUsers.innerHTML = '';
+      const singleUser = document.createElement('li');
+      singleUser.innerHTML = myData.nickname;
+      singleUser.id = 'online-user';
+      singleUser.setAttribute('data-testid', 'online-user');
+      listUsers.appendChild(singleUser);
+      Object.values(onlineUsers).forEach((user) => {
+        if (user.socketId === socket.id) return;
+        const newUser = document.createElement('li');
+        newUser.innerText = user.nickname;
+        newUser.setAttribute('data-testid', 'online-user');
+        listUsers.appendChild(newUser);
+      });
     });
   </script>
 </html>
