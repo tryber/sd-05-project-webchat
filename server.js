@@ -33,6 +33,7 @@ let users = [];
 
 app.get('/', async (_req, res) => { // ejs
   const allMessages = await messageModel.getAll();
+  console.log(allMessages);
   res.status(200).render('index', { contador: `Convidado ${contador}`, users, allMessages });
   contador += 1;
 });

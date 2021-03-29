@@ -5,7 +5,7 @@ const getAll = async () => {
   return dbs.collection('messages').find().toArray();
 };
 
-const createMessage = async ({ message }) => {
+const createMessage = async (message) => {
   const dbs = await dbConnection();
   return dbs.collection('messages').insertOne({ message });
 };
