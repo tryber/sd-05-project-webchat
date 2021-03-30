@@ -20,7 +20,7 @@ function wait(time) {
   }
 }
 
-describe.skip('Permita que usuários troquem mensagens particulares', () => {
+describe('Permita que usuários troquem mensagens particulares', () => {
   let browser;
   let page;
   let connection;

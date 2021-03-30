@@ -9,7 +9,7 @@ const app = express();
 
 const socketIo = require('socket.io');
 const http = require('http');
-const { createMessage, getMessages } = require('./model/messages');
+const { createMessage, getMessages, getMessagesPvt } = require('./model/messages');
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -40,10 +40,10 @@ io.on('connection', (socket) => {
   const socketId = socket.id;
   console.log(`Socket conectado: ${socketId}`);
 
-  socket.on('newUserConectando', ({ myData }) => {
-    let dataMy = myData.socketId;
-    dataMy = socket.id;
-    onlineUsers[dataMy.socketId] = dataMy;
+  socket.on('newUserConectando', ({ myData: old }) => {
+    const myData = old;
+    myData.socketId = socket.id;
+    onlineUsers[myData.socketId] = myData;
     io.emit('updateUsers', { onlineUsers });
   });
 
@@ -53,40 +53,39 @@ io.on('connection', (socket) => {
     console.log(`${socketId} está desconectado`);
   });
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', ({ chatMessage, nickname, target = '' }) => {
     const data = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    if (target !== '') {
+      const newMessage = `${data} (private) - ${nickname}: ${chatMessage}`;
+      createMessage(newMessage, socket.id, target);
+      return io.to(target).to(socket.id).emit('message', newMessage);
+    }
     const newMessage = `${data} - ${nickname}: ${chatMessage}`;
     createMessage(newMessage);
-    io.emit('message', newMessage);
+    return io.emit('message', newMessage);
   });
 
   socket.on('displayName', ({ myData }) => {
     onlineUsers[myData.socketId] = myData;
     io.emit('updateUsers', { onlineUsers });
   });
-
-  //     // CRIAR MENSAGEM PRIVATA
-  //     msg = await createPrivateMessage({
-  //       nickname,
-  //       message: chatMessage,
-  //       timestamp: moment(new Date()).format('DD-MM-yyyy hh:mm:ss'),
-  //       addressee,
-  //     });
-
-  // SALA PRIVATE
-
-  // https://socket.io/docs/v3/rooms/
-  // io.to(socketId)
-  //   .to(addressee)
-  //   .emit('message', `${msg.timestamp} (private) - ${nickname}: ${chatMessage}`, 'private');
-  // }
-  // });
 });
 let numeros = 0;
 app.get('/', async (_req, res) => {
   const getAllMessages = await getMessages();
   res.status(200).render('chat', { getAllMessages, onlineUsers, numeros });
   numeros += 1;
+});
+
+app.get('/chat-prive/:target/:origin', async (req, res) => {
+  const { target, origin } = req.params;
+  const getAllMessages = await getMessagesPvt(target, origin);
+  res.status(200).json(getAllMessages);
+});
+
+app.get('/chat', async (_req, res) => {
+  const getAllMessages = await getMessages();
+  res.status(200).json(getAllMessages);
 });
 
 const PORT = 3000;
