@@ -42,13 +42,19 @@ io.on('connection', (socket) => {
     delete onlineUsers[socket.id];
     io.emit('updateUser', { onlineUsers });
   });
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', ({ chatMessage, nickname, target }) => {
     const date = moment(new Date()).format('DD-MM-yyyy HH:mm:ss');
+    if (target !== '') {
+      const stringNewMessage = `${date} (private) - ${nickname}: ${chatMessage}`;
+      model.createMessage({ date, nickname, chatMessage, target, user: socket.id });
+      return io.to(target).to(socket.id).emit('message', stringNewMessage);  
+    }
     const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
-    model.createMessage({ date, nickname, chatMessage });
+    model.createMessage({ date, nickname, chatMessage, target: "Everyone" });
     io.emit('message', stringNewMessage);
   });
   socket.on('user', ({ myData }) => {
+    myData.socketId = socket.id;
     onlineUsers[myData.socketId] = { ...myData, socketId: socket.id };
     io.emit('updateUser', { onlineUsers });
   });
@@ -56,6 +62,12 @@ io.on('connection', (socket) => {
     onlineUsers[myData.socketId] = myData;
     io.emit('updateUser', { onlineUsers });
   });
+  // socket.on('pvtmessage', ({ myData, chatMessage }) => {
+  //   const date = moment(new Date()).format('DD-MM-yyyy HH:mm:ss');
+  //   const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
+  //   model.createMessage({ date, nickname, chatMessage, target: myData.socketId });
+  //   io.to(myData.socketId).emit(stringNewMessage)
+  // })
 });
 
 app.get('/', async (_req, res) => {

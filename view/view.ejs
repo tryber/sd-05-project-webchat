@@ -16,12 +16,14 @@
         <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
         <%Object.values(onlineUsers).forEach((user) =>{%>
         <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
+        <button id="sussurrar" data-testid="private">susurrar</button>
         <%})%>
       </ul>
     </div>
     <div>
       <input data-testid="message-box" id="message-box" />
       <button data-testid="send-button" id="message-send-button">Enviar</button>
+      <button id="public" data-testid="public">Publico</button>
     </div>
     <ul id="chat-box">
       <%messages.forEach(({date, nickname, chatMessage}) => {%>
@@ -41,7 +43,12 @@
     const chatBox = document.getElementById('chat-box');
     const onlineUsers = document.getElementById('online-user');
     const listUsers = document.getElementById('list-users');
+    const publicButton = document.getElementById('public');
+    publicButton.addEventListener('click', () => {
+      target = '';
+    })
     let nickname = 'Visitante'+'<%=numeros%>';
+    let target = '';
     const myData = {
       nickname,
       socketId: socket.socketId,
@@ -50,7 +57,7 @@
       userMe.innerHTML = userInputSave.value;
     });
     messageSendButton.addEventListener('click', () => {
-      socket.emit('message', { chatMessage: messageBox.value, nickname });
+      socket.emit('message', { chatMessage: messageBox.value, nickname, target });
     });
     socket.on('message', (stringNewMessage) => {
       const message = document.createElement('li');
@@ -68,6 +75,7 @@
       socket.emit('changeName', { myData });
     });
     socket.on('updateUser', ({ onlineUsers }) => {
+      console.log(onlineUsers, 'onlineUsers');
       listUsers.innerHTML = '';
       const singleUser = document.createElement('li');
       singleUser.innerHTML = myData.nickname;
@@ -80,6 +88,14 @@
         newUser.innerText = user.nickname;
         newUser.setAttribute('data-testid', 'online-user');
         listUsers.appendChild(newUser);
+
+        const newButton = document.createElement('button');
+        newButton.innerText = "sussurrar";
+        newButton.setAttribute('data-testid', 'private');
+        newButton.addEventListener('click', () => {
+          target = user.socketId;
+        })
+        listUsers.appendChild(newButton);
       });
     });
   </script>
