@@ -13,13 +13,9 @@
       <input data-testid="nickname-box" id="nickname-box" />
       <button data-testid="nickname-save" id="nickname-save">Salvar</button>
       <ul id="list-users">
-        <li id="online-user" data-testid="online-user">
-          Visitante<%=numeros%>
-        </li>
+        <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
         <%Object.values(onlineUsers).forEach((user) =>{%>
-        <li id="<%=user.socketId%>" data-testid="online-user">
-          <%=user.nickname%>
-        </li>
+        <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
         <button id="sussurrar" data-testid="private">susurrar</button>
         <%})%>
       </ul>
