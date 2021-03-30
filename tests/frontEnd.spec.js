@@ -22,7 +22,15 @@ describe('Crie um frontend para que as pessoas interajam com o chat', () => {
       useUnifiedTopology: true,
     });
     db = connection.db(process.env.DB_NAME);
-    browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--window-size=1920,1080'], headless: true });
+    browser = await puppeteer.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--window-size=1920,1080',
+      ],
+      headless: true,
+    });
     await db.collection('messages').deleteMany({});
     page = await browser.newPage();
     await page.goto(BASE_URL);
@@ -69,7 +77,9 @@ describe('Crie um frontend para que as pessoas interajam com o chat', () => {
     await sendButton.click();
     await page.waitForSelector(dataTestid('message'));
 
-    const messages = await page.$$eval(dataTestid('message'), (nodes) => nodes.map((n) => n.innerText));
+    const messages = await page.$$eval(dataTestid('message'), (nodes) =>
+      nodes.map((n) => n.innerText)
+    );
     expect(messages.length).toBeGreaterThanOrEqual(1);
     expect(_.last(messages)).toMatch(RegExp(nickname));
     expect(_.last(messages)).toMatch(RegExp(chatMessage));

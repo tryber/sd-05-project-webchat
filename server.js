@@ -12,14 +12,13 @@ const cors = require('cors');
 const moment = require('moment');
 const faker = require('faker');
 const { saveMessages, getMessages } = require('./model/webChatModel');
-// const { remove } = require('lodash');
-
 app.use(
   cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   })
 );
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', 'public');
@@ -30,10 +29,11 @@ let usersOnLine = [];
 app.get('/', async (_req, res) => {
   let nickname = faker.name.findName();
   const allMessages = await getMessages();
+  console.log('LINHA 32', usersOnLine);
   res.status(200).render('index', { nickname, usersOnLine, allMessages });
 });
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
 
   let userId = socket.id;
@@ -53,9 +53,9 @@ io.on('connection', (socket) => {
   });
 
   // Handle chat event
-  socket.on('message', async (nickname, chatMessage) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
     console.log('LINHA 57 ', chatMessage, nickname);
-    const realTime = moment(new Date()).format('DD MM YYYY hh:mm:ss');
+    const realTime = moment(new Date()).format('DD-MM-YYYY hh:mm:ss');
     const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
     console.log('server L64', msgFormated);
     io.emit('message', msgFormated);
@@ -71,14 +71,12 @@ io.on('connection', (socket) => {
     io.emit('userConnected', usersOnLine);
   });
 
-  //   socket.emit('usersOnline', usersOnLine);
+  // socket.emit('privateChat', nickName);
 
-  //   // socket.emit('privateChat', nickName);
-
-  //   // Handle typing event
-  //   // socket.on('typing', function (data) {
-  //   //   socket.broadcast.emit('typing', data);
-  //   // });
+  // socket.on('typing', function (id) {
+  //   const currentUser = usersOnLine.find((user) => user.userId === id);
+  //   socket.broadcast.emit('typing', currentUser);
+  // });
 });
 
 server.listen(3000, () => console.log('Listening on port 3000'));

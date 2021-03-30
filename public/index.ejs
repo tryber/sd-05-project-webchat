@@ -18,14 +18,18 @@
       <div id="all-users">
         <h3>Online users</h3>
         <ul id="users-online">
-          <li><%= nickname %></li>
+          <li data-testid="online-user"><%= nickname %></li>
           <% usersOnLine.forEach((user) => { %>
-          <li><%=user.nickName %></li>
+          <li data-testid="online-user"><%=user.nickname %></li>
           <% }) %>
         </ul>
       </div>
       <div id="chat-window">
-        <div id="chatBox" data-testid="message-box"><%= allMessages %></div>
+        <ul id="chatBox">
+          <% allMessages.forEach((msg) => { %>
+          <li data-testid="message"><%= msg.message %></li>
+          <% }) %>
+        </ul>
         <div id="userTyping"></div>
       </div>
       <div id="chat-mode">
@@ -40,7 +44,12 @@
             placeholder="Nickname"
             data-testid="nickname-box"
           />
-          <input id="message-field" type="text" placeholder="Message" />
+          <input
+            data-testid="message-box"
+            id="message-field"
+            type="text"
+            placeholder="Message"
+          />
         </form>
         <button type="button" id="save-nick" data-testid="nickname-save">
           Salvar Nickname
@@ -76,6 +85,7 @@
         [ownerUser, ...otherUsers].forEach((user) => {
           user.nickname;
           const li = document.createElement('li');
+          li.setAttribute('data-testid', 'online-user');
           li.innerHTML = user.nickname;
           ulUsers.appendChild(li);
         });
@@ -87,13 +97,13 @@
       });
 
       btnToSendMessage.addEventListener('click', function () {
-        (chatMessage = messageField.value),
-          nickname,
-          socket.emit('message', nickname, chatMessage);
+        const chatMessage = messageField.value;
+        socket.emit('message', { nickname, chatMessage });
       });
 
       socket.on('message', (message) => {
-        const msg = document.createElement('p');
+        const msg = document.createElement('li');
+        msg.setAttribute('data-testid', 'message');
         msg.innerHTML = message;
         chatBox.appendChild(msg);
       });
@@ -112,10 +122,6 @@
       //   userMsgField.value = '';
       // });
 
-      // userMsgField.addEventListener('keypress', function () {
-      //   socket.emit('typing', userTyping.value);
-      // });
-
       // socket.on('privateChat', (nick) => {
       //   nickName = nick;
       //   const div = document.createElement('div');
@@ -124,9 +130,13 @@
       //   chatBox.appendChild(div);
       // });
 
-      // socket.on('typing', function (data) {
-      //   feedback.innerHTML = '<p><em>' + data + ' is typing a message...</em></p>';
+      // messageField.addEventListener('keypress', function (e) {
+      //   e.preventDefault();
+      //   socket.emit('typing', socket.id);
       // });
+
+      // socket.on('typing', (user) => {
+      //   userTyping.innerHTML = '<p><em>' + user.nickname + ' is typing a message...</em></p>';
     </script>
   </body>
 </html>
