@@ -46,9 +46,8 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('saveNickname', (nick) => {
-    const id = socket.id;
     usersOnLine = usersOnLine.filter((user) => user.userId !== id);
-    usersOnLine.push({ userId: id, nickname: nick });
+    usersOnLine.push({ userId: socket.id, nickname: nick });
     io.emit('userConnected', usersOnLine);
     console.log('Line 51 - usersOnLine:', usersOnLine);
   });
