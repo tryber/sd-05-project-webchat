@@ -38,7 +38,7 @@ app.get('/', async (_req, res) => {
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
-  let userId = socket.id;
+  const userId = socket.id;
 
   socket.on('connected', (nickname) => {
     const users = { userId, nickname };
