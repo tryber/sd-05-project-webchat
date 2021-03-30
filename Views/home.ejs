@@ -20,7 +20,7 @@
       <section>
         <div id="chatView">
           <article id="chatMessages">
-            <uli id="chatList">
+            <ul id="chatList">
               <% console.log(messages) %> 
               <% if (messages.length > 0) {%>
                 <% messages.forEach((message) => { %> 
@@ -30,7 +30,6 @@
             </ul>
           </article>
           <article>
-            <div>
               <input type="text" id="inputNameChange" data-testid="nickname-box" placeholder="Change your name" />
               <button type="button" id="changeNameBtn" data-testid="nickname-save">Change it!</button>
             </div>
@@ -40,7 +39,7 @@
                 <% onlineUsers.forEach((user) => { %>
                   <li data-testid="online-user" class="onlineUser" id="<%= user[0] %>" ><%= user[0] %></li>
                 <% }) %>  
-              <% } %>  
+              <% } %>
             </ul>
           </article>
         </div>
@@ -71,7 +70,7 @@
     changeNameBtn.addEventListener('click', () => {
       const input = inputNameChange.value;
       console.log(input)
-      client.emit('nameChange', {input, nickname});
+      client.emit('nameChange', {id, input, nickname});
       nickname = input;
       console.log(nickname);
     });

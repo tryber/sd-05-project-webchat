@@ -1,7 +1,5 @@
 const socketIo = require('socket.io');
 
-const ZERO = 0;
-
 const transformDate = (date) =>
   new Date(date)
     .toLocaleDateString('en-US', {
@@ -51,15 +49,19 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
       io.emit('updateOnlineUsers', onlineUsers);
       console.log('depois', onlineUsers);
     });
-    socket.on('nameChange', ({ input, nickname }) => {
+    socket.on('nameChange', ({ id: idParam, input, nickname }) => {
       onlineUsers.forEach((user, index) => {
         console.log(user[0]);
-        console.log(nickname);
-        if (user[0] === nickname) {
-          onlineUsers[index][0] = input;
-          name = input;
+        if (user[0] === nickname && user[1] === idParam) {
+          console.log('passei2');
+          onlineUsers.splice(index, 1);
+        }
+        if (onlineUsers.indexOf([name, id]) > -1) {
+          onlineUsers.splice(onlineUsers.indexOf([nickname, id]), 1);
         }
       });
+      onlineUsers.push([input, idParam]);
+      name = input;
       io.emit('updateOnlineUsers', onlineUsers);
       console.log('aqui', onlineUsers);
     });
