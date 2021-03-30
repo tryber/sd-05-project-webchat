@@ -22,7 +22,8 @@ const formatMessage = (from, to) => (message) => ({
   createdAt: transformDate(new Date()),
 });
 
-const formatMessageToFront = (message) => `${message.createdAt} - ${message.from} : ${message.message}`;
+const formatMessageToFront = (message) =>
+  `${message.createdAt} - ${message.from} : ${message.message}`;
 
 const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
   // Setup connection
@@ -49,34 +50,48 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
       io.emit('updateOnlineUsers', onlineUsers);
       console.log('depois', onlineUsers);
     });
-    socket.on(
-      'message',
-      async ({ nickname: nameParam, to, chatMessage }) => {
-        const messages = await mongoConnection('messages');
-        await messages
-          .collection('messages')
-          .insertOne(formatMessage(nameParam, to)(chatMessage));
-        if (!to) {
-          io.emit('message', formatMessageToFront(formatMessage(nameParam, to)(chatMessage)));
-        } else {
-          let idTo;
-          onlineUsers.forEach((user, index) => {
-            if (user[0] === to) {
-              console.log(user);
-              const indexOne = 1;
-              const buffer = onlineUsers[index];
-              console.log('buffer', buffer);
-              idTo = buffer[indexOne];
-              console.log(idTo);
-            }
-          });
-          socket.broadcast
-            .to(idTo)
-            .emit('message', formatMessageToFront(formatMessage(nameParam, to)(chatMessage)));
-          console.log(to);
+    socket.on('nameChange', ({ input, nickname }) => {
+      onlineUsers.forEach((user, index) => {
+        console.log(user[0]);
+        console.log(nickname);
+        if (user[0] === nickname) {
+          onlineUsers[index][0] = input;
         }
-      },
-    );
+      });
+      io.emit('updateOnlineUsers', onlineUsers);
+      console.log('aqui', input);
+    });
+    socket.on('message', async ({ nickname: nameParam, to, chatMessage }) => {
+      const messages = await mongoConnection('messages');
+      await messages
+        .collection('messages')
+        .insertOne(formatMessage(nameParam, to)(chatMessage));
+      if (!to) {
+        io.emit(
+          'message',
+          formatMessageToFront(formatMessage(nameParam, to)(chatMessage)),
+        );
+      } else {
+        let idTo;
+        onlineUsers.forEach((user, index) => {
+          if (user[0] === to) {
+            console.log(user);
+            const indexOne = 1;
+            const buffer = onlineUsers[index];
+            console.log('buffer', buffer);
+            idTo = buffer[indexOne];
+            console.log(idTo);
+          }
+        });
+        socket.broadcast
+          .to(idTo)
+          .emit(
+            'message',
+            formatMessageToFront(formatMessage(nameParam, to)(chatMessage)),
+          );
+        console.log(to);
+      }
+    });
   });
 };
 
