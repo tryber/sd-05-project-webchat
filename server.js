@@ -17,7 +17,7 @@ const mongoConnection = require('./Models/mongoDBModel');
 
 // Controllers
 const chatController = require('./Controllers/chatController');
-const home = require('./Controllers/homeController');
+const { homeController } = require('./Controllers/homeController');
 
 // Setup
 const serverConfig = {
@@ -34,7 +34,7 @@ const chatConnections = {
 
 // Middlewares
 app.use(cors());
-app.use('/', home);
+app.use('/', homeController(onlineUsers));
 
 // Iniciando o chat
 chatController.run(server, serverConfig)(chatConnections, onlineUsers);

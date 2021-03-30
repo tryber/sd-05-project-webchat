@@ -31,7 +31,7 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
 
   io.on('connection', async (socket) => {
     const { id } = socket;
-    const name = parseInt(Math.random() * 100000, 10);
+    let name = parseInt(Math.random() * 100000, 10);
     onlineUsers.push([name, id]);
     console.log('Antes', onlineUsers);
     socket.emit('connected', { id, name });
@@ -39,6 +39,7 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
     io.emit('updateOnlineUsers', onlineUsers);
     socket.on('disconnect', () => {
       onlineUsers.forEach((user, index) => {
+        console.log(user[0]);
         if (user[0] === name && user[1] === id) {
           console.log('passei');
           onlineUsers.splice(index, 1);
@@ -56,10 +57,11 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
         console.log(nickname);
         if (user[0] === nickname) {
           onlineUsers[index][0] = input;
+          name = input;
         }
       });
       io.emit('updateOnlineUsers', onlineUsers);
-      console.log('aqui', input);
+      console.log('aqui', onlineUsers);
     });
     socket.on('message', async ({ nickname: nameParam, to, chatMessage }) => {
       const messages = await mongoConnection('messages');

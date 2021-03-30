@@ -35,7 +35,13 @@
               <button type="button" id="changeNameBtn" data-testid="nickname-save">Change it!</button>
             </div>
             <p>Usuários Online</p>
-            <ul id="onlineUsersList" data-testid="nickname-box"></ul>
+            <ul id="onlineUsersList" data-testid="nickname-box">
+              <% if (onlineUsers.length > 0) {%>
+                <% onlineUsers.forEach((user) => { %>
+                  <li data-testid="online-user" class="onlineUser" id="<%= user[0] %>" ><%= user[0] %></li>
+                <% }) %>  
+              <% } %>  
+            </ul>
           </article>
         </div>
       </section>
@@ -67,12 +73,14 @@
       console.log(input)
       client.emit('nameChange', {input, nickname});
       nickname = input;
+      console.log(nickname);
     });
 
     sendBtn.addEventListener('click', () => {
       const chatMessage = inputMessage.value;
       console.log(chatMessage);
       client.emit('message', { id, nickname, to, chatMessage });
+      console.log(nickname);
     });
 
     let onlineUsers = 0;
@@ -110,7 +118,7 @@
           console.log(to);
         });
         if (user[0] === nickname) {
-          li.innerHTML = `${user[0]} (You)`;
+          li.innerHTML = user[0];
           onlineUsersList.prepend(li);
         } else {
           li.innerHTML = user[0];
