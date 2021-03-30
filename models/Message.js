@@ -5,7 +5,7 @@ const addMessage = async (msgData) => {
   const newMessage = await db
     .collection('messages')
     .insertOne(msgData);
-  return newMessage.opt[0];
+  return newMessage.ops[0];
 };
 
 module.exports = {
