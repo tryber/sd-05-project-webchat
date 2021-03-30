@@ -75,10 +75,12 @@
       socket.emit('connected', nickname);
 
       socket.on('userConnected', (arrayOfUsers) => {
+        console.log(arrayOfUsers);
         ulUsers.innerHTML = '';
         const ownerUser = arrayOfUsers.find(
           (user) => user.userId === socket.id
         );
+        console.log('LINHA 83', ownerUser);
         const otherUsers = arrayOfUsers.filter(
           (user) => user.userId !== socket.id
         );

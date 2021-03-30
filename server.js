@@ -38,9 +38,11 @@ app.get('/', async (_req, res) => {
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
+  let userId = socket.id;
 
   socket.on('connected', (nickname) => {
-    usersOnLine.push(nickname);
+    const users = { userId, nickname };
+    usersOnLine.push(users);
     io.emit('userConnected', usersOnLine); // send to all users that are connected
     console.log(usersOnLine);
   });
@@ -62,9 +64,9 @@ io.on('connection', async (socket) => {
     await saveMessages(msgFormated);
   });
 
-  socket.on('private-message', (anotherSocketId, msg) => {
-    socket.to(anotherSocketId).emit('private message', socket.id, msg);
-  });
+  // socket.on('private-message', (anotherSocketId, msg) => {
+  //   socket.to(anotherSocketId).emit('private message', socket.id, msg);
+  // });
 
   socket.on('disconnect', () => {
     usersOnLine = usersOnLine.filter((user) => user.userId !== socket.id);
