@@ -10,6 +10,7 @@
     "debug": "nodemon server.js",
     "lint": "eslint --no-inline-config --ext .js,.jsx --no-error-on-unmatched-pattern -c .eslintrc.json .",
     "lintauto": "eslint --no-inline-config --ext .js,.jsx --fix --no-error-on-unmatched-pattern -c .eslintrc.json ."
+    "lint:styles": "stylelint **/*.css --config .stylelintrc.json --ignore-disables --allow-empty-input"
   },
   "keywords": [],
   "author": "",
