@@ -1,4 +1,5 @@
 const express = require('express');
+
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
@@ -11,6 +12,7 @@ const path = require('path');
 const cors = require('cors');
 const moment = require('moment');
 const faker = require('faker');
+
 const { saveMessages, getMessages } = require('./model/webChatModel');
 app.use(
   cors({
@@ -27,7 +29,7 @@ app.use(express.json());
 let usersOnLine = [];
 
 app.get('/', async (_req, res) => {
-  let nickname = faker.name.findName();
+  const nickname = faker.name.findName();
   const allMessages = await getMessages();
   console.log('LINHA 32', usersOnLine);
   res.status(200).render('index', { nickname, usersOnLine, allMessages });
@@ -35,8 +37,6 @@ app.get('/', async (_req, res) => {
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
-
-  let userId = socket.id;
 
   socket.on('connected', (nickname) => {
     usersOnLine.push({ userId, nickname });
