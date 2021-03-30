@@ -14,11 +14,12 @@ const moment = require('moment');
 const faker = require('faker');
 
 const { saveMessages, getMessages } = require('./model/webChatModel');
+
 app.use(
   cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
-  })
+  }),
 );
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -39,7 +40,7 @@ io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
 
   socket.on('connected', (nickname) => {
-    usersOnLine.push({ userId, nickname });
+    usersOnLine.push(nickname);
     io.emit('userConnected', usersOnLine); // send to all users that are connected
     console.log(usersOnLine);
   });

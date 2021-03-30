@@ -20,7 +20,9 @@
     "express": "^4.17.1",
     "mongodb": "^3.6.2",
     "socket.io": "3.0.4",
-    "socket.io-client": "3.0.5"
+    "socket.io-client": "3.0.5",
+    "moment": "^2.29.1",
+    "faker": "^5.5.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^7.24.5",
