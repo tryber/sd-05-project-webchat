@@ -16,16 +16,11 @@
         <input id="username" data-testid="nickname-box" placeholder="Digite seu usuario" />
         <button id="saveUser" type="button" data-testid="nickname-save">Salva usuário</button>
         <div id='chat'>
-          <div id='public'>
-            <h1>CHAT DO PRETINHO</h1>
-            <ul>
-              <% req.forEach(function(msg){ %>
-                <li class='messages' data-testid='message'><%=msg%></li>
-                <% }) %>
-              </ul>
-            </div>
-          </div>
-          <div id='private'></div>
+
+          <% req.forEach(function(msg){ %>
+            <li class='messages' data-testid='message'><%=msg%></li>
+            <% }) %>
+        </div>
         <input id="userMessage" data-testid="message-box" placeholder="Digite sus messagem" />
         <button type="submit" data-testid="send-button">Enviar mensagem</button>
       </form>
@@ -53,8 +48,7 @@
     const message = document.querySelector('#userMessage');
     const guest = document.querySelector('#users').children[0];
     const conversa = document.querySelector('#chat');
-    const private = document.querySelector('#private');
-    const public = document.querySelector('#public');
+    let target = '';
 
     const userNotification = (id, chat) => {
       messageRender(chat);
@@ -66,14 +60,18 @@
     
     const setPrivateMessage = async (e) => {
       // console.log('evento: ', e.target.getAttribute('to'));
-      private.innerHTML = "<h1>CHAT PRIVADO</h1>"
-            +"<ul><% req.forEach(function(msg){ %>"
-              +"<li class='messages' data-testid='message'><%=msg%></li>"
-            +"<% }) %>"
-            +"</ul>";
-      public.innerHTML = '';
-      private.setAttribute('targetID', e.target.getAttribute('to'))
-      conversa.appendChild(private);
+      target = e.target.getAttribute('to');
+      const id = e.target.getAttribute('from');
+      const privateMsg = await fetch(`http://localhost:3000/private/${id}/${target}`)
+      .then(res => res.json());    
+      console.log(privateMsg);
+      conversa.innerHTML = '';
+      privateMsg.forEach(msg => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid','message');
+        li.innerText = `${msg.data} - ${msg.nickname} (${msg.type}): ${msg.chatMessage}`;
+        conversa.appendChild(li);
+      }) 
     };
     
     // socket.emit('private-msg', messageMaker('private', to.id));
@@ -116,14 +114,12 @@
     });
     
     form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const privado = document.querySelector('#private');
-      console.log('evento: ', privado.getAttribute('targetID'));
-      
-      if (privado.getAttribute('targetID')) {
-        const targetID = privado.getAttribute('targetID');
-        socket.emit('private-message', messageMaker('private', targetID));
-      } else socket.emit('public-message', messageMaker('public', null));
+      console.log('evento: ', e);
+
+      e.preventDefault();    
+      if (target) {
+        socket.emit('private-message', messageMaker('private', target));
+      } else socket.emit('message', messageMaker('public', null));
     });
     
     saveUser.addEventListener('click', (e) => {
@@ -174,7 +170,7 @@
         // messageRender(msg);  
     });
 
-    socket.on('res-pub-message', (msg) => {
+    socket.on('message', (msg) => {
       messageRender(msg);
     });
   </script>

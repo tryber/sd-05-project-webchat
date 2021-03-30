@@ -27,32 +27,29 @@ if (!env) {
   env = 'development';
 }
 
-const response = [];
 let onlineUser = [];
 
 io.on('connection', (socket) => {
   socket.on('startConnection', (data) => {
     onlineUser.push({ id: socket.id, nickname: data.nickname });
     io.emit('update', onlineUser);
-    response.shift();
   });
   // socket.emit('saudacao', faker.name.firstName());
   socket.on('private-message', async (dados) => {
     const privateMessage = await database
-    .createMessage({ id: socket.id, ...dados })
-    .then((res) => res);
-    
+      .createMessage({ id: socket.id, ...dados })
+      .then((res) => res);
+
     const chat = `${privateMessage.data} - ${privateMessage.nickname} (${privateMessage.type}): ${privateMessage.chatMessage}`;
-    console.log('private no server: ', chat);
     io.to(privateMessage.targetId).to(socket.id).emit('res-pvt-message', socket.id, chat);
   });
 
-  socket.on('public-message', async (data) => {
+  socket.on('message', async (data) => {
     const message = await database.createMessage({ id: socket.id, ...data }).then((res) => res);
     const chat = `${message.data} - ${message.nickname}: ${message.chatMessage}`;
     // console.log(`chat: ${chat}`);
-    response.push(chat);
-    io.emit('res-pub-message', chat);
+    // response.push(chat);
+    io.emit('message', chat);
     io.emit('update', onlineUser);
   });
 
@@ -64,20 +61,26 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', async () => {
     onlineUser = onlineUser.filter((id) => id.id !== socket.id);
-    console.log(
-      'Lembre-se de deixar tudo relacionado a "conexão socket" dentro do evento "connection"'
-    );
     io.emit('update', onlineUser);
   });
 });
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const allMessages = await database.findAllMessages();
+  const response = allMessages.map((message) => `${message.data} - ${message.nickname}: ${message.chatMessage}`);
+
   res.status(200).render('index', {
     mensagens: 'Histórico de mensagens',
     req: [...response],
     guest: `guest ${faker.name.firstName()}`,
     onlineUser,
   });
+});
+
+app.get('/private/:id/:target', async (req, res) => {
+  const { target, id } = req.params;
+  const privateMsg = await database.findUsersMessages(id, target);
+  res.status(200).json(privateMsg);
 });
 
 server.listen(PORT, () => {

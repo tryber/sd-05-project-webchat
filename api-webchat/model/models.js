@@ -18,16 +18,21 @@ const createMessage = async ({ id, nickname, chatMessage, type, targetId }) => {
   return messages;
 };
 
-const findUsersMessages = async (userId, targetId) =>
+const findUsersMessages = async (id, targetId) =>
   getConnection('messages')
-    .then((msg) => msg
-      .find({ id: { or: [userId, targetId] }, exist: { targetId: { or: [userId, targetId] } } })
-      .toArray())
-    .catch((err) => console.log(err));
+    .then((msg) =>
+      msg
+        .find({
+          $or: [
+            { id, targetId },
+            { id: targetId, targetId: id },
+          ],
+        })
+        .toArray()).catch((err) => console.log(err));
 
 const findAllMessages = async () =>
   getConnection('messages')
-    .then((msg) => msg.find({}).toArray())
+    .then((msg) => msg.find({ targetId: null }).toArray())
     .catch((err) => console.log(err));
 
 // const findAllUser = async () =>
