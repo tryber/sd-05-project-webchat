@@ -42,20 +42,28 @@ io.on('connection', (socket) => {
     delete onlineUsers[socket.id];
     io.emit('updateUser', { onlineUsers });
   });
-  socket.on('message', ({ chatMessage, nickname, target }) => {
+  socket.on('message', ({ chatMessage, nickname, target = '' }) => {
     const date = moment(new Date()).format('DD-MM-yyyy HH:mm:ss');
     if (target !== '') {
-      const stringNewMessage = `${date} (private) - ${nickname}: ${chatMessage}`;
-      model.createMessage({ date, nickname, chatMessage, target, user: socket.id });
-      return io.to(target).to(socket.id).emit('message', stringNewMessage);  
+      const stringNewMessagePrivate = `${date} (private) - ${nickname}: ${chatMessage}`;
+      model.createMessage({
+        date,
+        nickname,
+        chatMessage,
+        target,
+        user: socket.id,
+      });
+      return io.to(target).to(socket.id).emit('message', stringNewMessagePrivate);
     }
     const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
-    model.createMessage({ date, nickname, chatMessage, target: "Everyone" });
+    model.createMessage({ date, nickname, chatMessage, target: 'Everyone' });
     io.emit('message', stringNewMessage);
   });
-  socket.on('user', ({ myData }) => {
+  socket.on('user', ({ myData: old }) => {
+    const myData = old;
     myData.socketId = socket.id;
     onlineUsers[myData.socketId] = { ...myData, socketId: socket.id };
+    console.log(onlineUsers, 'linha 65');
     io.emit('updateUser', { onlineUsers });
   });
   socket.on('changeName', ({ myData }) => {
@@ -74,6 +82,17 @@ app.get('/', async (_req, res) => {
   const messages = await model.getMessage();
   res.status(200).render('view', { numeros, onlineUsers, messages });
   numeros += 1;
+});
+
+app.get('/chatprivate/:user/:target', async (req, res) => {
+  const { target, user } = req.params;
+  const messages = await model.getMessagePrivate(target, user);
+  res.status(200).json(messages);
+});
+
+app.get('/chat', async (_req, res) => {
+  const messages = await model.getMessage();
+  res.status(200).json(messages);
 });
 
 const PORT = 3000;

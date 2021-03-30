@@ -13,9 +13,13 @@
       <input data-testid="nickname-box" id="nickname-box" />
       <button data-testid="nickname-save" id="nickname-save">Salvar</button>
       <ul id="list-users">
-        <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
+        <li id="online-user" data-testid="online-user">
+          Visitante<%=numeros%>
+        </li>
         <%Object.values(onlineUsers).forEach((user) =>{%>
-        <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
+        <li id="<%=user.socketId%>" data-testid="online-user">
+          <%=user.nickname%>
+        </li>
         <button id="sussurrar" data-testid="private">susurrar</button>
         <%})%>
       </ul>
@@ -27,9 +31,7 @@
     </div>
     <ul id="chat-box">
       <%messages.forEach(({date, nickname, chatMessage}) => {%>
-      <li data-testid="message">
-        <%=date%> - <%=nickname%>: <%=chatMessage%>
-      </li>
+      <li data-testid="message"><%=date%> - <%=nickname%>: <%=chatMessage%></li>
       <%})%>
     </ul>
   </body>
@@ -44,10 +46,21 @@
     const onlineUsers = document.getElementById('online-user');
     const listUsers = document.getElementById('list-users');
     const publicButton = document.getElementById('public');
-    publicButton.addEventListener('click', () => {
+    publicButton.addEventListener('click', async () => {
       target = '';
-    })
-    let nickname = 'Visitante'+'<%=numeros%>';
+      chatBox.innerHTML = '';
+      const messagePublics = await fetch(
+        'http://localhost:3000/chat/',
+      ).then((res) => res.json());
+      messagePublics.forEach(({ date, nickname, chatMessage }) => {
+        const createList = document.createElement('li');
+        const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
+        createList.innerHTML = stringNewMessage;
+        createList.setAttribute('data-testid', 'message');
+        chatBox.appendChild(createList);
+      });
+    });
+    let nickname = 'Visitante' + '<%=numeros%>';
     let target = '';
     const myData = {
       nickname,
@@ -57,14 +70,17 @@
       userMe.innerHTML = userInputSave.value;
     });
     messageSendButton.addEventListener('click', () => {
-      socket.emit('message', { chatMessage: messageBox.value, nickname, target });
+      socket.emit('message', {
+        chatMessage: messageBox.value,
+        nickname,
+        target,
+      });
     });
     socket.on('message', (stringNewMessage) => {
       const message = document.createElement('li');
       message.innerHTML = stringNewMessage;
       message.setAttribute('data-testid', 'message');
       chatBox.appendChild(message);
-      console.log('testando');
     });
     socket.emit('user', { myData });
     userButtonSave.addEventListener('click', () => {
@@ -75,7 +91,6 @@
       socket.emit('changeName', { myData });
     });
     socket.on('updateUser', ({ onlineUsers }) => {
-      console.log(onlineUsers, 'onlineUsers');
       listUsers.innerHTML = '';
       const singleUser = document.createElement('li');
       singleUser.innerHTML = myData.nickname;
@@ -90,11 +105,22 @@
         listUsers.appendChild(newUser);
 
         const newButton = document.createElement('button');
-        newButton.innerText = "sussurrar";
+        newButton.innerText = 'sussurrar';
         newButton.setAttribute('data-testid', 'private');
-        newButton.addEventListener('click', () => {
+        newButton.addEventListener('click', async () => {
           target = user.socketId;
-        })
+          chatBox.innerHTML = '';
+          const messagePrivates = await fetch(
+            `http://localhost:3000/chatprivate/${socket.id}/${user.socketId}`,
+          ).then((res) => res.json());
+          messagePrivates.forEach(({ date, nickname, chatMessage }) => {
+            const createList = document.createElement('li');
+            const stringNewMessagePrivate = `${date} (private) - ${nickname}: ${chatMessage}`;
+            createList.innerHTML = stringNewMessagePrivate;
+            createList.setAttribute('data-testid', 'message');
+            chatBox.appendChild(createList);
+          });
+        });
         listUsers.appendChild(newButton);
       });
     });

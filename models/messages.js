@@ -10,9 +10,16 @@ async function createMessage(parametros) {
 
 async function getMessage() {
   const db = await connection();
-  const message = await db.collection('messages').find({}).toArray();
+  const message = await db.collection('messages').find({ target: { $eq: 'Everyone' } }).toArray();
   console.log(message);
   return message;
 }
 
-module.exports = { createMessage, getMessage };
+async function getMessagePrivate(target, user) {
+  const db = await connection();
+  const message = await db.collection('messages').find({ $or: [{ target, user }, { user: target, target: user }] }).toArray();
+  console.log(message);
+  return message;
+}
+
+module.exports = { createMessage, getMessage, getMessagePrivate };
