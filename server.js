@@ -36,10 +36,17 @@ io.on('connection', (socket) => {
   });
 
   onlineUsers.unshift({ userId, nickname: tempNickname });
+
   console.log(`User ${userId} - ${tempNickname} connected`);
   socket.emit('connected', { userId, nickname: tempNickname });
-  socket.on('disconnect', () =>
-    console.log(`User ${userId} - ${tempNickname} disconnected`));
+  io.emit('userConnected', userId, tempNickname);
+
+  socket.on('disconnect', () => {
+    console.log(`User ${userId} - ${tempNickname} disconnected`);
+    const userIndex = onlineUsers.findIndex((user) => user.userId === userId);
+    onlineUsers.splice(userIndex, 1);
+    io.emit('userDisconnected', userId);
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
@@ -49,14 +56,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('nicknameChange', ({ nickname, userId: userId_ }) => {
-    console.log(nickname, userId);
     const userIndex = onlineUsers.findIndex((user) => user.userId === userId_);
     const user = onlineUsers[userIndex];
-    user.nickname = nickname;
 
-    console.log(
-      `User ${user.userId} change nickname from ${user.nickname} para ${nickname}.`,
-    );
+    console.log(`User ${user.userId} change nickname from ${user.nickname} para ${nickname}.`);
+    user.nickname = nickname;
     io.emit('nicknameChanged', nickname, userId_);
   });
 });

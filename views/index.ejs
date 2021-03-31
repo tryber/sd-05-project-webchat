@@ -19,6 +19,12 @@
   </ul>
 
   <div id="chat" class="chat" action="">
+    <ul id="online-users" class="online-users container">
+      <% onlineUsers.forEach(({userId, nickname})=> { %>
+        <li id="user-<%=userId%>" data-testid="online-user"><%=nickname%></li>
+      <%}) %>
+    </ul>
+
     <div class="nickname container">
       <input id="nickname-box" data-testid="nickname-box" autocomplete="on" />
       <button id="nickname-save" data-testid="nickname-save">Nickname</button>
@@ -32,15 +38,16 @@
 
   <script>
     const socket = io();
-    const nicknameSave = document.querySelector('#nickname-save');
     const nicknameBox = document.querySelector('#nickname-box');
+    const nicknameSave = document.querySelector('#nickname-save');
     const messageBox = document.querySelector('#message-box');
     const messagesUl = document.querySelector('#messages');
     const sendButton = document.querySelector('#send-button');
+    const onlineUsersDiv = document.querySelector('#online-users');
 
     let nickname;
     let userId; // current user
-    
+
     const createMessage = (msg) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
@@ -48,7 +55,15 @@
       li.innerHTML = msg;
       messagesUl.appendChild(li);
     };
-    
+
+    const createOnlineUser = (id, nickname) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.id = `user-${id}`;
+      li.innerText = nickname;
+      messagesUl.appendChild(li);
+    };
+
     sendButton.addEventListener('click', (e) => {
       e.preventDefault();
       const chatMessage = messageBox.value;
@@ -68,17 +83,29 @@
         nicknameBox.value = '';
       }
     });
-    
+
     socket.on('connected', (user) => {
       userId = user.userId;
       nickname = user.nickname;
       nicknameBox.placeholder = nickname;
     });
-    
+
+    socket.on('userConnected', (id, nickname) => {
+      createOnlineUser(id, nickname)
+    });
+
+    socket.on('userDisconnected', (id) => {
+      document.getElementById(`user-${id}`).remove();
+    });
+
     socket.on('message', (msg) => {
       createMessage(msg);
     });
-    </script>
+
+    socket.on('nicknameChanged', (nickname, userId) => {
+      document.getElementById(`user-${userId}`).innerText = nickname;
+    });
+  </script>
 </body>
 
 </html>
