@@ -1,4 +1,5 @@
 const socketIo = require('socket.io');
+const { getPrivateMessages, getMessages } = require('../Models/getMessages');
 
 const transformDate = (date) =>
   new Date(date)
@@ -20,40 +21,43 @@ const formatMessage = (from, to) => (message) => ({
   createdAt: transformDate(new Date()),
 });
 
-const formatMessageToFront = (message) =>
-  `${message.createdAt} - ${message.from} : ${message.message}`;
+const formatMessageToFront = (message, privateParam) => {
+  if (!privateParam) {
+    return `${message.createdAt} - ${message.from} : ${message.message}`;
+  }
+  return `${message.createdAt} (private) - ${message.from} : ${message.message}`;
+};
 
-const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
+const run = (...server) => async ({ mongoConnection }) => {
   // Setup connection
   const io = socketIo(...server);
+  const onlineUsers = [];
 
   io.on('connection', async (socket) => {
     const { id } = socket;
     let name = parseInt(Math.random() * 100000, 10);
     onlineUsers.push([name, id]);
-    console.log('Antes', onlineUsers);
-    socket.emit('connected', { id, name });
+    console.log(onlineUsers);
+    console.log(name, id);
+    // socket.emit('connected', { id, name });
     io.emit('newUserConnected', { name });
     io.emit('updateOnlineUsers', onlineUsers);
     socket.on('disconnect', () => {
+      console.log('passei');
       onlineUsers.forEach((user, index) => {
-        console.log(user[0]);
+        console.log(user);
         if (user[0] === name && user[1] === id) {
-          console.log('passei');
           onlineUsers.splice(index, 1);
         }
       });
-      if (onlineUsers.indexOf([name, id]) > -1) {
-        onlineUsers.splice(onlineUsers.indexOf([name, id]), 1);
-      }
+      // if (onlineUsers.indexOf([name, id]) > -1) {
+      //   onlineUsers.splice(onlineUsers.indexOf([name, id]), 1);
+      // }
       io.emit('updateOnlineUsers', onlineUsers);
-      console.log('depois', onlineUsers);
     });
     socket.on('nameChange', ({ id: idParam, input, nickname }) => {
       onlineUsers.forEach((user, index) => {
-        console.log(user[0]);
         if (user[0] === nickname && user[1] === idParam) {
-          console.log('passei2');
           onlineUsers.splice(index, 1);
         }
         if (onlineUsers.indexOf([name, id]) > -1) {
@@ -63,7 +67,16 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
       onlineUsers.push([input, idParam]);
       name = input;
       io.emit('updateOnlineUsers', onlineUsers);
-      console.log('aqui', onlineUsers);
+    });
+    socket.on('getPublicMessages', async () => {
+      const messages = await getMessages();
+      const formated = messages.map((message) => formatMessageToFront(message));
+      socket.emit('getPublicMessages', { messages: formated });
+    });
+    socket.on('getPrivateHistory', async ({ nickname, to }) => {
+      const messages = await getPrivateMessages(nickname, to);
+      const formated = messages.map((message) => formatMessageToFront(message, true));
+      socket.emit('getPrivateHistory', { messages: formated });
     });
     socket.on('message', async ({ nickname: nameParam, to, chatMessage }) => {
       const messages = await mongoConnection('messages');
@@ -79,21 +92,24 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
         let idTo;
         onlineUsers.forEach((user, index) => {
           if (user[0] === to) {
-            console.log(user);
             const indexOne = 1;
             const buffer = onlineUsers[index];
-            console.log('buffer', buffer);
             idTo = buffer[indexOne];
-            console.log(idTo);
           }
         });
+        socket.emit(
+          'message',
+          formatMessageToFront(formatMessage(nameParam, to)(chatMessage), true),
+        );
         socket.broadcast
           .to(idTo)
           .emit(
             'message',
-            formatMessageToFront(formatMessage(nameParam, to)(chatMessage)),
+            formatMessageToFront(
+              formatMessage(nameParam, to)(chatMessage),
+              true,
+            ),
           );
-        console.log(to);
       }
     });
   });

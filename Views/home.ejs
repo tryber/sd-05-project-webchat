@@ -21,7 +21,6 @@
         <div id="chatView">
           <article id="chatMessages">
             <ul id="chatList">
-              <% console.log(messages) %> 
               <% if (messages.length > 0) {%>
                 <% messages.forEach((message) => { %> 
                   <li data-testid="message"><%= message.createdAt %> - <%= message.from %> : <%= message.message %> </li>
@@ -33,6 +32,7 @@
               <input type="text" id="inputNameChange" data-testid="nickname-box" placeholder="Change your name" />
               <button type="button" id="changeNameBtn" data-testid="nickname-save">Change it!</button>
             </div>
+            <button data-testid="public" id="publicBtn">Public Chat</button>
             <p>Usuários Online</p>
             <ul id="onlineUsersList" data-testid="nickname-box">
               <% if (onlineUsers.length > 0) {%>
@@ -63,37 +63,46 @@
     const onlineUsersButtons = document.getElementsByClassName('onlineUser');
     const changeNameBtn = document.getElementById('changeNameBtn');
     const inputNameChange = document.getElementById('inputNameChange');
+    const publicBtn = document.getElementById('publicBtn');
 
-    console.log(inputNameChange);
-    console.log(changeNameBtn);
+
+    publicBtn.addEventListener('click', () => {
+      to = null
+      client.emit('getPublicMessages', {});
+    });
+
+
 
     changeNameBtn.addEventListener('click', () => {
       const input = inputNameChange.value;
-      console.log(input)
       client.emit('nameChange', {id, input, nickname});
       nickname = input;
-      console.log(nickname);
     });
 
     sendBtn.addEventListener('click', () => {
       const chatMessage = inputMessage.value;
-      console.log(chatMessage);
       client.emit('message', { id, nickname, to, chatMessage });
-      console.log(nickname);
     });
 
     let onlineUsers = 0;
     client.on('connected', (userData) => {
-      console.log(userData);
       id = userData.id;
       nickname = userData.name;
     });
+
+    client.on('getPublicMessages', ({ messages }) => {
+      chat.innerText = '';
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.innerText = message;
+        chat.appendChild(li);
+      })
+    })
 
     client.on('message', (messageData) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
       li.innerHTML= messageData
-      console.log(messageData);
       chat.appendChild(li);
     });
 
@@ -101,31 +110,39 @@
       console.log(`Seja bem vindo ao Chat ${name}`);
     });
 
+    client.on('getPrivateHistory', ({messages}) => {
+      chat.innerText='';
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.innerText = message;
+        chat.appendChild(li);
+      })
+    })
+
     client.on('updateOnlineUsers', (users) => {
       onlineUsersList.innerText = '';
       users.forEach((user) => {
         const li = document.createElement('li');
+        const btnPrivate = document.createElement('button');
+        btnPrivate.innerHTML = 'Privado';
+        btnPrivate.setAttribute('data-testid', 'private');
         li.setAttribute('data-testid', 'online-user');
         li.setAttribute('id', `${user[0]}`);
         li.setAttribute('class', 'onlineUser');
-        li.addEventListener('click', () => {
-          if (user[0] === to) {
-            to = null;
-          } else {
+        btnPrivate.addEventListener('click', () => {
             to = user[0];
-          }
-          console.log(to);
+            client.emit('getPrivateHistory', {nickname, to})
         });
         if (user[0] === nickname) {
           li.innerHTML = user[0];
+          onlineUsersList.appendChild(btnPrivate);
           onlineUsersList.prepend(li);
         } else {
           li.innerHTML = user[0];
           onlineUsersList.appendChild(li);
+          onlineUsersList.appendChild(btnPrivate);
         }
-        console.log(onlineUsersButtons);
       });
-      console.log(onlineUsers);
     });
   </script>
 </html>

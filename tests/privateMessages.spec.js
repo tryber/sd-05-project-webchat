@@ -135,6 +135,7 @@ describe('Permita que usuários troquem mensagens particulares', () => {
     wait(1000);
 
     const secondPageMessagePrivate = await page2.$$eval(dataTestid('message'), (nodes) => nodes.map((n) => n.innerText));
-    expect(secondPageMessagePrivate[0]).toMatch('eae mano como ta');
+    console.log(secondPageMessagePrivate);
+    expect(secondPageMessagePrivate).toMatch('eae mano como ta');
   });
 });

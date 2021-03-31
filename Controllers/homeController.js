@@ -6,7 +6,6 @@ const homeController = (onlineUsers) => {
 
   home.get('/', async (req, res) => {
     const messages = await getMessages();
-    console.log('esseeeeeee', onlineUsers);
     return res.render('home', { messages, onlineUsers });
   });
   return home;
