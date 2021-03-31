@@ -28,40 +28,33 @@ const formatMessageToFront = (message, privateParam) => {
   return `${message.createdAt} (private) - ${message.from} : ${message.message}`;
 };
 
-const run = (...server) => async ({ mongoConnection }) => {
+const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
   // Setup connection
   const io = socketIo(...server);
-  const onlineUsers = [];
 
   io.on('connection', async (socket) => {
     const { id } = socket;
     let name = parseInt(Math.random() * 100000, 10);
     onlineUsers.push([name, id]);
-    console.log(onlineUsers);
     console.log(name, id);
-    // socket.emit('connected', { id, name });
-    io.emit('newUserConnected', { name });
-    io.emit('updateOnlineUsers', onlineUsers);
+    socket.emit('connected', { id, name });
+    io.emit('greeting', { name });
+    io.emit('newUserConnected', { name, id });
     socket.on('disconnect', () => {
       console.log('passei');
       onlineUsers.forEach((user, index) => {
         console.log(user);
+        console.log(onlineUsers.indexOf([name, id]));
         if (user[0] === name && user[1] === id) {
           onlineUsers.splice(index, 1);
         }
       });
-      // if (onlineUsers.indexOf([name, id]) > -1) {
-      //   onlineUsers.splice(onlineUsers.indexOf([name, id]), 1);
-      // }
-      io.emit('updateOnlineUsers', onlineUsers);
+      io.emit('userDisconnected', { name, id });
     });
     socket.on('nameChange', ({ id: idParam, input, nickname }) => {
       onlineUsers.forEach((user, index) => {
         if (user[0] === nickname && user[1] === idParam) {
           onlineUsers.splice(index, 1);
-        }
-        if (onlineUsers.indexOf([name, id]) > -1) {
-          onlineUsers.splice(onlineUsers.indexOf([nickname, id]), 1);
         }
       });
       onlineUsers.push([input, idParam]);

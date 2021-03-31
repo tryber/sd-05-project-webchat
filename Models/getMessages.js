@@ -20,14 +20,17 @@ const getPrivateMessages = async (from, to) => {
     .find({
       $or: [
         {
-          $and: [{ from: { $eq: from } }, { to: { $eq: to } }],
+          from: { $eq: from },
+          to: { $eq: to },
         },
         {
-          $and: [{ from: { $eq: to } }, { to: { $eq: from } }],
+          from: { $eq: to },
+          to: { $eq: from },
         },
       ],
     })
     .toArray();
+  console.log(message);
   return message;
 };
 

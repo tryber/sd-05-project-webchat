@@ -37,7 +37,10 @@
             <ul id="onlineUsersList" data-testid="nickname-box">
               <% if (onlineUsers.length > 0) {%>
                 <% onlineUsers.forEach((user) => { %>
-                  <li data-testid="online-user" class="onlineUser" id="<%= user[0] %>" ><%= user[0] %></li>
+                  <div>
+                    <li data-testid="online-user" class="onlineUser" id="<%= user[1] %>" ><%= user[0] %></li>
+                    <button data-testid="private" class="pvt-btn">Privado</button>
+                  </div>
                 <% }) %>  
               <% } %>
             </ul>
@@ -64,13 +67,22 @@
     const changeNameBtn = document.getElementById('changeNameBtn');
     const inputNameChange = document.getElementById('inputNameChange');
     const publicBtn = document.getElementById('publicBtn');
+    const privateBtns = document.querySelectorAll('.pvt-btn') 
 
 
     publicBtn.addEventListener('click', () => {
       to = null
       client.emit('getPublicMessages', {});
     });
+console.log(privateBtns)
+    privateBtns.forEach(button => {
+      button.addEventListener('click', (event) => {
+        console.log(event.target.parentNode.firstChild.nextSibling.innerHTML)
+        to = event.target.parentNode.firstChild.nextSibling.innerHTML
+        client.emit('getPrivateHistory', {nickname, to})
 
+      });
+    });
 
 
     changeNameBtn.addEventListener('click', () => {
@@ -99,6 +111,12 @@
       })
     })
 
+    client.on('userDisconnected', ({name, id}) => {
+      const userElement = document.getElementById(`${id}`).parentNode;
+      console.log(userElement);
+      userElement.remove();
+    })
+
     client.on('message', (messageData) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
@@ -106,7 +124,7 @@
       chat.appendChild(li);
     });
 
-    client.on('newUserConnected', ({ name }) => {
+    client.on('greeting', ({ name }) => {
       console.log(`Seja bem vindo ao Chat ${name}`);
     });
 
@@ -119,30 +137,38 @@
       })
     })
 
-    client.on('updateOnlineUsers', (users) => {
-      onlineUsersList.innerText = '';
-      users.forEach((user) => {
+    client.on('nameChange', ({name, id}) => {
+      const onlineDisplay = document.getElementById(`${id}`);
+      console.log(onlineDisplay)
+      console.log(name)
+      onlineDisplay.innerHTML = name;
+    });
+
+    client.on('newUserConnected', ({name, id, onlineUsers}) => {
+
+      const div = document.createElement('div')
         const li = document.createElement('li');
         const btnPrivate = document.createElement('button');
         btnPrivate.innerHTML = 'Privado';
         btnPrivate.setAttribute('data-testid', 'private');
+        btnPrivate.setAttribute('class', 'pvt-btn');
         li.setAttribute('data-testid', 'online-user');
-        li.setAttribute('id', `${user[0]}`);
+        li.setAttribute('id', `${id}`);
         li.setAttribute('class', 'onlineUser');
         btnPrivate.addEventListener('click', () => {
-            to = user[0];
+            to = name;
             client.emit('getPrivateHistory', {nickname, to})
         });
-        if (user[0] === nickname) {
-          li.innerHTML = user[0];
-          onlineUsersList.appendChild(btnPrivate);
-          onlineUsersList.prepend(li);
+        if (name === nickname) {
+          li.innerHTML = name;
+          div.appendChild(li)
+          onlineUsersList.prepend(div);
         } else {
-          li.innerHTML = user[0];
-          onlineUsersList.appendChild(li);
-          onlineUsersList.appendChild(btnPrivate);
+          li.innerHTML = name;
+          div.appendChild(li);
+          div.appendChild(btnPrivate);
+          onlineUsersList.appendChild(div);
         }
       });
-    });
   </script>
 </html>
