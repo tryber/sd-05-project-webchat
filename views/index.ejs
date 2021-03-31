@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webchat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+
+<body>
+  <ul id="messages" class="messages">
+    <% messages.forEach(({nickname, chatMessage, timestamp})=> { %>
+      <li class="message" data-testid="message">
+        <%=timestamp %> - <%=nickname %>: <%=chatMessage %>
+      </li>
+    <%}) %>
+  </ul>
+
+  <div id="chat" class="chat" action="">
+    <div class="nickname container">
+      <input id="nickname-box" data-testid="nickname-box" autocomplete="on" />
+      <button id="nickname-save" data-testid="nickname-save">Nickname</button>
+    </div>
+
+    <div class="input-message container">
+      <input id="message-box" data-testid="message-box" autocomplete="off" />
+      <button id="send-button" data-testid="send-button">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    const nicknameSave = document.querySelector('#nickname-save');
+    const nicknameBox = document.querySelector('#nickname-box');
+    const messageBox = document.querySelector('#message-box');
+    const messagesUl = document.querySelector('#messages');
+    const sendButton = document.querySelector('#send-button');
+
+    let nickname;
+    let userId; // current user
+    
+    const createMessage = (msg) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.className = 'message';
+      li.innerHTML = msg;
+      messagesUl.appendChild(li);
+    };
+    
+    sendButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      const chatMessage = messageBox.value;
+      const msg = { chatMessage, nickname };
+      socket.emit('message', msg);
+      messageBox.value = '';
+      return false;
+    });
+
+    nicknameSave.addEventListener('click', (e) => {
+      e.preventDefault();
+      nickname = nicknameBox.value;
+      if (nickname !== '') {
+        console.log(nickname, userId);
+        socket.emit('nicknameChange', { nickname, userId });
+        nicknameBox.placeholder = nickname;
+        nicknameBox.value = '';
+      }
+    });
+    
+    socket.on('connected', (user) => {
+      userId = user.userId;
+      nickname = user.nickname;
+      nicknameBox.placeholder = nickname;
+    });
+    
+    socket.on('message', (msg) => {
+      createMessage(msg);
+    });
+    </script>
+</body>
+
+</html>
