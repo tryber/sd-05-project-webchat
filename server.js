@@ -23,7 +23,7 @@ app.set('views', './views');
 const onlineUsers = [];
 
 app.get('/', async (_req, res) => {
-  const messages = await getAllMessages();
+  const messages = await getAllMessages({ targetUser: { $ne: null } });
   res.status(200).render('index', { onlineUsers, messages });
 });
 
@@ -35,37 +35,58 @@ io.on('connection', (socket) => {
     separator: '',
   });
 
-  onlineUsers.unshift({ userId, nickname: tempNickname });
+  const newUser = { userId, nickname: tempNickname };
 
   console.log(`User ${userId} - ${tempNickname} connected`);
-  socket.emit('connected', { userId, nickname: tempNickname });
-  io.emit('userConnected', userId, tempNickname);
+  onlineUsers.unshift(newUser);
+  socket.emit('connected', newUser);
+  io.emit('userLoggedIn', newUser);
 
   socket.on('disconnect', () => {
+    const index = onlineUsers.findIndex((user_) => user_.userId === userId);
+
     console.log(`User ${userId} - ${tempNickname} disconnected`);
-    const userIndex = onlineUsers.findIndex((user) => user.userId === userId);
-    onlineUsers.splice(userIndex, 1);
-    io.emit('userDisconnected', userId);
+    onlineUsers.splice(index, 1);
+    io.emit('userLoggedOff', userId);
   });
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
+  socket.on('message', async (msg) => {
+    const isPrivate = msg.targetUser ? '(private)' : '';
     const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
-    await addMessage({ chatMessage, nickname, timestamp });
-    const msgString = `${timestamp} - ${nickname}: ${chatMessage}`;
-    io.emit('message', msgString);
+    const msgString = `${timestamp} - ${msg.nickname}${isPrivate}: ${msg.chatMessage}`;
+
+    await addMessage({ ...msg, timestamp });
+    if (isPrivate !== '') {
+      console.log(`User ${msg.userId} PV ${msg.targetUser}`);
+      io.to(msg.targetUser).to(msg.userId).emit('message', msgString);
+    } else io.emit('message', msgString);
   });
 
-  socket.on('nicknameChange', ({ nickname, userId: userId_ }) => {
-    const userIndex = onlineUsers.findIndex((user) => user.userId === userId_);
-    const user = onlineUsers[userIndex];
+  socket.on('nicknameChange', (user) => {
+    console.log(onlineUsers);
+    const index = onlineUsers.findIndex((user_) => user_.userId === user.userId);
+    const onlineUser = onlineUsers[index];
 
-    console.log(`User ${user.userId} change nickname from ${user.nickname} para ${nickname}.`);
-    user.nickname = nickname;
-    io.emit('nicknameChanged', nickname, userId_);
+    console.log(`User ${user.userId} changed nickname from ${onlineUser.nickname} para ${user.nickname}.`);
+    onlineUser.nickname = user.nickname;
+    io.emit('nicknameChanged', onlineUser);
+  });
+
+  socket.on('getPublicHistory', async () => {
+    const messages = await getAllMessages({ targetUser: null });
+    socket.emit('publicHistory', messages);
+  });
+
+  socket.on('getPrivateHistory', async (targetUser) => {
+    const messages = await getAllMessages({ targetUser });
+    const privateMessages = messages.reduce((array, msg) => {
+      if (msg.targetUser && (msg.targetUser === targetUser || msg.userId === targetUser)) array.push(msg);
+      return array;
+    }, []);
+    socket.emit('privateHistory', privateMessages);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 
 http.listen(PORT, () => console.log(`Listening on port ${PORT}`));
-//

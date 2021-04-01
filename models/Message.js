@@ -8,11 +8,11 @@ const addMessage = async (msgData) => {
   return newMessage.ops[0];
 };
 
-const getAllMessages = async () => {
+const getAllMessages = async (search = {}) => {
   const db = await connection();
   const messages = await db
     .collection('messages')
-    .find()
+    .find(search)
     .toArray();
   return messages;
 };
