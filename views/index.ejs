@@ -10,58 +10,56 @@
 </head>
 
 <body>
-  <ul id="messages" class="messages">
-    <% messages.forEach(({nickname, chatMessage, timestamp})=> { %>
-      <li class="message" data-testid="message">
-        <%=timestamp %> - <%=nickname %>: <%=chatMessage %>
-      </li>
-      <%}) %>
-  </ul>
-
-  <div id="chat" class="chat" action="">
-    <ul id="online-users" class="online-users container">
-      <% onlineUsers.forEach(({userId, nickname})=> { %>
-        <li id="user-<%=userId%>" data-testid="online-user">
-          <%=nickname%>
-            <button id="<%=userId%>" class="private" data-testid="private" target="<%=userId%>">Private</button>
+  <div class="messages container">
+    <ul id="messages">
+      <% messages.forEach(({timestamp, nickname, chatMessage})=> { %>
+        <li class="message" data-testid="message">
+          <%=timestamp %> - <%=nickname %>: <%=chatMessage %>
         </li>
-        <%}) %>
+      <%}) %>
     </ul>
+  </div>
 
-    <button id="public" data-testid="public" type="button">Public</button>
+  <div class="container">
+    <div class="online-users container">
+      <ul id="online-users">
+        <% onlineUsers.forEach(({userId, nickname})=> { %>
+          <li id="user-<%=userId%>" data-testid="online-user">
+            <%=nickname%>
+            <button id="<%=userId%>" class="private-button" data-testid="private" target="<%=userId%>">
+              Private
+            </button>
+          </li>
+        <%}) %>
+      </ul>
+    </div>
 
     <div class="nickname container">
       <input id="nickname-box" data-testid="nickname-box" autocomplete="on" />
-      <button id="nickname-save" data-testid="nickname-save">Nickname</button>
+      <button id="nickname-button" data-testid="nickname-save">Nickname</button>
     </div>
 
     <div class="input-message container">
       <input id="message-box" data-testid="message-box" autocomplete="off" />
       <button id="send-button" data-testid="send-button">Send</button>
+      <button id="public-button" data-testid="public">Public</button>
     </div>
   </div>
 
   <script>
     const socket = io();
-    const nicknameBox = document.querySelector('#nickname-box');
-    const nicknameSave = document.querySelector('#nickname-save');
-    const messageBox = document.querySelector('#message-box');
     const messagesUl = document.querySelector('#messages');
     const onlineUsers = document.querySelector('#online-users');
-    const privateButtons = document.querySelectorAll('.private');
-    const publicButton = document.querySelector('#public');
+    const nicknameBox = document.querySelector('#nickname-box');
+    const nicknameSave = document.querySelector('#nickname-button');
+    const messageBox = document.querySelector('#message-box');
     const sendButton = document.querySelector('#send-button');
+    const privateButtons = document.querySelectorAll('.private-button');
+    const publicButton = document.querySelector('#public-button');
 
     let nickname;
     let userId; // current user
-    let targetUser = false;
-
-    privateButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
-        targetUser = e.target.id;
-        socket.emit('getPrivateHistory', targetUser);
-      });
-    });
+    let targetUser = null;
 
     const createMessage = (msg) => {
       const li = document.createElement('li');
@@ -71,26 +69,29 @@
       messagesUl.appendChild(li);
     };
 
-    const createOnlineUser = (userId, nickname) => {
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.id = `user-${userId}`;
-      li.innerText = nickname;
-      messagesUl.appendChild(li);
+    const createOnlineUser = (user) => {
+      const userLi = document.createElement('li');
+      userLi.setAttribute('data-testid', 'online-user');
+      userLi.id = `user-${user.userId}`;
+      userLi.innerText = user.nickname;
+      messagesUl.appendChild(userLi);
 
       const privateButton = document.createElement('button');
       privateButton.setAttribute('type', 'button');
-      privateButton.setAttribute('id', userId);
+      privateButton.setAttribute('id', user.userId);
       privateButton.innerText = 'Private';
       privateButton.addEventListener('click', (e) => {
         targetUser = e.target.id;
         socket.emit('getPrivateHistory', targetUser);
       });
 
-      li.append(privateButton);
-
-      if (userId === userId) onlineUsers.prepend(li);
-      else onlineUsers.append(privUser);
+      if (user.userId === userId) {
+        onlineUsers.prepend(userLi);
+      }
+      else {
+        userLi.append(privateButton);
+        onlineUsers.append(userLi);
+      }
     };
 
     sendButton.addEventListener('click', (e) => {
@@ -118,6 +119,13 @@
       socket.emit('getPublicHistory');
     });
 
+    privateButtons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+        targetUser = e.target.id;
+        socket.emit('getPrivateHistory', targetUser);
+      });
+    });
+
     socket.on('connected', (user) => {
       userId = user.userId;
       nickname = user.nickname;
@@ -125,8 +133,7 @@
     });
 
     socket.on('userLoggedIn', (user) => {
-      const { userId, nickname } = user;
-      createOnlineUser(userId, nickname)
+      createOnlineUser(user)
     });
 
     socket.on('userLoggedOff', (userId) => {
@@ -144,21 +151,22 @@
       onlineUser.innerText = nickname;
     });
 
+    socket.on('publicHistory', (msgs) => {
+      messagesUl.innerHTML = '';
+      msgs.forEach((msg) => {
+        const { timestamp, nickname, chatMessage } = msg;
+        createMessage(`${timestamp} - ${nickname}: ${chatMessage}`);
+      });
+    });
+
     socket.on('privateHistory', (msgs) => {
       messagesUl.innerHTML = '';
       if (msgs.length) {
         msgs.forEach((msg) => {
           const { timestamp, nickname, chatMessage } = msg;
-          createMessage()
+          createMessage(`${timestamp} - ${nickname}(private): ${chatMessage}`)
         });
       }
-    });
-
-    socket.on('publicHistory', (items) => {
-      messagesUl.innerHTML = '';
-      items.forEach((item) => {
-        createMessage(`${item.date} - ${item.nickname}: ${item.chatMessage}`);
-      });
     });
   </script>
 </body>

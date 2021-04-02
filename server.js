@@ -23,7 +23,7 @@ app.set('views', './views');
 const onlineUsers = [];
 
 app.get('/', async (_req, res) => {
-  const messages = await getAllMessages({ targetUser: { $ne: null } });
+  const messages = await getAllMessages({ targetUser: null });
   res.status(200).render('index', { onlineUsers, messages });
 });
 
@@ -56,10 +56,8 @@ io.on('connection', (socket) => {
     const msgString = `${timestamp} - ${msg.nickname}${isPrivate}: ${msg.chatMessage}`;
 
     await addMessage({ ...msg, timestamp });
-    if (isPrivate !== '') {
-      console.log(`User ${msg.userId} PV ${msg.targetUser}`);
-      io.to(msg.targetUser).to(msg.userId).emit('message', msgString);
-    } else io.emit('message', msgString);
+    if (isPrivate !== '') io.to(msg.targetUser).to(msg.userId).emit('message', msgString);
+    else io.emit('message', msgString);
   });
 
   socket.on('nicknameChange', (user) => {
@@ -67,7 +65,7 @@ io.on('connection', (socket) => {
     const index = onlineUsers.findIndex((user_) => user_.userId === user.userId);
     const onlineUser = onlineUsers[index];
 
-    console.log(`User ${user.userId} changed nickname from ${onlineUser.nickname} para ${user.nickname}.`);
+    console.log(`User ${user.userId} changed nickname from ${onlineUser.nickname} to ${user.nickname}.`);
     onlineUser.nickname = user.nickname;
     io.emit('nicknameChanged', onlineUser);
   });
@@ -78,12 +76,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getPrivateHistory', async (targetUser) => {
-    const messages = await getAllMessages({ targetUser });
-    const privateMessages = messages.reduce((array, msg) => {
-      if (msg.targetUser && (msg.targetUser === targetUser || msg.userId === targetUser)) array.push(msg);
-      return array;
-    }, []);
-    socket.emit('privateHistory', privateMessages);
+    const query = {
+      targetUser: { $ne: null },
+      $or: [{ targetUser }, { userId: targetUser }],
+    };
+    const messages = await getAllMessages(query);
+    socket.emit('privateHistory', messages);
   });
 });
 
