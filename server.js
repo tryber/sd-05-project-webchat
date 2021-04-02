@@ -61,7 +61,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('nicknameChange', (user) => {
-    console.log(onlineUsers);
     const index = onlineUsers.findIndex((user_) => user_.userId === user.userId);
     const onlineUser = onlineUsers[index];
 

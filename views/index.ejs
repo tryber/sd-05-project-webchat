@@ -24,12 +24,12 @@
     <div class="online-users container">
       <ul id="online-users">
         <% onlineUsers.forEach(({userId, nickname})=> { %>
-          <li id="user-<%=userId%>" data-testid="online-user">
-            <%=nickname%>
+          <div class="online-user container">
+            <li id="user-<%=userId%>" data-testid="online-user"><%=nickname%></li>
             <button id="<%=userId%>" class="private-button" data-testid="private" target="<%=userId%>">
               Private
             </button>
-          </li>
+          </div>
         <%}) %>
       </ul>
     </div>
@@ -70,11 +70,14 @@
     };
 
     const createOnlineUser = (user) => {
-      const userLi = document.createElement('li');
-      userLi.setAttribute('data-testid', 'online-user');
-      userLi.id = `user-${user.userId}`;
-      userLi.innerText = user.nickname;
-      messagesUl.appendChild(userLi);
+      const userDiv = document.createElement('div');
+      userDiv.className = 'online-user';
+
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.id = `user-${user.userId}`;
+      li.innerText = user.nickname;
+      messagesUl.appendChild(li);
 
       const privateButton = document.createElement('button');
       privateButton.setAttribute('type', 'button');
@@ -85,12 +88,14 @@
         socket.emit('getPrivateHistory', targetUser);
       });
 
+      userDiv.append(li);
+
       if (user.userId === userId) {
-        onlineUsers.prepend(userLi);
+        onlineUsers.prepend(userDiv);
       }
       else {
-        userLi.append(privateButton);
-        onlineUsers.append(userLi);
+        userDiv.append(privateButton);
+        onlineUsers.append(userDiv);
       }
     };
 
