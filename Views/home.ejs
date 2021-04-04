@@ -35,10 +35,11 @@
             <button data-testid="public" id="publicBtn">Public Chat</button>
             <p>Usuários Online</p>
             <ul id="onlineUsersList" data-testid="nickname-box">
-              <% if (onlineUsers.length > 0) {%>
-                <% onlineUsers.forEach((user) => { %>
+              <% console.log(onlineUsers) %> 
+              <% if (onlineUsers) {%>
+                <% Object.values(onlineUsers).forEach((user) => { %>
                   <div>
-                    <li data-testid="online-user" class="onlineUser" id="<%= user[1] %>" ><%= user[0] %></li>
+                    <li data-testid="online-user" class="onlineUser" id="<%= user.id %>" ><%= user.name %></li>
                     <button data-testid="private" class="pvt-btn">Privado</button>
                   </div>
                 <% }) %>  
@@ -74,7 +75,6 @@
       to = null
       client.emit('getPublicMessages', {});
     });
-console.log(privateBtns)
     privateBtns.forEach(button => {
       button.addEventListener('click', (event) => {
         console.log(event.target.parentNode.firstChild.nextSibling.innerHTML)
@@ -106,14 +106,25 @@ console.log(privateBtns)
       chat.innerText = '';
       messages.forEach((message) => {
         const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message')
         li.innerText = message;
         chat.appendChild(li);
       })
-    })
+      });
+      
+    // client.on('getPublicMessages', ({ messages }) => {
+    //   chat.innerText = '';
+    //   messages.forEach((message) => {
+    //     const li = document.createElement('li');
+    //     li.setAttribute('data-testid', 'message')
+    //     li.innerText = message;
+    //     chat.appendChild(li);
+    //   })
+    // })
 
     client.on('userDisconnected', ({name, id}) => {
       const userElement = document.getElementById(`${id}`).parentNode;
-      console.log(userElement);
+      console.log('aqui', userElement);
       userElement.remove();
     })
 
@@ -132,6 +143,7 @@ console.log(privateBtns)
       chat.innerText='';
       messages.forEach((message) => {
         const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message')
         li.innerText = message;
         chat.appendChild(li);
       })
@@ -144,31 +156,60 @@ console.log(privateBtns)
       onlineDisplay.innerHTML = name;
     });
 
-    client.on('newUserConnected', ({name, id, onlineUsers}) => {
-
-      const div = document.createElement('div')
+    client.on('updateOnlineUsers', ({name, id: idParam, onlineUsers}) => {
+      onlineUsersList.innerText = '';
+      const usersArray = Object.values(onlineUsers);
+      usersArray.forEach((user) => {
+        const div = document.createElement('div')
         const li = document.createElement('li');
         const btnPrivate = document.createElement('button');
         btnPrivate.innerHTML = 'Privado';
         btnPrivate.setAttribute('data-testid', 'private');
         btnPrivate.setAttribute('class', 'pvt-btn');
         li.setAttribute('data-testid', 'online-user');
-        li.setAttribute('id', `${id}`);
+        li.setAttribute('id', `${user.id}`);
         li.setAttribute('class', 'onlineUser');
         btnPrivate.addEventListener('click', () => {
-            to = name;
+            to = user.name;
             client.emit('getPrivateHistory', {nickname, to})
         });
-        if (name === nickname) {
-          li.innerHTML = name;
+        if (user.name === nickname) {
+          li.innerHTML = user.name;
           div.appendChild(li)
           onlineUsersList.prepend(div);
         } else {
-          li.innerHTML = name;
+          li.innerHTML = user.name;
           div.appendChild(li);
           div.appendChild(btnPrivate);
           onlineUsersList.appendChild(div);
         }
-      });
+      })
+    })
+    
+    client.on('newUserConnected', ({name, id: idParam, onlineUsers}) => {
+        const div = document.createElement('div')
+          const li = document.createElement('li');
+          const btnPrivate = document.createElement('button');
+          btnPrivate.innerHTML = 'Privado';
+          btnPrivate.setAttribute('data-testid', 'private');
+          btnPrivate.setAttribute('class', 'pvt-btn');
+          li.setAttribute('data-testid', 'online-user');
+          li.setAttribute('id', `${id}`);
+          li.setAttribute('class', 'onlineUser');
+          btnPrivate.addEventListener('click', () => {
+              to = name;
+              client.emit('getPrivateHistory', {nickname, to})
+          });
+          if (name === nickname) {
+            li.innerHTML = name;
+            div.appendChild(li)
+            onlineUsersList.prepend(div);
+          } else {
+            li.innerHTML = name;
+            div.appendChild(li);
+            div.appendChild(btnPrivate);
+            onlineUsersList.appendChild(div);
+          }
+    });
   </script>
 </html>

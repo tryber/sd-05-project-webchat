@@ -1,7 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 
-const onlineUsers = [];
+const onlineUsers = {};
 
 const PORT = process.env.PORT || 3000;
 
@@ -59,29 +59,22 @@ const mongoConnection = require('./Models/mongoDBModel');
 io.on('connection', async (socket) => {
   const { id } = socket;
   let name = parseInt(Math.random() * 100000, 10).toString();
-  onlineUsers.push([name, id]);
+  onlineUsers[id] = { name, id };
 
   socket.emit('connected', { id, name });
   io.emit('greeting', { name });
-  io.emit('newUserConnected', { name, id });
+  io.emit('newUserConnected', { name, id, onlineUsers });
   console.log(onlineUsers);
   socket.on('disconnect', () => {
-    onlineUsers.forEach((user, index) => {
-      if (user[0] === name && user[1] === id) {
-        onlineUsers.splice(index, 1);
-      }
-    });
+    delete onlineUsers[id];
     io.emit('userDisconnected', { name, id });
+    io.emit('updateOnlineUsers', { onlineUsers });
   });
-  socket.on('nameChange', ({ id: idParam, input, nickname }) => {
-    onlineUsers.forEach((user, index) => {
-      if (user[0] === nickname && user[1] === idParam) {
-        onlineUsers.splice(index, 1);
-      }
-    });
-    onlineUsers.push([input, idParam]);
+  socket.on('nameChange', ({ id: idParam, input }) => {
+    onlineUsers[idParam].name = input;
     name = input;
     io.emit('nameChange', { name: input, id: idParam });
+    io.emit('updateOnlineUsers', { onlineUsers });
   });
   socket.on('getPublicMessages', async () => {
     const messages = await getMessages();
@@ -114,13 +107,14 @@ io.on('connection', async (socket) => {
       );
     } else {
       let idTo;
-      onlineUsers.forEach((user, index) => {
-        if (user[0] === to) {
-          const indexOne = 1;
-          const buffer = onlineUsers[index];
-          idTo = buffer[indexOne];
+      const arr = Object.values(onlineUsers);
+      console.log('aqui1', arr);
+      arr.forEach((user) => {
+        if (user.name === to) {
+          idTo = user.id;
         }
       });
+
       socket.emit(
         'message',
         formatMessageToFront(formatMessage(nameParam, to)(chatMessage), true),
@@ -136,8 +130,7 @@ io.on('connection', async (socket) => {
 });
 app.get('/', async (req, res) => {
   const messages = await getMessages();
-  const outraVar = onlineUsers;
-  return res.render('home', { messages, onlineUsers: outraVar });
+  return res.render('home', { messages, onlineUsers });
 });
 // rodando o servidor
 server.listen(PORT, () => {

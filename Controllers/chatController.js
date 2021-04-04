@@ -35,7 +35,7 @@ const run = (...server) => async ({ mongoConnection }, onlineUsers) => {
   io.on('connection', async (socket) => {
     const { id } = socket;
     let name = parseInt(Math.random() * 100000, 10);
-    onlineUsers.push([name, id]);
+    onlineUsers.unshift([name, id]);
     console.log(name, id);
     socket.emit('connected', { id, name });
     io.emit('greeting', { name });
