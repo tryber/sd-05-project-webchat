@@ -4,7 +4,7 @@ const getAll = async () => {
   const dbs = await dbConnection();
   return dbs.collection('messages').find({ destiny: { $exists: false } }).toArray();
 };
-
+// VAI
 const createMessage = async (message) => {
   const dbs = await dbConnection();
   return dbs.collection('messages').insertOne({ message });
