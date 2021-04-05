@@ -83,6 +83,11 @@ io.on('connection', (socket) => {
     // io.emit responde para todos os sockets
     // socket.broadcast.emit responde para todos os sockets menos ele mesmo
   });
+
+  socket.on('privateHistory', async ({ origin, destiny }) => {
+    const pvtMessages = await messageModel.getPvt(origin, destiny);
+    io.to(socket.id).emit('myPvtHist', pvtMessages);
+  });
 });
 
 server.listen(3000, () => console.log('msn na porta 3000'));

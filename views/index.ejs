@@ -24,7 +24,7 @@
 
     <input type="text" data-testid="nickname-box" id="nickname-box" />
 
-    <ul id="chatList" data-testid="message">
+    <ul id="chatList">
       <% allMessages.forEach(({ message }) => { %>
       <li data-testid="message"><%=message%></li>
       <% }) %>
@@ -95,14 +95,14 @@
         privateBtn.addEventListener('click', async () => {
           destiny = user.id;
           chat.innerHTML = '';
-          const msgHistory = await fetch(
-            `http://localhost:3000/${atualUser[0].id}/${user.id}`,
-          ).then((e) => e.json());
-          msgHistory.forEach((pvt) => addSms(pvt.message));
+          socket.emit('privateHistory', { origin: atualUser[0].id, destiny: user.id });
         });
         userList.appendChild(privateBtn);
-        // <button id="private-btn" data-testid="private">Direct</button>
       });
+    });
+    
+    socket.on('myPvtHist', (msgHistory) => {
+      msgHistory.forEach((pvt) => addSms(pvt.message));
     });
   </script>
 </html>
