@@ -34,7 +34,6 @@ let users = [];
 app.get('/', async (_req, res) => {
   // ejs
   const allMessages = await messageModel.getAll();
-  console.log(allMessages);
   res.status(200).render('index', { contador: `Convidado ${contador}`, users, allMessages });
   contador += 1;
 });
@@ -42,7 +41,6 @@ app.get('/', async (_req, res) => {
 app.get('/:origin/:destiny', async (req, res) => {
   const { origin, destiny } = req.params;
   const pvtMessages = await messageModel.getPvt(origin, destiny);
-  console.log(pvtMessages);
   res.status(200).json(pvtMessages);
 });
 
@@ -52,10 +50,8 @@ app.get('/public', async (_req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Alguém conectou');
   socket.on('connected', ({ nickname }) => {
     users.push({ id: socket.id, nickname });
-    console.log(users);
     io.emit('updateUsers', { users });
   });
 
@@ -66,7 +62,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('Alguém desconectou');
     users = users.filter((user) => user.id !== socket.id);
     io.emit('updateUsers', { users });
   });
