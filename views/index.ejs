@@ -1,79 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-
-  <h1>Olá</h1>
-  <div>
-
-    <h2>Usuário:</h2>
-    <ul id="userList">
-      <li data-testid="online-user"><%=contador%></li>
-      <% users.forEach((user) => { %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Olá</h1>
+    <div>
+      <h2>Usuário:</h2>
+      <ul id="userList">
+        <li data-testid="online-user"><%=contador%></li>
+        <% users.forEach((user) => { %>
         <li data-testid="online-user"><%=user.nickname%></li>
+        <button id="private-btn" data-testid="private">Direct</button>
+        <% }) %>
+      </ul>
+      <button id="public" data-testid="public">Public</button>
+    </div>
+
+    <button data-testid="nickname-save" id="nickname-save">Trocar nickname</button>
+
+    <input type="text" data-testid="nickname-box" id="nickname-box" />
+
+    <ul id="chatList" data-testid="message">
+      <% allMessages.forEach(({ message }) => { %>
+      <li data-testid="message"><%=message%></li>
       <% }) %>
     </ul>
+    <button id="send-button" data-testid="send-button">Enviar mensagem</button>
+    <input type="text" id="message-box" data-testid="message-box" />
+  </body>
 
-  </div>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
-  <button data-testid="nickname-save" id="nickname-save">Trocar nickname</button>
+  <script>
+    let destiny = '';
+    const chat = document.getElementById('chatList');
+    const socket = io('http://localhost:3000');
+    let nickname = '<%=contador%>';
+    const userList = document.getElementById('userList');
+    const nickButton = document.getElementById('nickname-save');
+    const nickInput = document.getElementById('nickname-box');
 
-  <input type="text" data-testid="nickname-box" id="nickname-box">
-
-  <ul id="chatList" data-testid="message">
-    <% allMessages.forEach(({ message }) => { %>
-      <li data-testid="message"><%=message%></li>
-    <% }) %>
-  </ul>
-  <button id="send-button" data-testid="send-button">Enviar mensagem</button>
-  <input type="text" id="message-box" data-testid="message-box">
-
-</body>
-
-<script src="http://localhost:3000/socket.io/socket.io.js"></script>
-
-<script>
-  const socket = io('http://localhost:3000');
-  let nickname = '<%=contador%>';
-  const userList = document.getElementById('userList');
-  const nickButton = document.getElementById('nickname-save');
-  const nickInput = document.getElementById('nickname-box');
-  const chat = document.getElementById('chatList');
-  nickButton.addEventListener('click', () => {
-    nickname = nickInput.value;
-    socket.emit('nickChange', { nickname });
-  });
-
-  const messageButton = document.getElementById('send-button');
-  const messageBox = document.getElementById('message-box');
-  const messageList = document.getElementById('chatList');
-  messageButton.addEventListener('click', () => {
-    socket.emit('message', ({ chatMessage: messageBox.value, nickname }))
-  });
-  socket.on('message', (sms) => {
-    const chatItem = document.createElement('li');
+    const addSms = (sms) => {
+      const chatItem = document.createElement('li');
       chatItem.innerHTML = sms;
       chatItem.setAttribute('data-testid', 'message');
       chat.appendChild(chatItem);
-  });
+    };
 
-  socket.emit('connected', { nickname });
-  socket.on('updateUsers', ({ users }) => {
-    userList.innerHTML = '';
-    const atualUser = users.filter((user) => user.nickname === nickname);
-    const otherUsers = users.filter((user) => user.nickname !== nickname);
-    [...atualUser, ...otherUsers].forEach(user => {
-      const listItem = document.createElement('li');
-      listItem.innerHTML = user.nickname;
-      listItem.setAttribute('data-testid', 'online-user');
-      userList.appendChild(listItem);
+    const publicBtn = document.getElementById('public');
+    publicBtn.addEventListener('click', async () => {
+      destiny = '';
+      chat.innerHTML = '';
+      const msgHistory = await fetch(`http://localhost:3000/public`).then((e) => e.json());
+      msgHistory.forEach((public) => addSms(public.message));
     });
-  });
-</script>
 
+    nickButton.addEventListener('click', () => {
+      nickname = nickInput.value;
+      socket.emit('nickChange', { nickname });
+    });
+
+    // const privateButton = document.createElement('button');
+    // privateButton.innerText = 'direct';
+    // privateButton.setAttribute('data-testid', 'private');
+
+    const messageButton = document.getElementById('send-button');
+    const messageBox = document.getElementById('message-box');
+    const messageList = document.getElementById('chatList');
+    messageButton.addEventListener('click', () => {
+      socket.emit('message', { chatMessage: messageBox.value, nickname, destiny });
+    });
+
+    socket.on('message', addSms);
+
+    socket.emit('connected', { nickname });
+    socket.on('updateUsers', ({ users }) => {
+      userList.innerHTML = '';
+      const atualUser = users.filter((user) => user.nickname === nickname);
+      const otherUsers = users.filter((user) => user.nickname !== nickname);
+      [...atualUser, ...otherUsers].forEach((user) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = user.nickname;
+        listItem.setAttribute('data-testid', 'online-user');
+        userList.appendChild(listItem);
+
+        if (user.id === atualUser[0].id) return;
+        const privateBtn = document.createElement('button');
+        privateBtn.innerHTML = 'Direct';
+        privateBtn.setAttribute('data-testid', 'private');
+        privateBtn.addEventListener('click', async () => {
+          destiny = user.id;
+          chat.innerHTML = '';
+          const msgHistory = await fetch(
+            `http://localhost:3000/${atualUser[0].id}/${user.id}`,
+          ).then((e) => e.json());
+          msgHistory.forEach((pvt) => addSms(pvt.message));
+        });
+        userList.appendChild(privateBtn);
+        // <button id="private-btn" data-testid="private">Direct</button>
+      });
+    });
+  </script>
 </html>

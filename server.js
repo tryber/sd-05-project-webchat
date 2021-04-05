@@ -31,11 +31,24 @@ let contador = 0;
 
 let users = [];
 
-app.get('/', async (_req, res) => { // ejs
+app.get('/', async (_req, res) => {
+  // ejs
   const allMessages = await messageModel.getAll();
   console.log(allMessages);
   res.status(200).render('index', { contador: `Convidado ${contador}`, users, allMessages });
   contador += 1;
+});
+
+app.get('/:origin/:destiny', async (req, res) => {
+  const { origin, destiny } = req.params;
+  const pvtMessages = await messageModel.getPvt(origin, destiny);
+  console.log(pvtMessages);
+  res.status(200).json(pvtMessages);
+});
+
+app.get('/public', async (_req, res) => {
+  const publictMessages = await messageModel.getAll();
+  res.status(200).json(publictMessages);
 });
 
 io.on('connection', (socket) => {
@@ -58,11 +71,18 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', { users });
   });
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname, destiny }) => {
     const agora = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
-    const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
-    await messageModel.createMessage(newMessage);
-    io.emit('message', newMessage);
+    if (!destiny) {
+      const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
+      await messageModel.createMessage(newMessage);
+      io.emit('message', newMessage);
+    } else {
+      const newMessage = `${agora} (private) - ${nickname}: ${chatMessage}`;
+      await messageModel.createMessagePvt(newMessage, destiny, socket.id);
+
+      io.to(destiny).to(socket.id).emit('message', newMessage);
+    }
     // socket.broadcast.emit('RESPOSTA', 'BLOQUEADO'+num)
     // socket.emit responde apenas para ele mesmo
     // io.emit responde para todos os sockets
