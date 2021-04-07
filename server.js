@@ -35,11 +35,17 @@ io.on('connection', (socket) => {
     io.emit('refreshUsers', { usuarios });
     console.log('Alguém caiu');
   });
-  socket.on('message', async ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ nickname, target, chatMessage }) => {
     const agora = dateformat(new Date(), 'dd-mm-yyyy hh:MM:ss');
-    const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
-    await model.createMessage(newMessage);
-    io.emit('message', newMessage);
+    if (!target) {
+      const newMessage = `${agora} - ${nickname}: ${chatMessage}`;
+      await model.createMessage(newMessage);
+      io.emit('message', newMessage);
+    } else {
+      const newMessage = `${agora} (private) - ${nickname}: ${chatMessage}`;
+      await model.createMessage(newMessage);
+      io.to(target).to(socket.id).emit('message', newMessage);
+    }
   });
 });
 
@@ -51,13 +57,11 @@ let contador = 0;
 
 app.get('/', async (req, res) => {
   const allMessages = await model.getAll();
-  res
-    .status(200)
-    .render('index', {
-      contador: `convidado ${contador}`,
-      usuarios,
-      allMessages,
-    });
+  res.status(200).render('index', {
+    contador: `convidado ${contador}`,
+    usuarios,
+    allMessages,
+  });
   contador += 1;
 });
 

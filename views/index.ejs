@@ -16,6 +16,7 @@
         <li data-testid="online-user"><%=contador%></li>
         <%usuarios.forEach((usuario) => {%>
         <li data-testid="online-user"><%=usuario.nickname%></li>
+        <button data-testid="private">Privado</button>
         <%})%>
       </ul>
     </div>
@@ -31,6 +32,7 @@
   </body>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
+    let target = '';
     const socket = io('http://localhost:3000');
     let nickname = '<%=contador%>';
     const userList = document.getElementById('listUsers');
@@ -40,7 +42,7 @@
     const inputMessage = document.getElementById('message-box');
     const buttonChat = document.getElementById('button-chat');
     buttonChat.addEventListener('click', () => {
-      socket.emit('message', { nickname, chatMessage: inputMessage.value });
+      socket.emit('message', { nickname, target, chatMessage: inputMessage.value });
     });
     buttonNickname.addEventListener('click', () => {
       nickname = inputText.value;
@@ -58,6 +60,13 @@
         itemLi.innerHTML = usuario.nickname;
         itemLi.setAttribute('data-testid', 'online-user');
         userList.appendChild(itemLi);
+        const buttonPrivate = document.createElement('button');
+        buttonPrivate.innerHTML = 'private';
+        buttonPrivate.setAttribute('data-testid', 'private');
+        buttonPrivate.addEventListener('click', () => {
+          target = usuario.id;
+        })
+        userList.appendChild(buttonPrivate);
       });
     });
     socket.on('message', (torpedo) => {
