@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link type="text/css" href="../style.css" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  </head>
+  <body>
+    <ul id="list-users">
+      <li data-testid="online-user"><%=nick%></li>
+      <%Object.values(onlineUsers).forEach((user) => {%>
+      <li data-testid="online-user"><%=user.nickname%></li>
+      <%})%>
+    </ul>
+    <div id="messages" class="messages">
+      <%messages.forEach(({date, nickname, chatMessage}) => {%>
+      <p data-testid="message"><%=date%> - <%=nickname%>: <%=chatMessage%></p>
+      <%})%>
+    </div>
+    <form id="box">
+      <input id="nickname-box" data-testid="nickname-box" />
+      <button type="button" id="nickname-save" data-testid="nickname-save">SALVAR</button>
+      <input id="message-box" data-testid="message-box" />
+      <button type="submit" id="send-button" data-testid="send-button">ENVIAR</button>
+    </form>
+
+    <script type="text/javascript">
+      const socket = io('http://localhost:3000');
+      const myForm = document.querySelector('form#box');
+      const nicknameSave = document.querySelector('button#nickname-save');
+      let nickname = '<%=nick%>';
+      socket.emit('connected', nickname);
+
+      nicknameSave.addEventListener('click', function () {
+        nickname = document.querySelector('input#nickname-box').value;
+        socket.emit('updateUser', nickname);
+      });
+
+      myForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const message = document.querySelector('input#message-box').value;
+        socket.emit('message', { nickname, chatMessage: message });
+
+        document.querySelector('input#message-box').value = '';
+      });
+
+      socket.on('users', function (onlineUsers) {
+        const listUsers = document.querySelector('ul#list-users');
+        listUsers.innerHTML = `<li data-testid="online-user">${
+          onlineUsers[socket.id].nickname
+        }</li>`;
+        console.log('front', onlineUsers);
+        Object.values(onlineUsers).forEach((user) => {
+          if (user.id === socket.id) return;
+          const singleUser = document.createElement('li');
+          singleUser.setAttribute('data-testid', 'online-user');
+          singleUser.innerHTML = user.nickname;
+          listUsers.appendChild(singleUser);
+        });
+      });
+
+      socket.on('message', function (message) {
+        const msg = document.createElement('p');
+        msg.setAttribute('data-testid', 'message');
+        msg.innerHTML = message;
+        const messages = document.querySelector('div#messages');
+        messages.appendChild(msg);
+      });
+    </script>
+  </body>
+</html>
