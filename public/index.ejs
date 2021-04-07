@@ -33,7 +33,7 @@
         </ul>
       </div>
       <div id="chat-options">
-        <button id="public-button" disabled >Public</button>
+        <button id="public-button" disabled>Public</button>
       </div>
       <div id="forms">
         <form>
@@ -74,49 +74,27 @@
       const btnToSendMessage = document.getElementById('send');
       const publicButton = document.getElementById('public-button');
 
-      socket.emit('user connected', nickname);
-
-      socket.on('online users', (arrayOfUsers) => {
-        console.log(arrayOfUsers);
-        ulUsers.innerHTML = '';
-        const selfUser = arrayOfUsers.find((user) => user.userId === socket.id);
-        const otherUsers = arrayOfUsers.filter(
-          (user) => user.userId !== socket.id
-        );
-        console.log('ESTA PASSANDO NA LINHA 90');
-        const selfUserLi = document.createElement('li');
-        selfUserLi.innerHTML = selfUser.nickname;
-        selfUserLi.setAttribute('data-testid', 'online-user');
-        selfUserLi.setAttribute('id', selfUser.userId);
-        ulUsers.appendChild(selfUserLi);
-        otherUsers.forEach((user) => {
-          user.nickname;
-          const otherUserLi = document.createElement('li');
-          otherUserLi.setAttribute('data-testid', 'online-user');
-          otherUserLi.setAttribute('id', user.userId);
-          otherUserLi.innerHTML = user.nickname;
-          const privateButton = document.createElement('button');
-          privateButton.textContent = 'go private';
-          privateButton.id = user.userId;
-          privateButton.setAttribute('data-testid', 'private');
-          privateButton.addEventListener('click', () => {
-            target = user.userId;
-            chatMode = 'private';
-            publicButton.disabled = false;
-            privateButton.disabled = true;
-            chatBox.innerHTML = '';
-            privateMessages.forEach((message) => {
-              const li = document.createElement('li');
-              li.textContent = message;
-              li.setAttribute('data-testid', 'message');
-              chatBox.appendChild(li);
-            });
+      const privateChat = (id) => {
+        const privateButton = document.createElement('button');
+        privateButton.textContent = 'go private';
+        privateButton.id = id;
+        privateButton.setAttribute('data-testid', 'private');
+        privateButton.addEventListener('click', () => {
+          target = id;
+          chatMode = 'private';
+          publicButton.disabled = false;
+          privateButton.disabled = true;
+          chatBox.innerHTML = '';
+          privateMessages.forEach((message) => {
+            const li = document.createElement('li');
+            li.textContent = message;
+            li.setAttribute('data-testid', 'message');
+            chatBox.appendChild(li);
           });
-          console.log('LINHA 116', privateButton);
-          otherUserLi.appendChild(privateButton);
-          ulUsers.appendChild(otherUserLi);
+          return false;
         });
-      });
+        return privateButton;
+      };
 
       publicButton.addEventListener('click', () => {
         target = undefined;
@@ -142,6 +120,44 @@
         chatMessage = messageField.value;
         socket.emit('message', { nickname, chatMessage, target });
         messageField.value = '';
+      });
+
+      socket.emit('user connected', nickname);
+
+      socket.on('message history', (messages) => {
+        chatBox.innerHTML = '';
+        messages.forEach((message) => {
+          const li = document.createElement('li');
+          li.innerHTML = message.message;
+          li.setAttribute('data-testid', 'message');
+          chatBox.appendChild(li);
+          publicMessages.push(message.message);
+        });
+      });
+
+      socket.on('online users', (arrayOfUsers) => {
+        console.log(arrayOfUsers);
+        ulUsers.innerHTML = '';
+        const selfUser = arrayOfUsers.find((user) => user.userId === socket.id);
+        const otherUsers = arrayOfUsers.filter(
+          (user) => user.userId !== socket.id
+        );
+        console.log('ESTA PASSANDO NA LINHA 90');
+        const selfUserLi = document.createElement('li');
+        selfUserLi.innerHTML = selfUser.nickname;
+        selfUserLi.setAttribute('data-testid', 'online-user');
+        selfUserLi.setAttribute('id', selfUser.userId);
+        ulUsers.appendChild(selfUserLi);
+        otherUsers.forEach((user) => {
+          user.nickname;
+          const otherUserLi = document.createElement('li');
+          otherUserLi.setAttribute('data-testid', 'online-user');
+          otherUserLi.setAttribute('id', user.userId);
+          otherUserLi.innerHTML = user.nickname;
+          const pvtButton = privateChat(user.userId);
+          otherUserLi.appendChild(pvtButton);
+          ulUsers.appendChild(otherUserLi);
+        });
       });
 
       socket.on('message', (message, target, nickname) => {

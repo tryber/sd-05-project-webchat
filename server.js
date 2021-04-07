@@ -33,12 +33,14 @@ app.get('/', async (_req, res) => {
   console.log('LINHA 33 USERS ONLINE:', usersOnLine);
   const nickname = faker.name.findName();
   const allMessages = await getMessages();
+  console.log('ALL MESSAGES:', allMessages);
   res.status(200).render('index', { nickname, usersOnLine, allMessages });
 });
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
   const userId = socket.id;
+  const messageHistory = await getMessages();
 
   socket.on('user connected', (nickname) => {
     const users = { userId, nickname };
@@ -46,6 +48,8 @@ io.on('connection', async (socket) => {
     io.emit('online users', usersOnLine); // send to all users that are connected
     console.log('LINHA 50', usersOnLine);
   });
+
+  socket.emit('message history', messageHistory);
 
   socket.on('saveNickname', (nick) => {
     usersOnLine = usersOnLine.filter((user) => user.userId !== socket.id);
