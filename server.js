@@ -19,10 +19,8 @@ const model = require('./models/mensagem');
 let usuarios = [];
 
 io.on('connection', (socket) => {
-  console.log(socket.id);
   socket.on('connected', ({ nickname }) => {
     usuarios.push({ id: socket.id, nickname });
-    console.log(usuarios);
     io.emit('refreshUsers', { usuarios });
   });
   socket.on('changeNick', ({ nickname }) => {
