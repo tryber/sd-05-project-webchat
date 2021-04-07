@@ -33,7 +33,7 @@
         </ul>
       </div>
       <div id="chat-options">
-        <button>Public</button>
+        <button id="public-button" disabled >Public</button>
       </div>
       <div id="forms">
         <form>
@@ -60,7 +60,6 @@
       const socket = io();
       let userId = socket.id;
       let nickname = '<%= nickname %>';
-      let chatMessage;
       let target;
       let privateMessages = [];
       let publicMessages = [];
@@ -69,19 +68,18 @@
       // Query DOM
       const ulUsers = document.getElementById('users-online');
       const chatBox = document.getElementById('chatBox');
-      const nickField = document.getElementById('Nickname-field');
-      const messageField = document.getElementById('message-field');
+      let nickField = document.getElementById('Nickname-field');
+      let messageField = document.getElementById('message-field');
       const btnToSaveNickname = document.getElementById('save-nick');
       const btnToSendMessage = document.getElementById('send');
+      const publicButton = document.getElementById('public-button');
 
       socket.emit('user connected', nickname);
 
       socket.on('online users', (arrayOfUsers) => {
         console.log(arrayOfUsers);
         ulUsers.innerHTML = '';
-        const selfUser = arrayOfUsers.find(
-          (user) => user.userId === socket.id
-        );
+        const selfUser = arrayOfUsers.find((user) => user.userId === socket.id);
         const otherUsers = arrayOfUsers.filter(
           (user) => user.userId !== socket.id
         );
@@ -98,60 +96,77 @@
           otherUserLi.setAttribute('id', user.userId);
           otherUserLi.innerHTML = user.nickname;
           const privateButton = document.createElement('button');
-          privateButton.textContent = 'go private'
+          privateButton.textContent = 'go private';
           privateButton.id = user.userId;
           privateButton.setAttribute('data-testid', 'private');
           privateButton.addEventListener('click', () => {
-          target = user.userId;
-          chatMode = 'private';
-          chatBox.innerHTML = '';
-          privateMessages.forEach((message) => {
-            const li = document.createElement('li');
-            li.textContent = message;
-            li.setAttribute('data-testid', 'message');
-            chatBox.appendChild(li);
+            target = user.userId;
+            chatMode = 'private';
+            publicButton.disabled = false;
+            privateButton.disabled = true;
+            chatBox.innerHTML = '';
+            privateMessages.forEach((message) => {
+              const li = document.createElement('li');
+              li.textContent = message;
+              li.setAttribute('data-testid', 'message');
+              chatBox.appendChild(li);
+            });
           });
-        });
           console.log('LINHA 116', privateButton);
           otherUserLi.appendChild(privateButton);
           ulUsers.appendChild(otherUserLi);
         });
       });
 
+      publicButton.addEventListener('click', () => {
+        target = undefined;
+        chatMode = 'public';
+        publicButton.disabled = true;
+        chatBox.innerHTML = '';
+        publicMessages.forEach((message) => {
+          const li = document.createElement('li');
+          li.textContent = message;
+          li.setAttribute('data-testid', 'message');
+          chatBox.appendChild(li);
+        });
+      });
+
       btnToSaveNickname.addEventListener('click', function () {
         nickname = nickField.value;
         socket.emit('saveNickname', nickname);
+        nickField.value = '';
       });
 
-      btnToSendMessage.addEventListener('click', function () {
-        const chatMessage = messageField.value;
+      btnToSendMessage.addEventListener('click', function (e) {
+        e.preventDefault();
+        chatMessage = messageField.value;
         socket.emit('message', { nickname, chatMessage, target });
+        messageField.value = '';
       });
 
       socket.on('message', (message, target, nickname) => {
         if (!target && !nickname && chatMode === 'public') {
-        const li = document.createElement('li');
-        li.textContent = message;
-        li.setAttribute('data-testid', 'message');
-        chatBox.appendChild(li);
-        return publicMessages.push(message);
-        } 
+          const li = document.createElement('li');
+          li.textContent = message;
+          li.setAttribute('data-testid', 'message');
+          chatBox.appendChild(li);
+          return publicMessages.push(message);
+        }
         if (!target && !nickname && chatMode !== 'public') {
-        return publicMessages.push(message);
-        } 
+          return publicMessages.push(message);
+        }
         if (target && nickname && chatMode === 'private') {
-        const li = document.createElement('li');
-        li.textContent = message;
-        li.setAttribute('data-testid', 'message');
-        chatBox.appendChild(li);
-        return privateMessages.push(message);
+          const li = document.createElement('li');
+          li.textContent = message;
+          li.setAttribute('data-testid', 'message');
+          chatBox.appendChild(li);
+          return privateMessages.push(message);
         }
         if (target && nickname && chatMode !== 'private') {
-        return privateMessages.push(message);
+          return privateMessages.push(message);
         }
         return;
       });
-
     </script>
   </body>
 </html>
