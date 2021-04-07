@@ -19,14 +19,15 @@
         <button data-testid="private">Privado</button>
         <%})%>
       </ul>
+      <button id="public" data-testid="public">Público</button>
     </div>
     <div>
       <input data-testid="message-box" id="message-box" type="text" />
       <button id="button-chat" data-testid="send-button">Enviar</button>
       <ul id="chat">
         <%allMessages.forEach((message) => {%>
-            <li data-testid="message"><%=message.message%></li>
-            <%})%>
+        <li data-testid="message"><%=message.message%></li>
+        <%})%>
       </ul>
     </div>
   </body>
@@ -41,8 +42,18 @@
     const chat = document.getElementById('chat');
     const inputMessage = document.getElementById('message-box');
     const buttonChat = document.getElementById('button-chat');
+    const buttonPublic = document.getElementById('public');
+    buttonPublic.addEventListener('click', () => {
+      target = '';
+      chat.innerHTML = '';
+      socket.emit('public');
+    });
     buttonChat.addEventListener('click', () => {
-      socket.emit('message', { nickname, target, chatMessage: inputMessage.value });
+      socket.emit('message', {
+        nickname,
+        target,
+        chatMessage: inputMessage.value,
+      });
     });
     buttonNickname.addEventListener('click', () => {
       nickname = inputText.value;
@@ -55,25 +66,36 @@
       const outrosUsuarios = usuarios.filter(
         (user) => user.nickname !== nickname
       );
-      [...dono, ...outrosUsuarios].forEach((usuario) => {
+      [...dono, ...outrosUsuarios].forEach((usuario, index) => {
         const itemLi = document.createElement('li');
         itemLi.innerHTML = usuario.nickname;
         itemLi.setAttribute('data-testid', 'online-user');
         userList.appendChild(itemLi);
+        if (index === 0) {
+          return;
+        }
         const buttonPrivate = document.createElement('button');
         buttonPrivate.innerHTML = 'private';
         buttonPrivate.setAttribute('data-testid', 'private');
         buttonPrivate.addEventListener('click', () => {
           target = usuario.id;
-        })
+          chat.innerHTML = '';
+          socket.emit('private', { target });
+        });
         userList.appendChild(buttonPrivate);
       });
     });
-    socket.on('message', (torpedo) => {
+    const loadingMessage = (torpedo) => {
       const itemLi = document.createElement('li');
       itemLi.innerHTML = torpedo;
       itemLi.setAttribute('data-testid', 'message');
       chat.appendChild(itemLi);
+    };
+    socket.on('message', loadingMessage);
+    socket.on('historico', (historico) => {
+      historico.forEach((msg) => {
+        loadingMessage(msg.message);
+      });
     });
   </script>
 </html>

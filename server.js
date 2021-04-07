@@ -43,9 +43,17 @@ io.on('connection', (socket) => {
       io.emit('message', newMessage);
     } else {
       const newMessage = `${agora} (private) - ${nickname}: ${chatMessage}`;
-      await model.createMessage(newMessage);
+      await model.createPrivateMessage(newMessage, target, socket.id);
       io.to(target).to(socket.id).emit('message', newMessage);
     }
+  });
+  socket.on('private', async ({ target }) => {
+    const historico = await model.getPrivate(target, socket.id);
+    io.to(target).to(socket.id).emit('historico', historico);
+  });
+  socket.on('public', async () => {
+    const historico = await model.getAll();
+    io.to(socket.id).emit('historico', historico);
   });
 });
 
