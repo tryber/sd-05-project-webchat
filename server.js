@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
-  }),
+  })
 );
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,14 +29,12 @@ app.use(express.json());
 
 let usersOnLine = [];
 
-
 app.get('/', async (_req, res) => {
   console.log('LINHA 33 USERS ONLINE:', usersOnLine);
   const nickname = faker.name.findName();
   const allMessages = await getMessages();
   res.status(200).render('index', { nickname, usersOnLine, allMessages });
 });
-
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
@@ -60,10 +58,10 @@ io.on('connection', async (socket) => {
   socket.on('message', async ({ nickname, chatMessage, target }) => {
     const realTime = moment(new Date()).format('DD-MM-YYYY hh:mm:ss');
     if (!target) {
-    const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
-    console.log('server L64', msgFormated);
-    await saveMessages(msgFormated);
-    io.emit('message', msgFormated);
+      const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
+      console.log('server L64', msgFormated);
+      await saveMessages(msgFormated);
+      io.emit('message', msgFormated);
     }
     const msgFormated = `${realTime} (private message) - ${nickname}: ${chatMessage}`;
     io.to(target).to(socket.id).emit('message', msgFormated, target, nickname);
@@ -73,8 +71,6 @@ io.on('connection', async (socket) => {
     usersOnLine = usersOnLine.filter((user) => user.userId !== socket.id);
     io.emit('online users', usersOnLine);
   });
-
 });
-
 
 server.listen(3000, () => console.log('Listening on port 3000'));
