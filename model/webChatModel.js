@@ -9,7 +9,6 @@ async function saveMessages(message) {
 async function getMessages() {
   const db = await connection();
   const allMessages = await db.collection('messages').find({}).toArray();
-  console.log('aqui no model:', allMessages);
   return allMessages;
 }
 

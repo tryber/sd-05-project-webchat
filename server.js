@@ -29,56 +29,52 @@ app.use(express.json());
 
 let usersOnLine = [];
 
+
 app.get('/', async (_req, res) => {
+  console.log('LINHA 33 USERS ONLINE:', usersOnLine);
   const nickname = faker.name.findName();
   const allMessages = await getMessages();
-  console.log('LINHA 32', usersOnLine);
   res.status(200).render('index', { nickname, usersOnLine, allMessages });
 });
+
 
 io.on('connection', async (socket) => {
   console.log('Made socket connection', socket.id);
   const userId = socket.id;
 
-  socket.on('connected', (nickname) => {
+  socket.on('user connected', (nickname) => {
     const users = { userId, nickname };
     usersOnLine.push(users);
-    io.emit('userConnected', usersOnLine); // send to all users that are connected
-    console.log(usersOnLine);
+    io.emit('online users', usersOnLine); // send to all users that are connected
+    console.log('LINHA 50', usersOnLine);
   });
 
   socket.on('saveNickname', (nick) => {
     usersOnLine = usersOnLine.filter((user) => user.userId !== socket.id);
     usersOnLine.push({ userId: socket.id, nickname: nick });
-    io.emit('userConnected', usersOnLine);
-    console.log('Line 51 - usersOnLine:', usersOnLine);
+    io.emit('online users', usersOnLine);
+    console.log('Line 57 - usersOnLine:', usersOnLine);
   });
 
   // Handle chat event
-  socket.on('message', async ({ nickname, chatMessage }) => {
-    console.log('LINHA 57 ', chatMessage, nickname);
+  socket.on('message', async ({ nickname, chatMessage, target }) => {
     const realTime = moment(new Date()).format('DD-MM-YYYY hh:mm:ss');
+    if (!target) {
     const msgFormated = `${realTime} - ${nickname}: ${chatMessage}`;
     console.log('server L64', msgFormated);
-    io.emit('message', msgFormated);
     await saveMessages(msgFormated);
+    io.emit('message', msgFormated);
+    }
+    const msgFormated = `${realTime} (private message) - ${nickname}: ${chatMessage}`;
+    io.to(target).to(socket.id).emit('message', msgFormated, target, nickname);
   });
-
-  // socket.on('private-message', (anotherSocketId, msg) => {
-  //   socket.to(anotherSocketId).emit('private message', socket.id, msg);
-  // });
 
   socket.on('disconnect', () => {
     usersOnLine = usersOnLine.filter((user) => user.userId !== socket.id);
-    io.emit('userConnected', usersOnLine);
+    io.emit('online users', usersOnLine);
   });
 
-  // socket.emit('privateChat', nickName);
-
-  // socket.on('typing', function (id) {
-  //   const currentUser = usersOnLine.find((user) => user.userId === id);
-  //   socket.broadcast.emit('typing', currentUser);
-  // });
 });
+
 
 server.listen(3000, () => console.log('Listening on port 3000'));
