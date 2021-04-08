@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>PR Gatinho Manhoso</h1>
+    <div>
+      <input data-testid="nickname-box" id="nickname-box" />
+      <button data-testid="nickname-save" id="nickname-save">Salvar</button>
+      <ul id="list-users">
+        <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
+        <%Object.values(onlineUsers).forEach((user) =>{%>
+        <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
+        <button id="sussurrar" data-testid="private">susurrar</button>
+        <%})%>
+      </ul>
+    </div>
+    <div>
+      <input data-testid="message-box" id="message-box" />
+      <button data-testid="send-button" id="message-send-button">Enviar</button>
+      <button id="public" data-testid="public">Publico</button>
+    </div>
+    <ul id="chat-box">
+      <%messages.forEach(({date, nickname, chatMessage}) => {%>
+      <li data-testid="message"><%=date%> - <%=nickname%>: <%=chatMessage%></li>
+      <%})%>
+    </ul>
+  </body>
+  <script>
+    const socket = io('http://localhost:3000/');
+    const messageBox = document.getElementById('message-box');
+    const messageSendButton = document.getElementById('message-send-button');
+    const userMe = document.getElementById('userMe');
+    const userButtonSave = document.getElementById('nickname-save');
+    const userInputSave = document.getElementById('nickname-box');
+    const chatBox = document.getElementById('chat-box');
+    const onlineUsers = document.getElementById('online-user');
+    const listUsers = document.getElementById('list-users');
+    const publicButton = document.getElementById('public');
+    publicButton.addEventListener('click', async () => {
+      target = '';
+      chatBox.innerHTML = '';
+      const messagePublics = await fetch(
+        'http://localhost:3000/chat/',
+      ).then((res) => res.json());
+      messagePublics.forEach(({ date, nickname, chatMessage }) => {
+        const createList = document.createElement('li');
+        const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
+        createList.innerHTML = stringNewMessage;
+        createList.setAttribute('data-testid', 'message');
+        chatBox.appendChild(createList);
+      });
+    });
+    let nickname = 'Visitante' + '<%=numeros%>';
+    let target = '';
+    const myData = {
+      nickname,
+      socketId: socket.socketId,
+    };
+    userButtonSave.addEventListener('click', () => {
+      userMe.innerHTML = userInputSave.value;
+    });
+    messageSendButton.addEventListener('click', () => {
+      socket.emit('message', {
+        chatMessage: messageBox.value,
+        nickname,
+        target,
+      });
+    });
+    socket.on('message', (stringNewMessage) => {
+      const message = document.createElement('li');
+      message.innerHTML = stringNewMessage;
+      message.setAttribute('data-testid', 'message');
+      chatBox.appendChild(message);
+    });
+    socket.emit('user', { myData });
+    userButtonSave.addEventListener('click', () => {
+      onlineUsers.innerHTML = userInputSave.value;
+      myData.nickname = userInputSave.value;
+      nickname = myData.nickname;
+      myData.socketId = socket.id;
+      socket.emit('changeName', { myData });
+    });
+    socket.on('updateUser', ({ onlineUsers }) => {
+      listUsers.innerHTML = '';
+      const singleUser = document.createElement('li');
+      singleUser.innerHTML = myData.nickname;
+      singleUser.id = 'online-user';
+      singleUser.setAttribute('data-testid', 'online-user');
+      listUsers.appendChild(singleUser);
+      Object.values(onlineUsers).forEach((user) => {
+        if (user.socketId === socket.id) return;
+        const newUser = document.createElement('li');
+        newUser.innerText = user.nickname;
+        newUser.setAttribute('data-testid', 'online-user');
+        listUsers.appendChild(newUser);
+
+        const newButton = document.createElement('button');
+        newButton.innerText = 'sussurrar';
+        newButton.setAttribute('data-testid', 'private');
+        newButton.addEventListener('click', async () => {
+          target = user.socketId;
+          chatBox.innerHTML = '';
+          const messagePrivates = await fetch(
+            `http://localhost:3000/chatprivate/${socket.id}/${user.socketId}`,
+          ).then((res) => res.json());
+          messagePrivates.forEach(({ date, nickname, chatMessage }) => {
+            const createList = document.createElement('li');
+            const stringNewMessagePrivate = `${date} (private) - ${nickname}: ${chatMessage}`;
+            createList.innerHTML = stringNewMessagePrivate;
+            createList.setAttribute('data-testid', 'message');
+            chatBox.appendChild(createList);
+          });
+        });
+        listUsers.appendChild(newButton);
+      });
+    });
+  </script>
+</html>
