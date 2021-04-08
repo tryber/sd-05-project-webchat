@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat</title>
+  </head>
+  <body>
+    <h1>WEB Chat bombando</h1>
+    <form action="">
+      <input id="inputText" type="text" data-testid="message-box" />
+      <button id="buttonText" type="button" data-testid="send-button">Enviar</button>
+    </form>
+    <form action="">
+      <input id="inputNickname" type="text" data-testid="nickname-box" />
+      <button id="buttonNickName" type="button" data-testid="nickname-save">
+        Mudar NickName
+      </button>
+    </form>
+    <ul id="chat">
+      <% if(allMessages) { %> <% allMessages.forEach(({message:oldMessage})=> { %>
+      <li data-testid="message"><%= oldMessage %></li>
+      <%})%> <% } %>
+    </ul>
+    <ul id="listUsers">
+      <% if(allUsers) { %> <% allUsers.forEach(({nickname})=> { %>
+      <li data-testid="online-user"><%= nickname %></li>
+      <%})%> <% } %>
+    </ul>
+  </body>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+    const randomNuber = Math.round(Math.random() * 10000);
+    let nickname = `Quest ${randomNuber}`;
+    socket.emit('newUser', { nickname });
+
+    const appendItem = (destiny, item, dataTestId) => {
+      console.log('destiny, item, dataTestId', destiny, item, dataTestId);
+      const chat = document.getElementById(destiny);
+      // usei jquerry pq estava dificil colocar o data-testid =D
+      // https://api.jquery.com/jquery/message
+      const teste = $(`<li data-testid="${dataTestId}">${item}</li>`);
+      chat.appendChild(teste[0]);
+    };
+
+    const buttonNickname = document.getElementById('buttonNickName');
+    buttonNickname.addEventListener('click', () => {
+      const temp = document.getElementById('inputNickname').value;
+      if (!temp) return false;
+      nickname = temp;
+      socket.emit('nicknameChanged', { nickname, id: socket.id });
+    });
+
+    socket.on('oldMessages', (oldMessages) => {
+      oldMessages.forEach(({ message }) => {
+        appendItem('chat', message, 'message');
+      });
+    });
+
+    socket.on('message', (newMessage) => appendItem('chat', newMessage, 'message'));
+
+    const buttonText = document.getElementById('buttonText');
+
+    buttonText.addEventListener('click', () => {
+      const chatMessage = document.getElementById('inputText').value;
+      if (!chatMessage) return false;
+      socket.emit('message', { chatMessage, nickname });
+    });
+
+    socket.on('UpdateUsers', ({ users }) => {
+      const me = users.find((e) => e.id === socket.id);
+      const others = users.filter((e) => e.id !== socket.id);
+      const newOrder = [me, ...others];
+      document.getElementById('listUsers').innerHTML = '';
+      newOrder.forEach((e) => appendItem('listUsers', e.nickname, 'online-user'));
+    });
+  </script>
+</html>

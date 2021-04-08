@@ -58,7 +58,6 @@ describe('Crie um back-end para conexão simultaneamente de clientes e troca de 
     const timeRegex = /\d{1,2}:\d{1,2}(:\d{0,2})?/gm;
 
     client1.emit('message', { chatMessage, nickname });
-
     client1.on('message', (message) => {
       expect(message.includes(chatMessage)).toBeTruthy();
       expect(message.includes(nickname)).toBeTruthy();
