@@ -1,74 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link type="text/css" href="../style.css" />
     <title>Document</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   </head>
   <body>
-    <ul id="list-users">
-      <li data-testid="online-user"><%=nick%></li>
-      <%Object.values(onlineUsers).forEach((user) => {%>
-      <li data-testid="online-user"><%=user.nickname%></li>
+    <div>
+      <ul id="list-users">
+        <li id="online-user" data-testid="online-user">Visitante<%=numeros%></li>
+        <%Object.values(onlineUsers).forEach((user) =>{%>
+          <li id="<%=user.socketId%>" data-testid="online-user"><%=user.nickname%></li>
+          <button id="sussurrar" data-testid="private">susurrar</button>
+          <%})%>
+        </ul>
+      </div>
+      <div>
+      <input data-testid="nickname-box" id="nickname-box" />
+      <button data-testid="nickname-save" id="nickname-save">Salvar</button>
+      <input data-testid="message-box" id="message-box" />
+      <button data-testid="send-button" id="message-send-button">Enviar</button>
+      <button id="public" data-testid="public">Publico</button>
+    </div>
+    <ul id="chat-box">
+      <%messages.forEach(({date, nickname, chatMessage}) => {%>
+      <li data-testid="message"><%=date%> - <%=nickname%>: <%=chatMessage%></li>
       <%})%>
     </ul>
-    <div id="messages" class="messages">
-      <%messages.forEach(({date, nickname, chatMessage}) => {%>
-      <p data-testid="message"><%=date%> - <%=nickname%>: <%=chatMessage%></p>
-      <%})%>
-    </div>
-    <form id="box">
-      <input id="nickname-box" data-testid="nickname-box" />
-      <button type="button" id="nickname-save" data-testid="nickname-save">SALVAR</button>
-      <input id="message-box" data-testid="message-box" />
-      <button type="submit" id="send-button" data-testid="send-button">ENVIAR</button>
-    </form>
-
-    <script type="text/javascript">
-      const socket = io('http://localhost:3000');
-      const myForm = document.querySelector('form#box');
-      const nicknameSave = document.querySelector('button#nickname-save');
-      let nickname = '<%=nick%>';
-      socket.emit('connected', nickname);
-
-      nicknameSave.addEventListener('click', function () {
-        nickname = document.querySelector('input#nickname-box').value;
-        socket.emit('updateUser', nickname);
-      });
-
-      myForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const message = document.querySelector('input#message-box').value;
-        socket.emit('message', { nickname, chatMessage: message });
-
-        document.querySelector('input#message-box').value = '';
-      });
-
-      socket.on('users', function (onlineUsers) {
-        const listUsers = document.querySelector('ul#list-users');
-        listUsers.innerHTML = `<li data-testid="online-user">${
-          onlineUsers[socket.id].nickname
-        }</li>`;
-        console.log('front', onlineUsers);
-        Object.values(onlineUsers).forEach((user) => {
-          if (user.id === socket.id) return;
-          const singleUser = document.createElement('li');
-          singleUser.setAttribute('data-testid', 'online-user');
-          singleUser.innerHTML = user.nickname;
-          listUsers.appendChild(singleUser);
-        });
-      });
-
-      socket.on('message', function (message) {
-        const msg = document.createElement('p');
-        msg.setAttribute('data-testid', 'message');
-        msg.innerHTML = message;
-        const messages = document.querySelector('div#messages');
-        messages.appendChild(msg);
-      });
-    </script>
   </body>
+  <script>
+    // n
+    const socket = io('http://localhost:3000/');
+    const messageBox = document.querySelector('#message-box');
+    const messageSendButton = document.querySelector('#message-send-button');
+    const userNickname = document.querySelector('#userMe');
+    const btnNicknameSave = document.querySelector('#nickname-save');
+    const inputNickname = document.querySelector('#nickname-box');
+    const chatBox = document.querySelector('#chat-box');
+    const onlineUsers = document.querySelector('#online-user');
+    const listUsers = document.querySelector('#list-users');
+    const publicButton = document.querySelector('#public');
+    publicButton.addEventListener('click', async () => {
+      target = '';
+      chatBox.innerHTML = '';
+      // não queria fazr por rotas mas foi o jeito
+      const messagePublics = await fetch(
+        'http://localhost:3000/chat/',
+      ).then((res) => res.json());
+      messagePublics.forEach(({ date, nickname, chatMessage }) => {
+        const createList = document.createElement('li');
+        const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
+        createList.innerHTML = stringNewMessage;
+        createList.setAttribute('data-testid', 'message');
+        chatBox.appendChild(createList);
+      });
+    });
+    let nickname = 'User <%=numeros%>';
+    let target = '';
+    const myData = {
+      nickname,
+      socketId: socket.socketId,
+    };
+    btnNicknameSave.addEventListener('click', () => {
+      userNickname.innerHTML = inputNickname.value;
+    });
+    messageSendButton.addEventListener('click', () => {
+      socket.emit('message', {
+        chatMessage: messageBox.value,
+        nickname,
+        target,
+      });
+    });
+    socket.on('message', (stringNewMessage) => {
+      const message = document.createElement('li');
+      message.innerHTML = stringNewMessage;
+      message.setAttribute('data-testid', 'message');
+      chatBox.appendChild(message);
+    });
+    socket.emit('user', { myData });
+    btnNicknameSave.addEventListener('click', () => {
+      onlineUsers.innerHTML = inputNickname.value;
+      myData.nickname = inputNickname.value;
+      nickname = myData.nickname;
+      myData.socketId = socket.id;
+      socket.emit('changeName', { myData });
+    });
+    socket.on('updateUser', ({ onlineUsers }) => {
+      listUsers.innerHTML = '';
+      // primeiro item sempre 'meu nick'
+      const singleUser = document.createElement('li');
+      singleUser.innerHTML = myData.nickname;
+      singleUser.id = 'online-user';
+      singleUser.setAttribute('data-testid', 'online-user');
+      listUsers.appendChild(singleUser);
+      // demais pessoas usuárias
+      Object.values(onlineUsers).forEach((user) => {
+        if (user.socketId === socket.id) return;
+        const newUser = document.createElement('li');
+        newUser.innerText = user.nickname;
+        newUser.setAttribute('data-testid', 'online-user');
+        listUsers.appendChild(newUser);
+        const newButton = document.createElement('button');
+        newButton.innerText = 'DM';
+        newButton.setAttribute('data-testid', 'private');
+        newButton.addEventListener('click', async () => {
+          target = user.socketId;
+          chatBox.innerHTML = '';
+          const messagePrivates = await fetch(
+            `http://localhost:3000/chatprivate/${socket.id}/${user.socketId}`,
+          ).then((res) => res.json());
+          messagePrivates.forEach(({ date, nickname, chatMessage }) => {
+            const createList = document.createElement('li');
+            const stringNewMessagePrivate = `${date} (private) - ${nickname}: ${chatMessage}`;
+            createList.innerHTML = stringNewMessagePrivate;
+            createList.setAttribute('data-testid', 'message');
+            chatBox.appendChild(createList);
+          });
+        });
+        listUsers.appendChild(newButton);
+      });
+    });
+  </script>
 </html>

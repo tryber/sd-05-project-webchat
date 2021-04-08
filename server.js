@@ -1,69 +1,89 @@
-require('dotenv').config();
-const cors = require('cors');
+const express = require('express');
 const http = require('http');
+const cors = require('cors');
 const path = require('path');
 const moment = require('moment');
-const express = require('express');
 const socketIo = require('socket.io');
-const model = require('./model');
+const { createMessage, getMessages, getPrivateMessages } = require('./model');
 
 const app = express();
-const server = http.createServer(app);
-const PORT = process.env.SERVER_PORT || 3000;
-const io = socketIo(server, {
+app.use(express.json());
+const httpServer = http.createServer(app);
+
+// quase certeza que socket io suporta cors mas tarde pra testar
+const io = socketIo(httpServer, {
   cors: {
-    origin: `http://localhost:${process.env.SERVER_PORT}`,
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
 });
+
 app.use(
   cors({
-    origin: `http://localhost:${process.env.SERVER_PORT}`,
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   }),
 );
-app.use(express.json());
 
 app.use('/', express.static(path.join(__dirname, 'view')));
-app.set('views', './view');
-// engine
-app.set('view engine', 'ejs');
 
-// io
+app.set('view engine', 'ejs');
+app.set('views', './view');
+let numeros = 0;
+
 const onlineUsers = {};
 
 io.on('connection', (socket) => {
-  // on connect
-  socket.on('connected', (nickname) => {
-    onlineUsers[socket.id] = { nickname, id: socket.id };
-    io.emit('users', onlineUsers);
-  });
   socket.on('disconnect', () => {
     delete onlineUsers[socket.id];
-    // console.log('d', onlineUsers);
+    io.emit('updateUser', { onlineUsers });
   });
-  socket.on('message', async (message) => {
-    const { nickname, chatMessage } = message;
-    const newMessage = await model
-      .createMessage({
-        date: moment(new Date()).format('DD-MM-yyyy HH:mm:ss'),
-        nickname: nickname || socket.id,
+  socket.on('message', ({ chatMessage, nickname, target = '' }) => {
+    const date = moment(new Date()).format('DD-MM-yyyy HH:mm:ss');
+    if (target !== '') {
+      const stringNewMessagePrivate = `${date} (private) - ${nickname}: ${chatMessage}`;
+      createMessage({
+        date,
+        nickname,
         chatMessage,
-      })
-      .then((msg) => `${msg.date} - ${msg.nickname}: ${msg.chatMessage}`);
-
-    io.emit('message', newMessage);
+        target,
+        user: socket.id,
+      });
+      return io.to(target).to(socket.id).emit('message', stringNewMessagePrivate);
+    }
+    const stringNewMessage = `${date} - ${nickname}: ${chatMessage}`;
+    createMessage({ date, nickname, chatMessage, target: 'Everyone' });
+    io.emit('message', stringNewMessage);
   });
-  socket.on('updateUser', (nickname) => {
-    onlineUsers[socket.id].nickname = nickname;
-    io.emit('users', onlineUsers);
+  socket.on('user', ({ myData: old }) => {
+    const myData = old;
+    myData.socketId = socket.id;
+    onlineUsers[myData.socketId] = { ...myData, socketId: socket.id };
+    io.emit('updateUser', { onlineUsers });
+  });
+  socket.on('changeName', ({ myData }) => {
+    onlineUsers[myData.socketId] = myData;
+    io.emit('updateUser', { onlineUsers });
   });
 });
-let convidado = 0;
+
 app.get('/', async (_req, res) => {
-  const AllMessages = await model.getAllMessages();
-  res.status(200).render('view', { messages: AllMessages, onlineUsers, nick: `user ${convidado}` });
-  convidado += 1;
+  const messages = await getMessages();
+  res.status(200).render('view', { numeros, onlineUsers, messages });
+  numeros += 1;
 });
 
-server.listen(PORT, () => console.log(`listening @${PORT}`));
+// baseado na ideia de rotas do Sid <3
+app.get('/chatprivate/:user/:target', async (req, res) => {
+  const { target, user } = req.params;
+  const messages = await getPrivateMessages(target, user);
+  res.status(200).json(messages);
+});
+
+app.get('/chat', async (_req, res) => {
+  const messages = await getMessages();
+  res.status(200).json(messages);
+});
+
+const PORT = 3000;
+httpServer.listen(PORT, () => console.log(`listennig @${PORT}`));

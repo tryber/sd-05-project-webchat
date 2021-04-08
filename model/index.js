@@ -1,4 +1,4 @@
 const connecion = require('./connection');
-const { createMessage, getAllMessages } = require('./messages');
+const { createMessage, getMessages, getPrivateMessages } = require('./messages');
 
-module.exports = { connecion, createMessage, getAllMessages };
+module.exports = { connecion, createMessage, getMessages, getPrivateMessages };

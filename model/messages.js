@@ -1,17 +1,32 @@
 const connection = require('./connection');
 
-const createMessage = async ({ date, nickname, chatMessage }) => {
-  const message = await connection()
-    .then(
-      (db) => db
-        .collection('messages')
-        .insertOne({ date, nickname, chatMessage }),
-    );
-
-  return message.ops[0];
+const createMessage = async (message) => {
+  const db = await connection();
+  const newMessage = await db.collection('messages').insertOne(message);
+  return newMessage.ops[0];
 };
 
-const getAllMessages = async () =>
-  connection().then((db) => db.collection('messages').find({}).toArray());
+const getMessages = async () => {
+  const db = await connection();
+  const message = await db
+    .collection('messages')
+    .find({ target: { $eq: 'Everyone' } })
+    .toArray();
+  return message;
+};
 
-module.exports = { createMessage, getAllMessages };
+const getPrivateMessages = async (target, user) => {
+  const db = await connection();
+  const message = await db
+    .collection('messages')
+    .find({
+      $or: [
+        { target, user },
+        { user: target, target: user },
+      ],
+    })
+    .toArray();
+  return message;
+};
+
+module.exports = { createMessage, getMessages, getPrivateMessages };
