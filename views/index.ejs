@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trybe WebChat</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+        integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <small>Online</small>
+    <ul id="online-users">
+        <% if (onlineUsers) { onlineUsers.forEach((user)=> {
+            %><li data-testid="online-user" id=<%=user.id %> ><%= user.nickname %></li>
+            <% }) } %>
+    </ul>
+
+    <input data-testid="nickname-box" type="text" id="input-name" placeholder="Enter a username" />
+    <button data-testid="nickname-save" id="btn-name">Save</button><br>
+
+    <textarea data-testid="message-box" id="input-msg" placeholder="Type your messsage"></textarea>
+    <button data-testid="send-button" id="btn-msg">Send</button>
+
+    <div id='messageList' class="card-block">
+
+        <% if (historyMessage) {%>
+            <% historyMessage.forEach(({ nickname, chatMessage, timestamp })=> { %>
+                <div data-testid="message">
+                    <%= timestamp %>
+                        <%= nickname %>
+                            <%= chatMessage %>
+                </div>
+                <%})%>
+                    <% } %>
+
+    </div>
+</body>
+<script>
+    const client = io('http://localhost:3000');
+
+    let nickname = '';
+
+    const nameBtn = document.getElementById('btn-name');
+    const nameInput = document.getElementById('input-name');
+    const msgInput = document.getElementById('input-msg');
+    const btnMessage = document.getElementById('btn-msg');
+    const listMessage = document.getElementById('messageList');
+    const listUsers = document.getElementById('online-users');
+    const timestamp = moment(new Date())
+
+    nameBtn.addEventListener('click', () => {
+        nickname = nameInput.value;
+        nameInput.value = '';
+        client.emit('change nickname', nickname);
+    });
+
+    client.on('users updated', ({ id, onlineUsers }) => {
+        onlineUsers.unshift(onlineUsers.find(user => user.id === client.id));
+        const updatedUsers = [ ...new Set(onlineUsers) ]    // remove duplicates
+        listUsers.innerText = '';
+        updatedUsers.forEach(user => {
+            const li = document.createElement('li');
+            li.setAttribute('data-testid', 'online-user');
+            li.innerHTML = user.nickname;
+            listUsers.appendChild(li);
+        })
+    })
+
+    btnMessage.addEventListener('click', () => {
+        const chatMessage = msgInput.value;
+        const data = { nickname, chatMessage }
+        client.emit('message', data)
+    });
+
+    client.on('message', (message) => {
+        const li = document.createElement('li');
+        li.innerHTML = message;
+        li.setAttribute('data-testid', 'message');
+        listMessage.appendChild(li);
+    });
+
+    client.on('welcome', (welcome) => {
+        const li = document.createElement('li');
+        const nickname = nameInput.value;
+        li.innerHTML = welcome;
+        listMessage.appendChild(li);
+    });
+
+</script>
+
+</html>

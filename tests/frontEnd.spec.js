@@ -67,6 +67,7 @@ describe('Crie um frontend para que as pessoas interajam com o chat', () => {
 
     const sendButton = await page.$('[data-testid=send-button]');
     await sendButton.click();
+    console.log('tst')
     await page.waitForSelector(dataTestid('message'));
 
     const messages = await page.$$eval(dataTestid('message'), (nodes) => nodes.map((n) => n.innerText));
