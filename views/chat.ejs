@@ -1,0 +1,52 @@
+<!-- TRANSPARENCIA: Projeto feito com Zambelli, Sid e Yoshi -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebChat</title>
+  </head>
+
+  <body>
+    <div id="pararNodeDetached">
+      <h1>Chat</h1>
+
+      <!-- User Section -->
+      <div id="userSection">
+        <input data-testid="nickname-box" id="username" type="text" />
+        <button data-testid="nickname-save" id="send_username" type="button">
+          Change Username
+        </button>
+        <ul id="userList">
+          <li data-testid="online-user" id="online">refenDeProjeto<%=numeros%></li>
+          <%Object.values(usersOnline).forEach(({ nickname }) => {%>
+          <li data-testid="online-user"><%=nickname%></li>
+          <button data-testid="private" id="private">DM</button>
+          <%})%>
+        </ul>
+        <div>
+          <button data-testid="public" id="public">Public</button>
+        </div>
+      </div>
+
+      <!-- Message Board -->
+      <div id="paraDeDarDetached">
+        <ul id="chatlog">
+          <%getMsgs.forEach(({ msgs }) => {%>
+          <li data-testid="message"><%=msgs%></li>
+          <%})%>
+        </ul>
+        <input
+          type="text"
+          id="message-box"
+          data-testid="message-box"
+          placeholder="Type a message..."
+        />
+        <button id="send-button" data-testid="send-button">Send</button>
+      </div>
+    </div>
+  </body>
+  <script src="chat.js"></script>
+</html>
