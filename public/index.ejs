@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zap da Trybe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form class="chat">
+      <div class="online-users">
+        <div id="online-users">
+          <%onlineUsers.forEach((user) => { %>
+          <div class="pvt-chat-box">
+            <li data-testid="online-user" id="<%=user.userId%>"><%=user.nickname%></li>
+            <button class="pvt-chat-btn" type="button" id="private-btn">pvt</button>
+          </div>
+          <% }) %>
+        </div>
+        <div class="chat-mode">
+          <button class="chat-mode-btn" data-testid="private" id="private" type="button">Private</button>
+          <button class="chat-mode-btn" data-testid="public" id="public" type="button">Public</button>
+        </div>
+      </div>
+      <div class="right-box">
+        <div class="input-box">
+          <input data-testid="nickname-box" id="nickname-box" />
+          <button class="chatBtn" data-testid="nickname-save" id="nickname-save" type="button">Trocar</button>
+        </div>
+        <div id="messages" class="messages">
+          <% messages.forEach((msg) => { %> <% if (!msg.to) { %>
+          <li data-testid="message"><%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%></li>
+          <% } %> <% }) %>
+        </div>
+        <div class="input-box">
+          <input data-testid="message-box" id="message-box" type="text" />
+          <button class="chatBtn" data-testid="send-button" id="send-button" type="button">Enviar</button>
+        </div>
+      </div>
+    </form>
+  </body>
+  <script defer src="/main.js"></script>
+</html>
