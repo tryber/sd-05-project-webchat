@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webchat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+
+<body>
+  <div class="messages container">
+    <ul id="messages">
+      <% messages.forEach(({timestamp, nickname, chatMessage})=> { %>
+        <li class="message" data-testid="message">
+          <%=timestamp %> - <%=nickname %>: <%=chatMessage %>
+        </li>
+      <%}) %>
+    </ul>
+  </div>
+
+  <div class="container">
+    <div class="online-users container">
+      <ul id="online-users">
+        <% onlineUsers.forEach(({userId, nickname})=> { %>
+          <div class="online-user container">
+            <li id="user-<%=userId%>" data-testid="online-user"><%=nickname%></li>
+            <button id="<%=userId%>" class="private-button" data-testid="private" target="<%=userId%>">
+              Private
+            </button>
+          </div>
+        <%}) %>
+      </ul>
+    </div>
+
+    <div class="nickname container">
+      <input id="nickname-box" data-testid="nickname-box" autocomplete="on" />
+      <button id="nickname-button" data-testid="nickname-save">Nickname</button>
+    </div>
+
+    <div class="input-message container">
+      <input id="message-box" data-testid="message-box" autocomplete="off" />
+      <button id="send-button" data-testid="send-button">Send</button>
+      <button id="public-button" data-testid="public">Public</button>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    const messagesUl = document.querySelector('#messages');
+    const onlineUsers = document.querySelector('#online-users');
+    const nicknameBox = document.querySelector('#nickname-box');
+    const nicknameSave = document.querySelector('#nickname-button');
+    const messageBox = document.querySelector('#message-box');
+    const sendButton = document.querySelector('#send-button');
+    const privateButtons = document.querySelectorAll('.private-button');
+    const publicButton = document.querySelector('#public-button');
+
+    let nickname;
+    let userId; // current user
+    let targetUser = null;
+
+    const createMessage = (msg) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.className = 'message';
+      li.innerHTML = msg;
+      messagesUl.appendChild(li);
+    };
+
+    const createOnlineUser = (user) => {
+      const userDiv = document.createElement('div');
+      userDiv.className = 'online-user';
+
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.id = `user-${user.userId}`;
+      li.innerText = user.nickname;
+      messagesUl.appendChild(li);
+
+      const privateButton = document.createElement('button');
+      privateButton.setAttribute('type', 'button');
+      privateButton.setAttribute('id', user.userId);
+      privateButton.innerText = 'Private';
+      privateButton.addEventListener('click', (e) => {
+        targetUser = e.target.id;
+        socket.emit('getPrivateHistory', targetUser);
+      });
+
+      userDiv.append(li);
+
+      if (user.userId === userId) {
+        onlineUsers.prepend(userDiv);
+      }
+      else {
+        userDiv.append(privateButton);
+        onlineUsers.append(userDiv);
+      }
+    };
+
+    sendButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      const chatMessage = messageBox.value;
+      const msg = { userId, chatMessage, nickname, targetUser };
+
+      if (chatMessage !== '') socket.emit('message', msg);
+      messageBox.value = '';
+    });
+
+    nicknameSave.addEventListener('click', (e) => {
+      e.preventDefault();
+      nickname = nicknameBox.value;
+
+      if (nickname !== '') {
+        socket.emit('nicknameChange', { userId, nickname });
+        nicknameBox.placeholder = nickname;
+        nicknameBox.value = '';
+      }
+    });
+
+    publicButton.addEventListener('click', () => {
+      targetUser = null;
+      socket.emit('getPublicHistory');
+    });
+
+    privateButtons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+        targetUser = e.target.id;
+        socket.emit('getPrivateHistory', targetUser);
+      });
+    });
+
+    socket.on('connected', (user) => {
+      userId = user.userId;
+      nickname = user.nickname;
+      nicknameBox.placeholder = nickname;
+    });
+
+    socket.on('userLoggedIn', (user) => {
+      createOnlineUser(user)
+    });
+
+    socket.on('userLoggedOff', (userId) => {
+      const onlineUser = document.getElementById(`user-${userId}`);
+      onlineUser.remove();
+    });
+
+    socket.on('message', (msg) => {
+      createMessage(msg);
+    });
+
+    socket.on('nicknameChanged', (user) => {
+      const { userId, nickname } = user;
+      const onlineUser = document.getElementById(`user-${userId}`);
+      onlineUser.innerText = nickname;
+    });
+
+    socket.on('publicHistory', (msgs) => {
+      messagesUl.innerHTML = '';
+      msgs.forEach((msg) => {
+        const { timestamp, nickname, chatMessage } = msg;
+        createMessage(`${timestamp} - ${nickname}: ${chatMessage}`);
+      });
+    });
+
+    socket.on('privateHistory', (msgs) => {
+      messagesUl.innerHTML = '';
+      if (msgs.length) {
+        msgs.forEach((msg) => {
+          const { timestamp, nickname, chatMessage } = msg;
+          createMessage(`${timestamp} - ${nickname}(private): ${chatMessage}`)
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
