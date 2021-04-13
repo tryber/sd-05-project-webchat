@@ -1,0 +1,136 @@
+<!-- Time programming Samuel, PR, Lari, Sidnei -->
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div>
+    <input data-testid="nickname-box" id="nickname-box" />
+    <button data-testid="nickname-save" id="nickname-save">SALVAR NOME</button>
+    <ul id='list-new-user'>
+      <li id='change-name' data-testid="online-user">
+        Guest<%=numeros%>
+      </li>
+      <%Object.values(onlineUsers).forEach((user) =>{%>
+      <li id=<%=user.socketId%> data-testid="online-user"><%=user.nickname%></li>
+      <button data-testid="private">Chamar contatinho</button>
+      <%})%>
+    </ul>
+  </div>
+  <div>
+    <input data-testid="message-box" id="message-box" />
+    <button data-testid="send-button" id="message-send-button">ENVIAR MENSAGEM</button>
+    <button id="public" data-testid="public">Chat Público</button>
+  </div>
+  <!-- <div>
+    <button data-testid="private" id="private" type="button">Private</button>
+    <button data-testid="public" id="public" type="button">Public</button>
+  </div> -->
+  <ul id='chat-box'>
+    <% getAllMessages.forEach(({ chatMessage }) => {  %>
+      <li data-testid="message">
+        <%= chatMessage %>
+      </li>
+      <% })%>
+  </ul>
+  <script type="text/javascript">
+  </script>
+</body>
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<Script>
+  const socket = io('http://localhost:3000');
+  const messageBox = document.getElementById('message-box');
+  const messageSendButton = document.getElementById('message-send-button');
+  const chatBox = document.getElementById('chat-box');
+  const changeName = document.getElementById('change-name');
+  const saveName = document.getElementById('nickname-save');
+  const saveNameBox = document.getElementById('nickname-box');
+  const newListWithUser = document.getElementById('list-new-user');
+  const publicButton = document.getElementById('public');
+
+  publicButton.addEventListener('click', async () => {
+    target = '';
+    chatBox.innerHTML = "";
+      const myMsg = await fetch('http://localhost:3000/chat').then((res) => res.json());
+    myMsg.forEach(({ chatMessage }) => {
+      const chatAgain = document.createElement('li');
+      chatAgain.innerHTML = chatMessage;
+      chatAgain.setAttribute('data-testid', 'message');
+      chatBox.appendChild(chatAgain);
+    })
+  })
+
+  // button PUBLIC e PRIVATE -----------------------------------
+  // const buttonPublic = document.getElementById('public');
+  // const buttonPrivate = document.getElementById('private');
+  // target.previousSibling. possivel possibilidade button private
+  // is that previousSibling returns the previous sibling node as an element node, a text node or a comment node
+  // ------------------------------------------------------------
+  let nickname = 'Guest' + '<%=numeros%>';
+  let target = '';
+  const myData = {
+    nickname, socketId: socket.id
+  };
+  // novo usuarios que loga aparece para os demais
+  socket.emit('newUserConectando', { myData });
+  saveName.addEventListener('click', () => {
+    changeName.innerHTML = saveNameBox.value
+    myData.nickname = saveNameBox.value
+    nickname = myData.nickname
+    myData.socketId = socket.id
+    socket.emit('displayName', { myData })
+  });
+  messageSendButton.addEventListener('click', () => {
+    messageBox.value
+    socket.emit('message', { chatMessage: messageBox.value, nickname, target })
+  });
+  socket.on('message', (chatMessage) => {
+    const message = document.createElement('li')
+    message.innerHTML = chatMessage;
+    message.setAttribute('data-testid', 'message');
+    chatBox.appendChild(message)
+    // console.log(chatMessage);
+  });
+  socket.on('updateUsers', ({ onlineUsers }) => {
+    newListWithUser.innerHTML = '';
+    const myUser = document.createElement('li');
+    myUser.innerHTML = myData.nickname;
+    myUser.id = "change-name";
+    myUser.setAttribute('data-testid', 'online-user');
+    newListWithUser.appendChild(myUser);
+    Object.values(onlineUsers).forEach(user => {
+      if (user.socketId === socket.id) return
+      const newUser = document.createElement('li');
+      newUser.innerHTML = user.nickname;
+      newUser.setAttribute('data-testid', 'online-user');
+      newListWithUser.appendChild(newUser);
+
+      const newBtn = document.createElement('button');
+      newBtn.innerText = "contatinho";
+      newBtn.setAttribute('data-testid', 'private');
+      newBtn.addEventListener('click', async () => {
+        target = user.socketId;
+        chatBox.innerHTML = "";
+        console.log(target, 'target aqui');
+        const myMsg = await fetch(`http://localhost:3000/chat-prive/${socket.id}/${user.socketId}`).then((res) => res.json());
+        console.log(myMsg, 'msg contatinhos');
+        myMsg.forEach(({ chatMessage }) => {
+          const myPvt = document.createElement('li');
+          myPvt.innerHTML = chatMessage;
+          myPvt.setAttribute('data-testid', 'message');
+          chatBox.appendChild(myPvt);
+        })
+      });
+      newListWithUser.appendChild(newBtn);
+    });
+  })
+</Script>
+
+</html> 
