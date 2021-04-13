@@ -1,0 +1,37 @@
+html , body {
+  height: 100%;
+}
+
+input {
+  border: 1px solid #ddd;
+  font-size: 14pt;
+}
+
+button {
+  background: #069;
+  color: white;
+  font-size: 14pt;
+  font-weight: 900;
+  text-align: center;
+}
+
+.chat-form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.messages {
+  border: 1px solid pink;
+  height: 400px;
+  padding: 20px;
+  width: 600px;
+}
+
+.online-users {
+  border: 1px solid green;
+  font-size: 14pt;
+  font-weight: 900;
+  width: 400px;
+}

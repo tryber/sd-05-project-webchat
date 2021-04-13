@@ -1,0 +1,132 @@
+<!-- front-end ~ área do cliente -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projeto Webchat - Bloco 32: Socket.io </title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="online-users">
+    <h3>Usuários Online:</h3>
+    <ul id="online-users-list">
+      <% if (onlineUsers !==[]) { %>
+        <% onlineUsers.forEach((user)=> { %>
+          <li data-testid="online-user" id="<%=user.socketId%>"><%=user.nickname%></li>
+          <% }) %>
+            <% } %>
+    </ul>
+  </div>
+
+  <div class="messages">
+    <ul id="messages-list">
+      <% if (messages) { %>
+        <% messages.forEach((message)=> { %>
+          <li data-testid="message">
+            <%= `${message.dateTime} - ${message.nickname}: ${message.chatMessage}` %>
+          </li>
+          <% }) %>
+            <% } %>
+    </ul>
+  </div>
+
+  <form class="chat-form">
+    <div>
+      <input type="text" data-testid="nickname-box" id="nickname-input" name="username"
+        placeholder="Digite seu nome de usuário">
+      <button type="button" data-testid="nickname-save" id="save-nick-btn">Salvar</button>
+    </div>
+
+    <div>
+      <input type="text" data-testid="message-box" id="message-input" name="message" placeholder="Digite sua mensagem">
+      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
+    </div>
+  </form>
+
+  <script type="text/javascript">
+    const client = io();
+
+    // constantes e variáveis
+    const nickInput = document.querySelector('#nickname-input');
+    const nickButton = document.querySelector('#save-nick-btn');
+    const messages = document.querySelector('.messages');
+    const messagesList = document.querySelector('#messages-list');
+    const messageInput = document.querySelector('#message-input');
+    const sendBtn = document.querySelector('#send-btn');
+    const onlineUsers = document.querySelector('.online-users')
+    const onlineUsersList = document.querySelector('#online-users-list')
+
+    let clientId = '';
+    let nickname = '';
+
+    // events listeners
+    sendBtn.addEventListener('click', () => {
+      if (messageInput.value.length > 0) {
+        const chatMessage = messageInput.value;
+        client.emit('message', { nickname, chatMessage });
+        messageInput.value = '';
+      }
+    })
+
+    nickButton.addEventListener('click', () => {
+      nickname = nickInput.value;
+      client.emit('updateNickname', nickname)
+      nickInput.value = '';
+    })
+
+    // eventos do socket conectando cliente e servidor
+    client.on('connected', ({ userId, guestNickname }) => {
+      clientId = userId;
+      nickname = guestNickname;
+
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${clientId}`);
+      li.innerHTML = nickname;
+      onlineUsersList.appendChild(li);
+    })
+
+    client.on('updateNickname', ({ nickname, socketId }) => {
+      const userNickname = document.getElementById(socketId);
+      userNickname.innerHTML = nickname;
+    });
+
+    client.on('message', (receivedMessage) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.textContent = receivedMessage;
+      messages.appendChild(li);
+    });
+
+    client.on('messagesLog', (allMessages) => {
+      messages.innerHTML = '';
+      allMessages.forEach((message) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${message.date} - ${message.nickname}: ${message.chatMessage}`;
+        messages.append(li);
+      });
+    });
+
+    client.on('userDisconnected', (userId) => {
+      const disconnectedUser = document.getElementById(userId);
+      disconnectedUser.remove();
+    });
+  </script>
+</body>
+
+</html>
+
+<!-- referências:
+1. vídeo da Rocketseat
+https://youtu.be/-jXfKDYJJvo
+2. setAttribute() method
+https://www.w3schools.com/jsref/met_element_setattribute.asp
+-->
