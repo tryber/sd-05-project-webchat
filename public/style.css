@@ -1,0 +1,104 @@
+body , html {
+  height: 100%;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.chat {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  justify-content: center;
+  padding: 2%;
+}
+
+.chatBtn {
+  height: 100%;
+  margin: 0;
+  width: 9.5%;
+}
+
+.input-box {
+  height: 9%;
+}
+
+input {
+  border: 1px solid #ddd;
+  font-size: 1.5em;
+  height: 100%;
+  padding: 2%;
+  width: 90%;
+}
+
+button {
+  background: #096;
+  border: none;
+  color: white;
+  font-size: 1.5em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.messages {
+  border: 1px solid #ddd;
+  height: 79%;
+  margin: 1% 0;
+  overflow: auto;
+  width: 100%;
+}
+
+.messages li {
+  margin: 1%;
+}
+
+.online-users {
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  margin: 0 1% 0 0;
+  padding: 1%;
+  width: 20%;
+}
+
+.right-box {
+  height: 100%;
+  width: 100%;
+}
+
+.chat-mode {
+  display: flex;
+  height: 10%;
+  width: 100%;
+}
+
+.chat-mode-btn {
+  margin: 1%;
+  position: relative;
+  width: 100%;
+}
+
+.pvt-chat-btn {
+  font-size: 0.8em;
+  width: 20%;
+}
+
+.pvt-chat-box {
+  display: flex;
+  justify-content: space-between;
+  margin: 2%;
+  width: 96%;
+}
+
+.pvt-chat-user {
+  display: flex;
+  margin: 2%;
+  width: 96%;
+}
