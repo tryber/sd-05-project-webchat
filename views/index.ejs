@@ -1,0 +1,57 @@
+<!-- Front-end client side -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebChat Project</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h2>Welcome to the WebChien Chat</h2>
+    <!-- Both lists here: from new messages socketio & from bd -->
+    <ul class="messages" id="messages">
+      <% if (allMessages) { %>
+        <% allMessages.forEach((msg) => { %>
+          <li data-testid="message">
+            <%= `${msg.dateFormat} - ${msg.nickname}: ${msg.chatMessage}`%>
+          </li>
+       <% }) %>
+      <% } %>
+    </ul>
+    <section class="chat-inputs">
+      <div class="nickname-stuff">
+        <input data-testid="nickname-box" type="text" id="nickname-input" name="nickname" placeholder="Enter your nickname here">
+        <button data-testid="nickname-save" type="button" id="nickname-save">Save nickname</button>
+      </div>
+      <div class="message-stuff">
+        <input data-testid="message-box" type="text" id="message-input" name="message" placeholder="Digit your message here">
+        <button data-testid="send-button" type="button" id="send">Send message</button>
+      </div>
+    </section>
+    <!-- if using form tag, remember type="button" and preventDefault
+    so as not to default to cleaning screen and method get -->
+    <ul class="users" id="users">
+      <% if (onlineUsers && onlineUsers.length > 0) { %>
+        <% onlineUsers.forEach((user) => { %>
+          <li data-testid="online-user" id="<%=user.id %>"><%=user.nickname%></li>
+       <% }) %>
+      <% } %>
+    </ul>
+  </body>
+  <!-- Connect with client.js and right port -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="/client.js"></script>
+  <!-- Example of another option without client.js file: socket & dom manipulation here
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const form = document.querySelector('form')
+      const inputMessage = document.querySelector('#mensagemInput')
+      form.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        and so on with dom manipulation
+      });
+    </script> -->
+</html>
