@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat da Nanat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form class="chat">
+      <input
+        type="text"
+        name="username"
+        data-testid="nickname-box"
+        placeholder="Digite seu usuário"
+      />
+      <div class="messages">
+        <%allMessages.forEach((message)=>{%>
+        <p data-testid="message">
+          <%=message.dateTime%> - <%=message.nickname%>: <%=message.chatMessage%>
+        </p>
+        <%})%>
+      </div>
+      <div class="usersOn">
+        <%usersOnline.forEach((user)=>{%>
+        <p data-testid="online-user" id="<%=user.socketId%>"><%=user.nickname%></p>
+        <%})%>
+      </div>
+      <input
+        type="text"
+        data-testid="message-box"
+        name="message"
+        placeholder="Digite sua mensagem"
+      />
+      <button type="button" data-testid="send-button">Enviar</button>
+      <button type="button" data-testid="nickname-save">Salvar Nickname</button>
+    </form>
+
+    <script type="text/javascript">
+      const socket = io('http://localhost:3000');
+      const chatButton = document.querySelector('[data-testid="send-button"]');
+      const authorInput = document.querySelector('[data-testid="nickname-box"]');
+      const messageInput = document.querySelector('[data-testid="message-box"]');
+      const chat = document.querySelector('.messages');
+      const userList = document.querySelector('.usersOn');
+      const userButton = document.querySelector('[data-testid="nickname-save"]');
+      let nick;
+      let id;
+
+      userButton.addEventListener('click', function () {
+        const nickname = authorInput.value;
+
+        if (nickname.length) {
+          socket.emit('nickChange', nickname);
+        }
+      });
+
+      chatButton.addEventListener('click', function () {
+        const nickname = nick;
+        const chatMessage = messageInput.value;
+
+        if (nickname.length && chatMessage.length) {
+          const messageObject = {
+            nickname,
+            chatMessage,
+          };
+
+          socket.emit('message', messageObject);
+        }
+      });
+
+      socket.on('message', (message) => {
+        const p = document.createElement('p');
+        p.innerHTML = message;
+        p.setAttribute('data-testid', 'message');
+        chat.appendChild(p);
+      });
+
+      socket.on('conectado', (userId, fakeName) => {
+        nick = fakeName;
+        id = userId;
+        const divUsers = document.getElementsByClassName('usersOn');
+        const p = document.createElement('p');
+        p.innerHTML = fakeName;
+        p.setAttribute('data-testid', 'online-user');
+        p.setAttribute('id', userId);
+        userList.prepend(p);
+      });
+
+      socket.on('userOn', (userId, fakeName) => {
+        const p = document.createElement('p');
+        p.innerHTML = fakeName;
+        p.setAttribute('data-testid', 'online-user');
+        p.setAttribute('id', userId);
+        userList.appendChild(p);
+      });
+
+      socket.on('nickChange', (nickname, userId) => {
+        const p = document.getElementById(userId);
+        p.innerHTML = nickname;
+        nick = nickname;
+      });
+
+      socket.on('disconected', (userId) => {
+        const p = document.getElementById(userId);
+        console.log(p);
+        p.remove();
+      });
+    </script>
+  </body>
+</html>
