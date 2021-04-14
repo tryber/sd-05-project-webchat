@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webchat</title>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font: 13px Helvetica, Arial;
+      }
+      form {
+        background: rgb(255, 253, 253);
+        padding: 3px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      }
+      form input {
+        border: 1;
+        padding: 10px;
+        width: 90%;
+        margin-right: 0.5%;
+      }
+      form button {
+        width: 9%;
+        background: rgb(130, 224, 255);
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+      }
+      #mensagens {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      #mensagens li {
+        padding: 5px 10px;
+      }
+      #mensagens li:nth-child(odd) {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="users"></ul>
+    <ul id="messages"></ul>
+    <ul id="onlineUsers">
+      <% if(usersOnline !== []) { %>
+        <% usersOnline.forEach((user) => { %>
+          <li data-testid="online-user" id=<%= `${user.socketId}` %> ><%= `${user.nickname}` %></li>
+        <% }) %>
+      <% } %>
+    </ul>
+    <ul id="messages">
+    <% if (messages) { %>
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message">
+          <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+        </li>
+     <% }) %>
+    <% } %>
+    </ul>
+    <form id="form" action="">
+      <input data-testid="nickname-box" id="nickname" type="text" />
+      <button data-testid="nickname-save" id="save-nickname">Salvar</button>
+      <input data-testid="message-box" id="input" autocomplete="off" />
+      <button data-testid="send-button">Enviar</button>
+    </form>
+  </body>  
+  <script>
+    const client = io();
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const nickname = document.getElementById('nickname');
+    const users = document.getElementById('onlineUsers');
+    const messages = document.getElementById('messages');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (nickname.value && input.value) {
+        client.emit('message', { nickname: nickname.value, chatMessage: input.value })
+        input.value = '';
+      }
+    });
+    document.getElementById('save-nickname').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (nickname.value) {
+        client.emit('changeNickname', nickname.value )
+      }
+    });
+    client.on('changeNickname', (nick, id) => {
+      const changeUser = document.getElementById(id);
+      changeUser.innerHTML = nick;
+    });
+    
+    let userid = '';
+      client.on('saveId', (id) => {
+      userid = id;
+    });
+    client.on('listOfUsers', (nickname, socketId) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${socketId}`);
+      li.textContent = nickname;
+        if (socketId === userid) {
+          users.prepend(li);
+      } else {
+          users.append(li);
+      }
+    });
+    client.on('message', (mensagem) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.textContent = mensagem;
+      messages.appendChild(li);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</html>
