@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <title>Projeto webchat</title>
+  </head>
+  <body>
+    <div id="chat">
+        <ul id="chat">
+          <% messagesArray.forEach((msg) => { %>
+            <li data-testid="message"><%= `${msg.date} ${msg.nickname}: ${msg.message}`%></li>
+            <% }) %>
+        </ul>
+    </div>
+    <input type="text" data-testid="nickname-box" placeholder="digite seu nick" id="name-input" />
+    <button type="button" data-testid="nickname-save" id="name-button">Salvar Nick</button>
+    <input type="text" data-testid="message-box" placeholder="digite sua mensagem" id= "message-input"/>
+    <button type="button" data-testid="send-button" id="submit-button">Enviar</button>
+
+  
+      <div id="users">
+        <ul id="users-list">
+          <%usersOn.forEach((user) => { %>
+            <li data-testid="online-user" id="<%=user.userID%>"><%=user.nickname%></li>
+            <% }) %>
+        </ul>
+      </div>
+
+    <script type="text/javascript">
+
+    const socket = io('http://localhost:3000');
+
+    const nick = document.getElementById("name-input")
+    const nickButton = document.getElementById("name-button")
+    const message = document.getElementById("message-input")
+    const submit = document.getElementById("submit-button")
+    const usersOnline = document.getElementById("users")
+    const usersList = document.getElementById("users-list")
+    let userId;
+
+    const d = new Date()
+    const date = `${d.getDate()}-${d.getMonth()}-${d.getFullYear()} ${d.getHours()}:${d.getMinutes()} PM`
+
+    submit.addEventListener('click', (e) => {
+      socket.emit('message', { chatMessage: message.value, nickname: nick.value })
+      message.value = ''
+      return false;
+    })
+
+    nickButton.addEventListener('click', (e) => {
+      let nickname = nick.value
+      socket.emit('nickChange', userId, nickname);
+      const li = document.getElementById(userId)
+      console.log(`li ${li}`)
+      document.getElementById(userId).innerHTML = nickname;
+    })
+
+    const createMessage = (message) => {
+      console.log(message)
+      const messageUl = document.getElementById("chat")
+      const li = document.createElement('li')
+      li.setAttribute('data-testid', 'message')
+      li.innerText = message
+      messageUl.appendChild(li)
+    }
+
+    socket.on('message', (data) => createMessage(data))
+
+    socket.on('Connected', ((userID) => { userId = userID }))
+
+    socket.on('connected', (userID, newUser) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${userID}`);
+      li.innerHTML = newUser;
+      if (userId === userID) {
+        usersList.prepend(li);
+      } else {
+      usersList.appendChild(li);
+      }
+    });
+
+    socket.on('nickChange', ({ userId, nickname }) => {
+      console.log(`user id ${userId}`)
+      const li = document.getElementById(userId)
+      console.log(`li ${li}`)
+      document.getElementById(userId).innerHTML = nickname;
+    });
+
+    socket.on('disconnected', (userID) => {
+      document.getElementById(userID).parentNode.remove();
+    });
+    
+    </script>
+  </body>
+</html>
