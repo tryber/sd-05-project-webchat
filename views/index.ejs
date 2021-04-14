@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webChat</title>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  </head>
+  <body>
+    <form>
+      <ul id="messages">
+        <% if (messages) { %>
+            <% messages.forEach((msg) => { %>
+              <li data-testid="message">
+                <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+              </li>
+            <% }) %>
+        <% } %>
+      </ul>
+      <div>
+        <input data-testid="nickname-box" id="nickname" type="text" placeholder="Digite seu nick"/>
+        <button data-testid="nickname-save" id="btnName" type="button">Salvar</button>
+      </div>
+      <!-- <div class="messages"></div> -->
+      <div>
+        <input data-testid="message-box" id="message" type="text" placeholder="Digite sua mensagem">
+        <button data-testid="send-button" id="btnMsg" type="button" >Enviar</button>
+      </div>
+      <ul id="usersOnline">
+        <h1><%= users.forEach((a) => a.nickname) %></h1>
+        <% if (users.length > 0) { %>
+          <% users.forEach((user) => { %>
+            <li data-testid="online-user"><%=`${user.nickname}`%></li>
+          <% }) %>
+        <% } %>
+      </ul>
+    </form>
+  </body>
+  <script type="text/javascript">
+    const client = io('http://localhost:3000');
+    /* const teste =;
+    console.log('teste=====>', teste); */
+    
+    // para não aparecer o anônimo no chat
+    let nickname = `Guest #${Math.round(Math.random() * 1000)}`;
+    const btnName = document.getElementById('btnName');
+    const usersList = document.getElementById('usersOnline');
+    const inputNickname = document.getElementById('nickname');
+    let userId = '';
+    console.log('btnName ==> ', btnName.id)
+
+    btnName.addEventListener('click', () => {
+      nickname = inputNickname.value;
+      console.log('name ==> ', nickname);
+      /* if (nickname.value.length) {
+        nick = nickname.value;
+
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = nick ? nick : nickname.value;
+        users.appendChild(li);
+      }
+      const newUser = { nickname: nickname.value };
+
+      client.emit('online', newUser); */
+      // client.emit('online', { name });
+      client.emit('updateName', { nickname });
+    });
+
+    function usersOnline (users) {
+      usersList.innerText = '';
+
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerHTML = nickname;
+      usersList.appendChild(li);
+
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = user.nickname;
+        usersList.appendChild(li);
+      });
+    }
+
+    client.emit('online', { nickname });
+
+    client.on('updateArrayUsers', ({ id, users }) => {
+      if (userId === '') {
+        userId = id;
+      }
+      const filterUsers = users.filter((user) => user.id !== userId);
+      usersOnline(filterUsers);
+    });
+
+    const message = document.getElementById('message');
+    const btnMsg = document.getElementById('btnMsg');
+    const messages = document.getElementById('messages');
+    // moment do projeto crush manager
+    // const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+    
+    // rederiza as msgs na tela
+    btnMsg.addEventListener('click', (e) => {
+      e.preventDefault();
+      const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+      // console.log('message.value==>', message.value);
+      if (message.value.length) {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${timestamp} - ${nickname}: ${message.value}`
+        messages.appendChild(li);
+      }
+
+      const send = {
+        nickname,
+        chatMessage: message.value,
+      };
+
+      client.emit('message', send);
+      // client.on('message', send);
+      
+
+      message.value = '';
+      return false;
+    });
+  
+  </script>
+</html>
