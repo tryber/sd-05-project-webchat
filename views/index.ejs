@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Cduessel - WebChat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="text-align: center;">The ZapZap WebChat</h1>
+      <div class="row g-3">
+        <input data-testid="nickname-box" id="nickNameInput" autocomplete="off" type= "text" placeholder="Escreva seu nome aqui" class="col-3 form-control"/>
+        <button data-testid="nickname-save" id="btn-name"" class="btn btn-primary" type="button">Salvar</button>
+      </div>
+      <div>
+        <h2>Usuários online:</h2>
+        <ul id="onlineUsers" class="list-unstyled">
+          <li id="userNickname" data-testid="online-user">Estou online!</li>
+          <% if (onlineUsers) { %>
+            <% onlineUsers.forEach((user) => { %>
+            <li data-testid="online-user"><%=user.nickname%></li>
+            <% }) %>
+            <% }%>
+        </ul>
+    </div>
+      <h2>Mensagens</h2>
+      <ul class="list-unstyled" id="messageList">
+        <% if (historyMessages) { %>
+          <% historyMessages.forEach((msg) => { %>
+            <li data-testid="message">
+              <%= `${msg.date} ${msg.time} - ${msg.nickname}: ${msg.chatMessage}` %>
+            </li>
+          <% }) %>
+          <% }%>
+      </ul>
+      <form class="row" style="position: fixed; bottom: 2%; width: 100%">
+        <input data-testid="message-box" id="inputMessage" autocomplete="off" placeholder="Escreva sua mensagem aqui" class="col-sm-6 form-control" />
+        <button
+        id="send-button"
+        data-testid="send-button"
+        class="btn btn-primary"
+        type="button"
+        >Enviar</button>
+      </form>
+    </div>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script defer src="/script.js"></script>
+    </body>
+</html>
