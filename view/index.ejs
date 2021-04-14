@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Web CHATeador</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <ul class="messages" id="messages">
+      <% messages.forEach(({date, nickname, chatMessage}) => { %>
+      <li data-testid="message" class="message-item">
+        <%=date %> - <%=nickname %>: <%=chatMessage%>
+      </li>
+      <%}) %>
+    </ul>
+    <div class="chat-room" id="chat-room" action="">
+      <div class="nickName container">
+        <input id="nickInput" autocomplete="on" data-testid="nickname-box" />
+        <button id="change-nick" data-testid="nickname-save">Apelido</button>
+      </div>
+      <div class="input-message container">
+        <input
+          data-testid="message-box"
+          id="mensagemInput"
+          autocomplete="off"
+        />
+        <button id="send-message" data-testid="send-button">Send</button>
+      </div>
+      <div class="logged-users container" id="logged-users">
+        <% onlineUsers.forEach(({userId, nickname}) => { %>
+        <div class="pvt-user">
+          <li data-testid="online-user" id="user-<%=userId%>"><%=nickname%></li>
+          <button
+            class="pvt-button <%=userId %>"
+            type="button"
+            id="<%=userId %>"
+          >
+            Sigilo
+          </button>
+        </div>
+        <%}) %>
+      </div>
+      <div class="chat-type">
+        <button
+          class="chat-type-btn"
+          data-testid="private"
+          id="private-btn"
+          type="button"
+        >
+          Privado
+        </button>
+        <button
+          class="chat-type-btn"
+          data-testid="public"
+          id="pub-btn"
+          type="button"
+        >
+          Pub
+        </button>
+      </div>
+    </div>
+    <script>
+      const socket = io();
+      const inputMessage = document.querySelector('#mensagemInput');
+      const privateBtns = document.querySelectorAll('.pvt-button');
+      const loggedUsers = document.querySelector('#logged-users');
+      const sendMessage = document.querySelector('#send-message');
+      const privateChat = document.querySelector('#private-btn');
+      const changeNick = document.querySelector('#change-nick');
+      const messagesUl = document.querySelector('#messages');
+      const nickInput = document.querySelector('#nickInput');
+      const publicChat = document.querySelector('#pub-btn');
+      const form = document.querySelector('#chat-room');
+      let nickname;
+      let userId;
+      let targetUsr = null;
+
+      privateBtns.forEach((button) => {
+        button.addEventListener('click', (e) => {
+          targetUsr = e.target.id;
+          socket.emit('getPrivate', userId, targetUsr);
+        });
+      });
+
+      const createMessage = (recMsg) => {
+        const msgLi = document.createElement('li');
+        msgLi.setAttribute('data-testid', 'message');
+        msgLi.className = 'message-item';
+        msgLi.innerHTML = recMsg;
+        messagesUl.appendChild(msgLi);
+      };
+
+      const showUsers = (id, nick) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.setAttribute('id', `user-${id}`);
+        li.innerText = nick;
+
+        const privButton = document.createElement('button');
+        privButton.setAttribute('type', 'button');
+        privButton.setAttribute('id', id);
+        privButton.setAttribute = `pvt-button ${id}`;
+        privButton.innerText = 'Sigilo';
+
+        const privUser = document.createElement('div');
+        privUser.setAttribute('class', 'pvt-user');
+
+        privButton.addEventListener('click', (e) => {
+          targetUsr = e.target.id;
+          socket.emit('getPrivate', userId, targetUsr);
+        });
+
+        privUser.append(li);
+        privUser.append(privButton);
+        if (id === userId) {
+          loggedUsers.prepend(li);
+        } else {
+          loggedUsers.append(privUser);
+        }
+      };
+      sendMessage.addEventListener('click', (e) => {
+        e.preventDefault();
+        const chatMessage = document.querySelector('#mensagemInput').value;
+        const message = {chatMessage, nickname, targetId: targetUsr, userId};
+        if (targetUsr) {
+          message.pvtMsg = true
+        }
+        if (chatMessage != '') {
+          socket.emit('message', message );
+        }
+        inputMessage.value = '';
+      });
+      changeNick.addEventListener('click', (e) => {
+        e.preventDefault();
+        nickname = nickInput.value;
+        if (nickname != '') {
+          socket.emit('nickChange', { nickname, userId });
+          nickInput.placeholder = nickname;
+          nickInput.value = '';
+        }
+      });
+      privateChat.addEventListener('click', () => {
+        let selectUser = document.querySelectorAll('[data-testid="online-user"]')[1].id;
+        selectUser = selectUser.slice(5) //removento o do id user-
+        targetUsr = selectUser;
+        socket.emit('getPrivate', userId, selectUser);
+      });
+
+      publicChat.addEventListener('click', () => {
+        targetUsr = null;
+        socket.emit('getPublic');
+      });
+      socket.on('connected', (usuario) => {
+        userId = usuario.userId;
+        nickname = usuario.nickname;
+        nickInput.placeholder = nickname;
+      });
+
+      socket.on('userConnected', (id, nick) => showUsers(id, nick));
+      socket.on('message', (message) => {
+        createMessage(message);
+      });
+      socket.on('nickChange', (nick, userId) => {
+        const ulNick = document.getElementById(`user-${userId}`);
+        ulNick.innerText = nick;
+      });
+      socket.on('userQuit', (id) => {
+        document.getElementById(id).remove();
+      });
+      socket.on('privateHistory', (items) => {
+        messagesUl.innerHTML = '';
+        if (items.length){
+          items.forEach((item) => {
+            createMessage(`${item.date} - ${item.nickname}(private): ${item.chatMessage}`)
+          });
+        }
+      });
+      socket.on('publicHistory', (items) => {
+        messagesUl.innerHTML = '';
+        items.forEach((item) => {
+          createMessage(`${item.date} - ${item.nickname}: ${item.chatMessage}`);
+        });
+      });
+    </script>
+  </body>
+</html>
