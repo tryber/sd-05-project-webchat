@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trybe - Webchat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  </head>
+  <body>
+    <h1>
+      <strong>Webchat</strong>
+      <span>for Trybe's students</span>
+    </h1>
+    <ul id="messages">
+      <% if (messages) { %>
+        <% messages.forEach((message) => { %>
+          <li data-testid="message">
+            <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}` %>
+          </li>
+       <% }) %>
+      <% } %>
+    </ul>
+    <form>
+      <section>
+        <input
+          data-testid="nickname-box"
+          id="nickname-box"
+          type="text"
+          placeholder="Type your name here"
+        />
+        <button data-testid="nickname-save" id="btn-name" type="button">Save</button>
+      </section>
+      <section>
+        <input
+          data-testid="message-box"
+          id="message"
+          type="text"
+          placeholder="Type your message here"
+        />
+        <button data-testid="send-button" id="btn-message" type="button">Send</button>
+      </section>
+      <ul id="users">
+        <% if(users !== []) { %>
+          <% users.forEach((user) => { %>
+            <li data-testid="online-user"><%= `${user.nickname}` %></li>
+          <% }) %>
+        <% } %>
+      </ul>
+    </form>
+  </body>
+  <script type="text/javascript">
+    const client = io('http://localhost:3000');
+    const message = document.getElementById('message');
+    const messageBtn = document.getElementById('btn-message');
+    const messages = document.getElementById('messages');
+    const nameBox = document.getElementById('nickname-box');
+    const nameBtn = document.getElementById('btn-name');
+    const userList = document.getElementById('users');
+    let nickname = `Guest #${Math.round(Math.random() * 1000)}`;
+    let userId = '';
+
+    messageBtn.addEventListener('click', () => {
+      const timestamp = moment(new Date()).format('DD-MM-yyyy hh:mm:ss');
+      
+      if (message.value.length) {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = `${timestamp} - ${nickname}: ${message.value}`
+        messages.appendChild(li);
+      }
+      
+      const sendMessage = {
+        nickname,
+        chatMessage: message.value,
+      };
+      
+      client.emit('message', sendMessage);
+      
+      message.value = '';
+      return false;
+    });
+    
+    nameBtn.addEventListener('click', () => {
+      nickname = nameBox.value;
+      
+      client.emit('updateNickname', { nickname })
+    });
+    
+    function renderOnlineUsers(users) {
+      userList.innerText = '';
+      
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerHTML = nickname;
+      userList.appendChild(li);
+      
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = user.nickname;
+        userList.appendChild(li);
+      });
+    }
+
+    client.emit('userLogin', { nickname });
+    
+    client.on('updateUsers', ({ id, users }) => {
+      if (userId === '') {
+        userId = id;
+      }
+
+      const filterUsers = users.filter((user) => user.id !== userId);
+      renderOnlineUsers(filterUsers);
+    });
+    </script>
+</html>
