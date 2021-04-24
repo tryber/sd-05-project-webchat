@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('./head'); %>
+  <%- include('./socket'); %>
+</head>
+<body class="container">
+  <main>
+    <div class="col s12 row">
+      <div class="header">
+        <%- include('./components/nickname'); %>
+      </div>
+      <div class="card horizontal col s12 m8">
+        <div class="card-stacked">
+          <div id="board" class="card-content">
+          <% messages.forEach(({ nickname, at, chatMessage }) => { %>
+            <!-- <p data-testid="message">
+              <img src="https://ui-avatars.com/api/?name=<%= nickname %>e&size=24">
+              <small><%= at %></small>&nbsp;<strong><%= nickname %></strong>&nbsp;<%= chatMessage %>
+            </p> -->
+            <p data-testid="message"><%= at %> - <%= nickname %>: <%= chatMessage %></p>
+          <% }); %>
+          </div>
+          <div class="card-action">
+            <%- include('./components/form'); %>
+          </div>
+        </div>
+      </div>
+      <div class="card horizontal col s12 m3">
+        <div class="card-stacked">
+          <div class="card-action">
+            Users Online
+          </div>
+          <div class="card-content" id="online-board">
+            <% Object.values(users).forEach((user) => { %>
+              <p data-testid="online-user"><%= user %></p>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+      
+  </footer>
+</body>
+</html>
