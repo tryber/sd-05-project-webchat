@@ -1,0 +1,60 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font: 13px;
+  font-family: Helvetica, Arial, Verdana, Tahoma, sans-serif;
+}
+
+form {
+  bottom: 0;
+  padding: 3px;
+  position: fixed;
+  width: 100%;
+}
+
+form input {
+  border: 0;
+  margin-right: 0.5%;
+  padding: 10px;
+  width: 90%;
+}
+
+form button {
+  background: rgb(130, 224, 255);
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  width: 9%;
+}
+
+.nicknameBox {
+  background: gray;
+  bottom: 100px;
+  padding: 3px;
+  position: fixed;
+  width: 100%;
+}
+
+.mensagens {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  top: 50px;
+}
+
+.mensagens li {
+  padding: 5px 10px;
+}
+
+.mensagens li:nth-child( odd ) {
+  background: rgb(238, 238, 238);
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+}

@@ -37,7 +37,7 @@ describe('Informe a todos os clientes quem está online no momento', () => {
     await db.collection('messages').deleteMany({});
     await connection.close();
   });
-  
+
   it('Será validado que quando um usuário se conecta, seu nome aparece no frontend de todos', async () => {
     const nickname = 'Joao da carrocinha'
     const secondNickname = 'Zacarias'
@@ -55,7 +55,7 @@ describe('Informe a todos os clientes quem está online no momento', () => {
     let usersOnline = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
 
     expect(usersOnline).toContain(nickname);
-    
+
     const newPage = await browser.newPage();
 
     await newPage.goto(BASE_URL);
@@ -71,7 +71,7 @@ describe('Informe a todos os clientes quem está online no momento', () => {
     usersOnline2 = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
 
     expect(usersOnline2).toContain(nickname);
-    await newPage.close(); 
+    await newPage.close();
   });
 
   it('Será validado que qunado um usuário se desconecta, seu nome desaparece do frontend dos outros usuários.', async () => {
