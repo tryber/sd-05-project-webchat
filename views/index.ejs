@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webchat</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+  </head>
+  <body>
+    <h1>Bate-papo Trybe</h1>
+    <div id="users"></div>
+    <input data-testid="nickname-box" id="userInput" type="text" name="userInput" placeholder="Altere seu Nickname" autocomplete="off">
+    <button data-testid="nickname-save" id="buttonUsuário">Criar usuário</button>
+    <h3>Participantes Online</h3>
+    <ul id="online-users">
+      <% if (onlineUsers) { %>
+        <% onlineUsers.forEach((user)=> { %>
+          <li data-testid="online-user" id=<%= user.id %>><%= user.nickname %></li>
+        <% }) %>
+      <% } %> 
+    </ul>
+    <ul id="mensagens">
+      <% if (message) { %>
+        <% message.forEach((msg) => { %>
+          <li data-testid="message">
+            <%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %>
+          </li>
+        <% }) %>
+      <% } %>
+    </ul>
+    <input data-testid="message-box" id="mensagemInput" type="text" name="mensagemInput" placeholder="Digite seu texto aqui..." autocomplete="off">
+    <button data-testid="send-button" id="buttonMensagens">Enviar</button>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script defer src="./messageList.js"></script>
+  <script type="text/javascript">
+    const SocketIo = io();
+    
+    const changeNikname = async () => {
+      const inputUser = document.querySelector('#userInput');
+      const inputUserValue = await inputUser.value;
+      SocketIo.emit('changeNick', nickname = inputUserValue);
+      inputUser.value = '';
+    };
+    document.getElementById('buttonUsuário').addEventListener('click', changeNikname);
+
+    SocketIo.on('nickname', ({id, nickname}) => { document.getElementById('users').innerHTML = nickname; });
+
+    SocketIo.on('onlineUsers', ({ id, onlineUsers }) => {
+      const onlineUl = document.getElementById('online-users');
+      onlineUsers.unshift(onlineUsers.find(user => user.id === SocketIo.id));
+      const updatedUsers = [ ...new Set(onlineUsers) ]    // remove duplicates
+      onlineUl.innerText = '';
+      updatedUsers.forEach(user => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = user.nickname;
+        onlineUl.appendChild(li);
+      });
+    })
+
+    document.getElementById('buttonMensagens').addEventListener('click', async () => {
+      const nicknameDoc = document.querySelector('#users');
+      const chatMessageDoc = document.querySelector('#mensagemInput');
+      const timestamp = moment(new Date().getTime()).format('DD-MM-yyyy hh:mm:ss');
+      const nickname = nicknameDoc.innerHTML;
+      const chatMessage = chatMessageDoc.value;
+      if (chatMessage) {
+        SocketIo.emit('message', { nickname, chatMessage });
+        chatMessageDoc.value = '';
+      }
+      
+      message = `${timestamp} - ${nickname}: ${chatMessage}`;
+      messageList(message);
+    });
+    
+    SocketIo.on('message', (message) => messageList(message));
+
+  </script>
+</html>
