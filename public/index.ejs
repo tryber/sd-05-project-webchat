@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trybe Webchat</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js" integrity="sha512-/DXTXr6nQodMUiq+IUJYCt2PPOUjrHJ9wFrqpJ3XkgPNOZVfMok7cRw6CSxyCQxXn6ozlESsSh1/sMCTF1rL/g==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA==" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <form id="chat">
+    <div class="nick"></div>
+    <input type="text" name='nickname' data-testid="nickname-box" placeholder="Digite seu apelido">
+    <button type="button" name="nicknameButton" data-testid="nickname-save" >Salvar</button>
+    <div class="messages">
+      <%msgHistory.forEach((message) =>{%>
+      <li data-testid="message"><%=message.dateTime%> - <%=message.nickname%>: <%=message.chatMessage%></li>
+      <%})%>
+    </div>
+    <div class="usersOnline">
+      <%usersOnline.forEach((user) =>{%>
+        <li data-testid="online-user" id="<%=user.id%>"><%=user.nickname%></li>
+        <%})%>
+    </div>
+    <input type="text" name="message" data-testid="message-box" placeholder="Digite sua mensagem">
+    <button data-testid="send-button"  id="submitButton" type="button">Enviar</button>
+  </form>
+
+  <script type="text/javascript">
+    const client = io();
+    const chatBtn = document.querySelector('[data-testid="send-button"]');
+    const messages = document.querySelector('.messages');
+    const author = document.querySelector('[data-testid="nickname-box"]');
+    const message = document.querySelector('[data-testid="message-box"]');
+    const userList = document.querySelector('.usersOnline');
+    const nickBtn = document.querySelector('[data-testid="nickname-save"]');
+    
+    let id;
+    let nick;
+
+    client.on('connected', (user) => {
+      id = user.id;
+      nick = user.nickname;
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.textContent = user.nickname;
+      li.setAttribute('id', user.id);
+      userList.prepend(li);
+    })
+
+    chatBtn.addEventListener('click', function() {
+      
+      if (nick.length && message.value.length) {
+        const messageObject = {
+          nickname: nick,
+          chatMessage: message.value,
+        };
+
+        client.emit('message', messageObject);
+      }
+    })
+
+    nickBtn.addEventListener('click', function () {
+      nick = author.value;
+      client.emit('author', nick);
+      author.value = '';
+    });
+
+    client.on('message', (mensagemRecebida) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.textContent = mensagemRecebida;
+      messages.appendChild(li);
+    });
+
+    client.on('notify', (user) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.textContent = user.nickname;
+      li.setAttribute('id', user.id);
+      userList.appendChild(li);
+    });
+
+    client.on('author', (user) => {
+      const alterAuthor = document.getElementById(user.id)
+      alterAuthor.textContent = user.nickname;
+    });
+
+    client.on('disconnected', (userId) => {
+      const userDisconnect = document.getElementById(userId);
+      console.log(userDisconnect);
+      userDisconnect.remove();
+    });
+
+  </script>
+
+</body>
+</html>
