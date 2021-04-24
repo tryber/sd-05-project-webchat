@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font: 13px Helvetica, Arial;
+      }
+
+      form[ class = 'mensagensForm' ] {
+        background: black;
+        bottom: 0;
+        padding: 3px;
+        position: fixed;
+        width: 90%;
+      }
+
+      form input[ class = 'mensagensForm' ] {
+        border: 0;
+        margin-right: 0.5%;
+        padding: 10px;
+        width: 90%;
+      }
+
+      form button[ class = 'mensagensForm' ] {
+        background: rgb(130, 224, 255);
+        border: none;
+        padding: 10px;
+        width: 9%;
+      }
+
+      form[ class = 'userForma' ] {
+        background: black;
+        bottom: 40px;
+        padding: 3px;
+        position: absolute;
+        width: 40%;
+      }
+
+      form input[ class = 'userForm' ] {
+        border: 0;
+        margin-right: 0.5%;
+        padding: 10px;
+        width: 65%;
+      }
+
+      form button[ class = 'btnSnick' ] {
+        background: rgb(130, 224, 255);
+        border: none;
+        margin-left: 2%;
+        padding: 10px;
+        width: 30%;
+      }
+
+      .ulbox {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .ulbox li {
+        padding: 5px 10px;
+      }
+
+      #mensagens {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      #mensagens li {
+        padding: 5px 10px;
+      }
+
+      #mensagens li:nth-child(odd) {
+        background: #eee;
+      }
+
+      #mensagens {
+        margin-bottom: 40px;
+      }
+
+      .boxonline {
+        background-color: #89cff0;
+        border: 3px dotted black;
+        min-height: 400px;
+        position: absolute;
+        right: 0;
+        top: 30%;
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="boxonline"><center><h3>Pessoas online:</h3></center><br>
+      <ul class="ulbox">
+        <% if (usersOnline !== [] ) {%>
+          <% usersOnline.forEach(user => { %>
+              <li>
+                <div data-testid="online-user"><%=user %></div>
+              </li>
+            <%})%>
+        <% } %>
+      </ul>
+    </div>
+    <form action="" class="userForma">
+      <input id="useForm" class="userForm" autocomplete="off" data-testid="nickname-box" /> <button data-testid="nickname-save" class="btnSnick">Salvar Nickname</button>
+    </form>
+    <form action="" class="mensagensForm">
+      <input id="mensagemInput" autocomplete="off" data-testid="message-box" class="mensagensForm"/><button data-testid="send-button" class="mensagensForm">Send</button>
+    </form>
+    <ul id="mensagens">
+      <% if (historico) {%>
+        <% historico.forEach(hist => { %>
+            <li>
+              <div data-testid="message"><%=hist %></div>
+            </li>
+          <%})%>
+      <% } %>
+    </ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const form = document.querySelector('.mensagensForm');
+      const inputMessage = document.querySelector('#mensagemInput');
+      const inputNickname = document.querySelector('#useForm');
+      const formNickName = document.querySelector('.userForma');
+      let nickname;
+
+      socket.on('initialNickname', (nickInicial) => {
+        nickname = nickInicial;
+      });
+
+      formNickName.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const oldNickname = nickname;
+        nickname = inputNickname.value;
+        inputNickname.value = '';
+        socket.emit('changeNickName', { oldNickname, nicknameAtual: nickname } );
+      });
+
+      form.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        socket.emit('message', { chatMessage: inputMessage.value, nickname });
+        inputMessage.value = '';
+        return false;
+      });
+
+      const createMessage = (message) => {
+        const messagesUl = document.querySelector('#mensagens');
+        const li = document.createElement('li');
+        li.innerHTML = `<div data-testid="message">${message}</div>`;
+        messagesUl.appendChild(li);
+      }
+
+      const createOnlineList = (lista) => {
+        const boxOnlineUl = document.querySelector('.ulbox');
+        boxOnlineUl.innerHTML = '';
+        const li = document.createElement('li');
+        li.innerHTML = `<div data-testid="online-user"><img src="./online.png">${nickname}<img src="./me.png"></div>`;
+        boxOnlineUl.appendChild(li);
+        lista.forEach((item) => {
+          if (item !== nickname) {
+            const li = document.createElement('li');
+            li.innerHTML = `<div data-testid="online-user"><img src="./online.png">${item}</div>`;
+            boxOnlineUl.appendChild(li);
+          }
+        });
+
+      };
+
+      socket.on('message', (mensagem) => createMessage(mensagem));
+      socket.on('listUsersOnline', (uai) => createOnlineList(uai));
+    </script>
+  </body>
+</html>
