@@ -51,7 +51,6 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     const firstMessageToSend = { chatMessage: 'bora meu povo', nickname: 'jorge' };
 
     client1.emit('message', firstMessageToSend);
-
     await page.goto(BASE_URL);
     await page.waitForSelector('[data-testid=message]');
     await page.waitForTimeout(1000);

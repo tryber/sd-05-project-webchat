@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webchat da uou</title>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
+</head>
+  
+<body>
+  <form>
+    <h1>Lista de Usuários</h1>
+    <ul id= onlineUsers>
+      <% if (online) {
+        online.forEach((onlineUser) => {
+      %>
+        <li data-testid="online-user" id=<%= onlineUser.id %> ><%= onlineUser.nickname %></li><%
+        })
+      } %>
+    </ul>
+    <label>Nome
+      <input data-testid="nickname-box" id=inputName type='text'> 
+    </label>
+    <button type='button' data-testid="nickname-save" id='savename' >Salvar nome</button>
+    <ul id= chatList>
+      <% if (getM) {
+        getM.forEach((data) => {
+      %>
+          <li data-testid="message"><%= data %></li><%
+        })
+      }%>
+    </ul>
+    <input type='text' data-testid="message-box" id= 'text-input' placeholder="digite a msg">
+    <button type='button' data-testid='send-button' id='send-btn'>Enviar</button>
+  </form>
+  <script>
+    const socket= io();
+    const textInput = document.getElementById('text-input');
+    const sendBtn = document.getElementById('send-btn');
+    const saveBtn = document.getElementById('savename');
+    const nameInput = document.getElementById('inputName');
+   
+    let userId;
+    let nickname;
+
+    socket.on('connected', (id, username) => {
+      userId=id
+      nickname=username
+    })
+    socket.on('message', (text) => {
+      const list = document.getElementById('chatList')
+      const line = document.createElement('li');
+      line.setAttribute('data-testid', 'message');
+      line.innerText = text;
+      list.appendChild(line);
+    })
+    socket.on('connection', (id, username) =>{
+      const ul = document.getElementById('onlineUsers')
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      console.log(username)
+      li.innerText = username;
+      li.setAttribute('id', id);
+      ul.appendChild(li);
+    })
+    socket.on('user disconnected', (id) =>{
+      console.log(`ID ${id}`)
+      const li = document.getElementById(id)
+      console.log(`LI${li}`)
+      li.remove();
+    })
+
+    sendBtn.addEventListener('click',() =>{
+      socket.emit('message', {
+        nickname,
+        chatMessage: textInput.value,
+      });
+      textInput.value = '';
+    })
+    saveBtn.addEventListener('click', () => {
+      nickname = nameInput.value
+      nameInput.value = '';
+      // const li = document.querySelector(`#${userId}`);
+      const li = document.getElementById(userId)
+
+      li.innerHTML = nickname;
+      console.log(nickname)
+      socket.emit('change name', nickname, userId);
+    })
+    socket.on('change name', (user) => {
+      const li = document.getElementById(user.id)
+      li.innerHTML = user.nickname;
+      console.log(li)
+    })
+  </script>
+</body>
+</html>
